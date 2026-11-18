@@ -1,0 +1,104 @@
+[
+  {
+    "id": "m1q01",
+    "title": "Identify the requested entity",
+    "prompt": "An online bookstore stores order records with customer ID, order ID, order date and product ID. One customer may place several orders on the same day, and one order may contain several products. The manager asks: ‘How many different customers placed at least one order on 12 June?’ Which statement captures the requested task?",
+    "options": [
+      "Count all product lines recorded on 12 June.",
+      "Count the distinct order IDs recorded on 12 June.",
+      "Count the distinct customer IDs linked to orders on 12 June.",
+      "Count the distinct product IDs sold on 12 June."
+    ],
+    "marks": 2,
+    "hints": [
+      "Ask what real-world thing the manager wants a number for: line items, orders, products or people.",
+      "One customer can appear in several order records, so counting records is not necessarily counting customers.",
+      "The requested result is one count per different customer identity among the orders dated 12 June."
+    ]
+  },
+  {
+    "id": "m1q02",
+    "title": "Separate context from the task",
+    "prompt": "A parking authority operates four locations and uses camera-based entry logs. For Lot A, it wants to know how many different vehicles entered between 08:00 and 10:00. Which sentence states the actual task rather than background information or an implementation idea?",
+    "options": [
+      "The authority operates four parking locations.",
+      "Use a dictionary to store vehicle registration numbers.",
+      "Count distinct vehicle registration numbers recorded at Lot A between 08:00 and 10:00.",
+      "Improve the accuracy of the entry cameras."
+    ],
+    "marks": 2,
+    "hints": [
+      "The actual task should describe the result the authority wants, not merely the environment it works in.",
+      "A data structure is a possible way to implement a solution; it does not define the requested outcome.",
+      "Look for the sentence that names the count, the vehicle identity and the stated location and time window."
+    ]
+  },
+  {
+    "id": "m1q03",
+    "title": "Recognise scope creep",
+    "prompt": "A student portal stores login events. The stated request is: ‘Report the number of distinct accounts that logged in at least once on Monday.’ Which proposed deliverable adds work that the request does not ask for?",
+    "options": [
+      "Use Monday as the reporting period.",
+      "Count an account only once even if it logged in several times.",
+      "Return a single numeric count of the qualifying accounts.",
+      "Send a reactivation message to every account that did not log in on Monday."
+    ],
+    "marks": 2,
+    "hints": [
+      "Separate what is necessary to produce the requested report from what might be a useful follow-up campaign.",
+      "The request is about accounts that did log in, not taking action on accounts that did not.",
+      "Look for the option that creates a new communication workflow instead of producing the requested count."
+    ]
+  },
+  {
+    "id": "m1q04",
+    "title": "Distinguish an entity from its events",
+    "prompt": "A museum gate log contains successful entry scans. A visitor may appear in more than one scan record because the gate was slow to respond. The museum asks for the number of different visitors who entered on a given date. What should the requested count represent?",
+    "options": [
+      "The number of scan events recorded that day.",
+      "The number of distinct visitor identities represented in the day’s entry scan records.",
+      "The number of times each gate sensor activated.",
+      "The number of passes printed for the museum."
+    ],
+    "marks": 2,
+    "hints": [
+      "A scan is an event. A visitor is the real-world entity the museum wants to count.",
+      "One visitor can cause more than one scan event, so an event count can overstate the number of visitors.",
+      "The count must be based on different visitor identities, restricted to the specified date."
+    ]
+  },
+  {
+    "id": "m1q05",
+    "title": "Identify an ambiguity that needs clarification",
+    "prompt": "A procurement team asks for a report showing the number of ‘active suppliers’ this quarter. Its records contain supplier IDs, purchase orders, deliveries and invoices, but the request does not define the word ‘active’. What is the best next step before writing the task statement?",
+    "options": [
+      "Assume any supplier with an invoice is active.",
+      "Count every supplier ID appearing anywhere in the records.",
+      "Ask which business condition qualifies a supplier as active, such as an order placed, a delivery completed or another agreed rule.",
+      "Choose the fastest data structure and use that as the definition."
+    ],
+    "marks": 2,
+    "hints": [
+      "The reporting period is stated, but one important term that determines who belongs in the result is not.",
+      "Different definitions of ‘active’ can produce different counts from the same records.",
+      "Clarify the business meaning of the word before deciding which records qualify."
+    ]
+  },
+  {
+    "id": "m1q06",
+    "title": "Transfer the skill to a new domain",
+    "prompt": "A learning platform asks: ‘How many learners completed a course in November?’ Its event log records when a learner opened a lesson, played a video, started a quiz and submitted a quiz. The platform has not defined what ‘completed a course’ means. What should the problem solver do first?",
+    "options": [
+      "Treat opening the final lesson as course completion.",
+      "Treat every quiz submission as course completion.",
+      "Clarify the completion rule, such as whether all required units must be finished or an assessment must be passed.",
+      "Count every event in November and divide by the number of courses."
+    ],
+    "marks": 2,
+    "hints": [
+      "The date range is clear, but the condition that determines whether a learner belongs in the count is not.",
+      "Opening content, playing a video and submitting a quiz are different activities; none is automatically equivalent to completion.",
+      "Ask the platform owner to state the exact completion criterion before counting learners."
+    ]
+  }
+]

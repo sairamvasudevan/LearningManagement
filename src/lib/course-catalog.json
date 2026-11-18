@@ -1,0 +1,1410 @@
+{
+  "stages": [
+    {
+      "id": 1,
+      "title": "Read and define the problem",
+      "description": "Turn a story into a precise, testable task."
+    },
+    {
+      "id": 2,
+      "title": "Represent the problem",
+      "description": "Choose a clear model for the information and relationships."
+    },
+    {
+      "id": 3,
+      "title": "Build reliable logic",
+      "description": "Construct decisions, rules and deterministic solution steps."
+    },
+    {
+      "id": 4,
+      "title": "Work with sequences and patterns",
+      "description": "Reason about repeated actions, ranges and common sequence patterns."
+    },
+    {
+      "id": 5,
+      "title": "Choose data structures",
+      "description": "Select representations based on the operations a problem needs."
+    },
+    {
+      "id": 6,
+      "title": "Search, order and select",
+      "description": "Recognise when searching, sorting, filtering and merging fit."
+    },
+    {
+      "id": 7,
+      "title": "Solve recursive and graph problems",
+      "description": "Handle hierarchical, connected and dependency-based problems."
+    },
+    {
+      "id": 8,
+      "title": "Reason about efficiency",
+      "description": "Compare cost, scale, memory and practical trade-offs."
+    },
+    {
+      "id": 9,
+      "title": "Prove, test and review",
+      "description": "Check correctness, diagnose defects and evaluate AI-assisted output."
+    },
+    {
+      "id": 10,
+      "title": "Transfer to real-world interviews",
+      "description": "Apply the full problem-solving process to unfamiliar scenarios."
+    }
+  ],
+  "modules": [
+    {
+      "id": 1,
+      "stage": 1,
+      "title": "Separate the story from the task",
+      "objective": "Identify the exact outcome requested without confusing background details with the task or its possible implementation.",
+      "focus": "Story versus task; input; action; output",
+      "evidence": "A one-sentence task statement that preserves the requested outcome.",
+      "tier": "foundation",
+      "practiceCount": 4,
+      "activityStyle": "Classify · extract · clarify · restate",
+      "published": true
+    },
+    {
+      "id": 2,
+      "stage": 1,
+      "title": "Express a task as input, rule and output",
+      "objective": "Describe a problem as the information received, the transformation required and the result expected.",
+      "focus": "Input contract; transformation; output contract",
+      "evidence": "A complete input–rule–output contract.",
+      "tier": "foundation",
+      "practiceCount": 3,
+      "activityStyle": "Map · classify · construct",
+      "published": false
+    },
+    {
+      "id": 3,
+      "stage": 1,
+      "title": "Extract constraints and limits",
+      "objective": "Find size, range, uniqueness, ordering and resource restrictions that change which solutions are valid.",
+      "focus": "Bounds; uniqueness; ordering; capacity; limits",
+      "evidence": "A constraint sheet that distinguishes explicit limits from assumptions.",
+      "tier": "foundation",
+      "practiceCount": 4,
+      "activityStyle": "Inspect · classify · apply",
+      "published": false
+    },
+    {
+      "id": 4,
+      "stage": 1,
+      "title": "Separate facts, assumptions and unknowns",
+      "objective": "Distinguish what the problem guarantees from what a solver is tempted to assume, and identify what must be clarified.",
+      "focus": "Facts; assumptions; ambiguity; clarification",
+      "evidence": "A list of confirmed facts, open questions and safe assumptions.",
+      "tier": "foundation",
+      "practiceCount": 3,
+      "activityStyle": "Classify · challenge · clarify",
+      "published": false
+    },
+    {
+      "id": 5,
+      "stage": 1,
+      "title": "Use examples and counterexamples",
+      "objective": "Create examples that confirm the interpretation and counterexamples that expose an incomplete or incorrect reading.",
+      "focus": "Normal cases; counterexamples; expected outcomes",
+      "evidence": "A small example set with independently reasoned expected results.",
+      "tier": "foundation",
+      "practiceCount": 4,
+      "activityStyle": "Predict · compare · explain",
+      "published": false
+    },
+    {
+      "id": 6,
+      "stage": 1,
+      "title": "Discover edge cases before solving",
+      "objective": "Identify empty, minimal, maximal, repeated, missing and unusual inputs relevant to a task.",
+      "focus": "Boundary cases; duplicates; missing values; extremes",
+      "evidence": "A ranked edge-case list with a reason each case matters.",
+      "tier": "foundation",
+      "practiceCount": 4,
+      "activityStyle": "Generate · classify · prioritise",
+      "published": false
+    },
+    {
+      "id": 7,
+      "stage": 1,
+      "title": "Write observable acceptance criteria",
+      "objective": "Convert a vague request into conditions that a proposed result must satisfy to be considered correct.",
+      "focus": "Acceptance criteria; observable behaviour; scope",
+      "evidence": "Testable acceptance criteria that can be checked without seeing the implementation.",
+      "tier": "foundation",
+      "practiceCount": 4,
+      "activityStyle": "Rewrite · validate · reject",
+      "published": false
+    },
+    {
+      "id": 8,
+      "stage": 1,
+      "title": "Decompose a task into subproblems",
+      "objective": "Break a multi-part request into smaller outcomes that can be solved and checked independently.",
+      "focus": "Decomposition; subgoals; responsibility boundaries",
+      "evidence": "A dependency-aware breakdown of a larger task.",
+      "tier": "building",
+      "practiceCount": 4,
+      "activityStyle": "Decompose · sequence · explain",
+      "published": false
+    },
+    {
+      "id": 9,
+      "stage": 1,
+      "title": "Map dependencies between subproblems",
+      "objective": "Determine which outputs are needed before other steps can begin and identify independent work.",
+      "focus": "Dependencies; ordering; independent steps",
+      "evidence": "A valid execution order with dependencies explained.",
+      "tier": "building",
+      "practiceCount": 5,
+      "activityStyle": "Order · diagram · diagnose",
+      "published": false
+    },
+    {
+      "id": 10,
+      "stage": 1,
+      "title": "Turn an unclear request into a precise brief",
+      "objective": "Resolve a realistic, imperfect problem statement into a bounded task with inputs, outputs, constraints and acceptance criteria.",
+      "focus": "Synthesis; scope; specification; clarification",
+      "evidence": "A complete problem brief and a justified list of unresolved questions.",
+      "tier": "synthesis",
+      "practiceCount": 4,
+      "activityStyle": "Case analysis · specification · review",
+      "published": false
+    },
+    {
+      "id": 11,
+      "stage": 2,
+      "title": "Identify entities and their attributes",
+      "objective": "Extract the objects a problem talks about and the information that describes each one.",
+      "focus": "Entities; attributes; identity; records",
+      "evidence": "An entity model that distinguishes identity from descriptive fields.",
+      "tier": "foundation",
+      "practiceCount": 3,
+      "activityStyle": "Extract · group · model",
+      "published": false
+    },
+    {
+      "id": 12,
+      "stage": 2,
+      "title": "Distinguish single values from collections",
+      "objective": "Recognise whether a task needs one value, an ordered collection, a group of unique values or keyed records.",
+      "focus": "Scalar values; collections; records",
+      "evidence": "A suitable first-pass data representation for several scenarios.",
+      "tier": "foundation",
+      "practiceCount": 4,
+      "activityStyle": "Classify · match · justify",
+      "published": false
+    },
+    {
+      "id": 13,
+      "stage": 2,
+      "title": "Choose between a sequence and a set",
+      "objective": "Decide whether order and duplicates are meaningful or whether only membership and uniqueness matter.",
+      "focus": "Order; duplicates; membership; uniqueness",
+      "evidence": "A representation choice justified by required operations.",
+      "tier": "foundation",
+      "practiceCount": 4,
+      "activityStyle": "Compare · select · explain",
+      "published": false
+    },
+    {
+      "id": 14,
+      "stage": 2,
+      "title": "Model direct lookup with key–value records",
+      "objective": "Represent information that must be found quickly by a stable identifier or key.",
+      "focus": "Keys; values; lookup; mapping",
+      "evidence": "A key–value model with a clear uniqueness rule.",
+      "tier": "building",
+      "practiceCount": 5,
+      "activityStyle": "Map · query · diagnose",
+      "published": false
+    },
+    {
+      "id": 15,
+      "stage": 2,
+      "title": "Model last-in and first-in workflows",
+      "objective": "Recognise when a stack-like or queue-like process matches the order in which work must be handled.",
+      "focus": "LIFO; FIFO; push/pop; enqueue/dequeue concepts",
+      "evidence": "A correct workflow model and a trace of its state changes.",
+      "tier": "building",
+      "practiceCount": 4,
+      "activityStyle": "Classify · trace · choose",
+      "published": false
+    },
+    {
+      "id": 16,
+      "stage": 2,
+      "title": "Represent state and state transitions",
+      "objective": "Describe how an object or process changes after an event, while identifying valid and invalid states.",
+      "focus": "State; event; transition; invariant",
+      "evidence": "A state-transition model with allowed transitions identified.",
+      "tier": "building",
+      "practiceCount": 5,
+      "activityStyle": "Model · trace · validate",
+      "published": false
+    },
+    {
+      "id": 17,
+      "stage": 2,
+      "title": "Represent relationships as a network",
+      "objective": "Model entities connected by relationships when a problem concerns reachability, routes or dependencies.",
+      "focus": "Nodes; edges; direction; weights",
+      "evidence": "A relationship model with correctly identified nodes and edges.",
+      "tier": "building",
+      "practiceCount": 4,
+      "activityStyle": "Draw · interpret · classify",
+      "published": false
+    },
+    {
+      "id": 18,
+      "stage": 2,
+      "title": "Trace information with tables and diagrams",
+      "objective": "Use a state table, decision table or simple diagram to make a multi-step process visible and checkable.",
+      "focus": "Trace tables; decision tables; state diagrams",
+      "evidence": "A complete trace that another person can follow.",
+      "tier": "building",
+      "practiceCount": 4,
+      "activityStyle": "Trace · complete · explain",
+      "published": false
+    },
+    {
+      "id": 19,
+      "stage": 2,
+      "title": "Choose a representation from required operations",
+      "objective": "Select a data model by asking what must be looked up, updated, ordered, counted or traversed.",
+      "focus": "Operation-first modelling; trade-offs; representation",
+      "evidence": "A reasoned model choice based on the dominant operations.",
+      "tier": "applied",
+      "practiceCount": 5,
+      "activityStyle": "Compare · select · defend",
+      "published": false
+    },
+    {
+      "id": 20,
+      "stage": 2,
+      "title": "Model a practical domain",
+      "objective": "Translate a small business workflow into entities, relationships, state and operations without relying on a programming language.",
+      "focus": "Domain modelling; entities; relationships; state",
+      "evidence": "A coherent model of a realistic workflow.",
+      "tier": "synthesis",
+      "practiceCount": 5,
+      "activityStyle": "Scenario model · critique · refine",
+      "published": false
+    },
+    {
+      "id": 21,
+      "stage": 3,
+      "title": "Write steps in an unambiguous order",
+      "objective": "Describe a deterministic procedure where each step has a clear purpose and no hidden interpretation.",
+      "focus": "Sequence; precision; preconditions",
+      "evidence": "An ordered procedure that produces the intended result on a sample.",
+      "tier": "foundation",
+      "practiceCount": 4,
+      "activityStyle": "Order · repair · explain",
+      "published": false
+    },
+    {
+      "id": 22,
+      "stage": 3,
+      "title": "Use conditions to make decisions",
+      "objective": "Translate a requirement into a condition and determine which outcome follows when it is true or false.",
+      "focus": "Boolean conditions; decision branches",
+      "evidence": "A correct decision rule for each case.",
+      "tier": "foundation",
+      "practiceCount": 4,
+      "activityStyle": "Classify · choose · trace",
+      "published": false
+    },
+    {
+      "id": 23,
+      "stage": 3,
+      "title": "Combine conditions without logic errors",
+      "objective": "Evaluate compound conditions and identify how AND, OR and NOT affect the result.",
+      "focus": "Compound logic; truth tables; short-circuit intuition",
+      "evidence": "A complete truth table and correct interpretation of a compound rule.",
+      "tier": "building",
+      "practiceCount": 5,
+      "activityStyle": "Evaluate · complete · diagnose",
+      "published": false
+    },
+    {
+      "id": 24,
+      "stage": 3,
+      "title": "Count, accumulate and maintain a running result",
+      "objective": "Distinguish a counter from a running total and update each correctly as records are processed.",
+      "focus": "Counters; accumulators; running state",
+      "evidence": "A correct state trace for a count or aggregate.",
+      "tier": "building",
+      "practiceCount": 4,
+      "activityStyle": "Trace · update · explain",
+      "published": false
+    },
+    {
+      "id": 25,
+      "stage": 3,
+      "title": "Compare values and maintain a best-so-far result",
+      "objective": "Design reasoning for minimum, maximum and selection tasks, including ties and empty input conditions.",
+      "focus": "Comparison; min/max; initialisation; ties",
+      "evidence": "A correct comparison strategy with boundary behaviour stated.",
+      "tier": "building",
+      "practiceCount": 5,
+      "activityStyle": "Trace · select · test",
+      "published": false
+    },
+    {
+      "id": 26,
+      "stage": 3,
+      "title": "Build multi-branch classification rules",
+      "objective": "Translate several categories and thresholds into mutually clear decision rules, including boundary values.",
+      "focus": "Decision trees; ranges; precedence; boundary ownership",
+      "evidence": "A complete decision table with no gaps or overlapping rules.",
+      "tier": "building",
+      "practiceCount": 5,
+      "activityStyle": "Classify · repair · validate",
+      "published": false
+    },
+    {
+      "id": 27,
+      "stage": 3,
+      "title": "Use preconditions, postconditions and invariants",
+      "objective": "State what must be true before a procedure, what it guarantees after, and what remains true during it.",
+      "focus": "Preconditions; postconditions; invariants",
+      "evidence": "A concise correctness contract for a procedure.",
+      "tier": "applied",
+      "practiceCount": 5,
+      "activityStyle": "State · check · justify",
+      "published": false
+    },
+    {
+      "id": 28,
+      "stage": 3,
+      "title": "Respect operation order and side effects",
+      "objective": "Recognise when changing the order of steps changes the outcome and identify operations that mutate shared state.",
+      "focus": "Dependencies; sequencing; side effects",
+      "evidence": "A safe operation order with side effects called out.",
+      "tier": "applied",
+      "practiceCount": 5,
+      "activityStyle": "Reorder · compare · diagnose",
+      "published": false
+    },
+    {
+      "id": 29,
+      "stage": 3,
+      "title": "Distinguish local choices from global goals",
+      "objective": "Recognise when a locally attractive decision can block a better overall outcome and when a greedy choice is justified.",
+      "focus": "Greedy choice; look-ahead; local versus global",
+      "evidence": "A reasoned decision about whether a local-choice strategy is safe.",
+      "tier": "applied",
+      "practiceCount": 4,
+      "activityStyle": "Counterexample · compare · defend",
+      "published": false
+    },
+    {
+      "id": 30,
+      "stage": 3,
+      "title": "Construct a complete decision workflow",
+      "objective": "Combine conditions, counters, comparisons and invariants to solve a deterministic multi-step task.",
+      "focus": "Logic synthesis; state; decision workflow",
+      "evidence": "A traceable procedure with correct results across varied cases.",
+      "tier": "synthesis",
+      "practiceCount": 6,
+      "activityStyle": "Build · trace · test",
+      "published": false
+    },
+    {
+      "id": 31,
+      "stage": 4,
+      "title": "Trace repeated actions as changing state",
+      "objective": "Track how each repetition changes values and identify the exact state after a specified number of steps.",
+      "focus": "Iteration; state tables; repeated updates",
+      "evidence": "A correct step-by-step trace without executing code.",
+      "tier": "foundation",
+      "practiceCount": 4,
+      "activityStyle": "Trace · complete · predict",
+      "published": false
+    },
+    {
+      "id": 32,
+      "stage": 4,
+      "title": "Determine when repetition should stop",
+      "objective": "Define a termination condition and recognise procedures that stop too early, too late or never.",
+      "focus": "Termination; loop conditions; progress",
+      "evidence": "A valid stop condition and an explanation of why progress reaches it.",
+      "tier": "building",
+      "practiceCount": 5,
+      "activityStyle": "Diagnose · repair · justify",
+      "published": false
+    },
+    {
+      "id": 33,
+      "stage": 4,
+      "title": "Prevent off-by-one boundary errors",
+      "objective": "Reason precisely about inclusive and exclusive endpoints, first and last positions and counts of items.",
+      "focus": "Index boundaries; inclusive/exclusive ranges",
+      "evidence": "Correct start, stop and count decisions on boundary examples.",
+      "tier": "building",
+      "practiceCount": 5,
+      "activityStyle": "Trace · compare · correct",
+      "published": false
+    },
+    {
+      "id": 34,
+      "stage": 4,
+      "title": "Reason about nested repetition",
+      "objective": "Count how many operations occur when one repeated process is placed inside another.",
+      "focus": "Nested repetition; iteration counts; growth intuition",
+      "evidence": "A correct operation count for nested patterns.",
+      "tier": "building",
+      "practiceCount": 5,
+      "activityStyle": "Count · tabulate · compare",
+      "published": false
+    },
+    {
+      "id": 35,
+      "stage": 4,
+      "title": "Scan from both ends with two pointers",
+      "objective": "Recognise problems where two moving positions can replace repeated rescanning.",
+      "focus": "Two pointers; opposing and same-direction scans",
+      "evidence": "A pointer-movement plan with a clear stopping condition.",
+      "tier": "applied",
+      "practiceCount": 5,
+      "activityStyle": "Choose · trace · test",
+      "published": false
+    },
+    {
+      "id": 36,
+      "stage": 4,
+      "title": "Process contiguous ranges with a sliding window",
+      "objective": "Maintain a summary over a moving contiguous range without rebuilding it from scratch each time.",
+      "focus": "Sliding window; fixed and variable windows",
+      "evidence": "A window-update trace and a justified validity condition.",
+      "tier": "applied",
+      "practiceCount": 5,
+      "activityStyle": "Trace · update · diagnose",
+      "published": false
+    },
+    {
+      "id": 37,
+      "stage": 4,
+      "title": "Use prefix summaries for repeated range questions",
+      "objective": "Precompute cumulative information so multiple range queries can be answered efficiently.",
+      "focus": "Prefix sums; cumulative summaries; range queries",
+      "evidence": "A correct prefix model and range-result derivation.",
+      "tier": "applied",
+      "practiceCount": 5,
+      "activityStyle": "Construct · query · verify",
+      "published": false
+    },
+    {
+      "id": 38,
+      "stage": 4,
+      "title": "Count frequencies and handle duplicates",
+      "objective": "Use frequency information to solve counting, matching and repeated-item problems.",
+      "focus": "Frequency tables; duplicates; multiplicity",
+      "evidence": "A frequency model with correct counts for repeated values.",
+      "tier": "applied",
+      "practiceCount": 5,
+      "activityStyle": "Count · map · interpret",
+      "published": false
+    },
+    {
+      "id": 39,
+      "stage": 4,
+      "title": "Reason about intervals and overlapping time windows",
+      "objective": "Compare, sort and combine ranges when appointments, events or time periods overlap.",
+      "focus": "Intervals; endpoints; overlap; adjacency",
+      "evidence": "A correct interval classification or merge plan.",
+      "tier": "applied",
+      "practiceCount": 6,
+      "activityStyle": "Draw · compare · merge",
+      "published": false
+    },
+    {
+      "id": 40,
+      "stage": 4,
+      "title": "Select a sequence pattern for an unfamiliar task",
+      "objective": "Choose between a direct scan, two pointers, a window, prefix summary or frequency model based on the task structure.",
+      "focus": "Pattern recognition; sequence synthesis",
+      "evidence": "A pattern choice supported by the input structure and required output.",
+      "tier": "synthesis",
+      "practiceCount": 6,
+      "activityStyle": "Classify · compare · defend",
+      "published": false
+    },
+    {
+      "id": 41,
+      "stage": 5,
+      "title": "Use lists and arrays for ordered data",
+      "objective": "Reason about position, traversal, insertion, deletion and repeated access in an ordered collection.",
+      "focus": "Index; order; traversal; shifts",
+      "evidence": "A correct operation plan for an ordered collection.",
+      "tier": "foundation",
+      "practiceCount": 4,
+      "activityStyle": "Trace · classify · choose",
+      "published": false
+    },
+    {
+      "id": 42,
+      "stage": 5,
+      "title": "Use maps for direct lookup",
+      "objective": "Choose a key-based mapping when a problem repeatedly asks for information by identifier.",
+      "focus": "Key lookup; update; missing keys",
+      "evidence": "A map-based solution outline and its lookup/update behaviour.",
+      "tier": "building",
+      "practiceCount": 5,
+      "activityStyle": "Model · query · justify",
+      "published": false
+    },
+    {
+      "id": 43,
+      "stage": 5,
+      "title": "Use sets for uniqueness and membership",
+      "objective": "Remove duplicate representation from the reasoning and answer membership questions without preserving order.",
+      "focus": "Set membership; uniqueness; union/intersection intuition",
+      "evidence": "A correct set operation plan with order limitations stated.",
+      "tier": "building",
+      "practiceCount": 5,
+      "activityStyle": "Select · trace · compare",
+      "published": false
+    },
+    {
+      "id": 44,
+      "stage": 5,
+      "title": "Use a stack for unresolved work",
+      "objective": "Model nested or most-recent-first tasks using a last-in-first-out structure.",
+      "focus": "Stack; push/pop; matching; undo",
+      "evidence": "A stack trace that preserves the correct processing order.",
+      "tier": "building",
+      "practiceCount": 5,
+      "activityStyle": "Trace · match · debug",
+      "published": false
+    },
+    {
+      "id": 45,
+      "stage": 5,
+      "title": "Use a queue for arrival-order processing",
+      "objective": "Model first-in-first-out work such as service desks, task buffers and breadth-first exploration.",
+      "focus": "Queue; enqueue/dequeue; fairness; processing order",
+      "evidence": "A queue model and a correct sequence of processed items.",
+      "tier": "building",
+      "practiceCount": 5,
+      "activityStyle": "Trace · schedule · assess",
+      "published": false
+    },
+    {
+      "id": 46,
+      "stage": 5,
+      "title": "Understand linked records and references",
+      "objective": "Reason about nodes connected by references and the consequences of inserting, removing or losing a link.",
+      "focus": "Nodes; links; references; head/tail",
+      "evidence": "A correct linked-structure update sequence.",
+      "tier": "applied",
+      "practiceCount": 6,
+      "activityStyle": "Diagram · update · diagnose",
+      "published": false
+    },
+    {
+      "id": 47,
+      "stage": 5,
+      "title": "Prioritise work with a priority queue",
+      "objective": "Choose a priority-based structure when the next item is selected by urgency or rank rather than arrival time.",
+      "focus": "Priority; heap intuition; repeated best-item retrieval",
+      "evidence": "A priority-processing plan with tie and update behaviour considered.",
+      "tier": "applied",
+      "practiceCount": 6,
+      "activityStyle": "Choose · simulate · compare",
+      "published": false
+    },
+    {
+      "id": 48,
+      "stage": 5,
+      "title": "Represent hierarchy with trees",
+      "objective": "Model parent-child relationships and reason about root, leaves, depth and traversal requirements.",
+      "focus": "Tree; root; child; leaf; depth",
+      "evidence": "A tree model and a valid traversal plan.",
+      "tier": "applied",
+      "practiceCount": 5,
+      "activityStyle": "Draw · classify · traverse",
+      "published": false
+    },
+    {
+      "id": 49,
+      "stage": 5,
+      "title": "Combine structures to support different operations",
+      "objective": "Use one structure for ordered output and another for fast lookup or counting when a task needs both.",
+      "focus": "Composite representation; index; sequence; lookup",
+      "evidence": "A composite model that supports all required operations.",
+      "tier": "applied",
+      "practiceCount": 6,
+      "activityStyle": "Design · justify · evaluate",
+      "published": false
+    },
+    {
+      "id": 50,
+      "stage": 5,
+      "title": "Choose a data structure from an operation profile",
+      "objective": "Compare realistic operation frequency, ordering needs and update patterns before selecting a representation.",
+      "focus": "Structure selection; workload; trade-offs",
+      "evidence": "A defensible structure choice for an unfamiliar scenario.",
+      "tier": "synthesis",
+      "practiceCount": 6,
+      "activityStyle": "Scenario choice · counterexample · defence",
+      "published": false
+    },
+    {
+      "id": 51,
+      "stage": 6,
+      "title": "Search an unsorted collection",
+      "objective": "Use a systematic scan, decide when it can stop and identify what result must be retained.",
+      "focus": "Linear search; early exit; matching condition",
+      "evidence": "A correct search trace and stopping rule.",
+      "tier": "foundation",
+      "practiceCount": 4,
+      "activityStyle": "Trace · stop · select",
+      "published": false
+    },
+    {
+      "id": 52,
+      "stage": 6,
+      "title": "Use binary search only when its preconditions hold",
+      "objective": "Recognise the sorted or monotonic condition required for repeatedly narrowing a search range.",
+      "focus": "Binary search; sortedness; monotonic predicate",
+      "evidence": "A valid range-narrowing trace with its precondition stated.",
+      "tier": "building",
+      "practiceCount": 5,
+      "activityStyle": "Check precondition · trace · correct",
+      "published": false
+    },
+    {
+      "id": 53,
+      "stage": 6,
+      "title": "Use sorting to expose structure",
+      "objective": "Choose sorting when ordered neighbours, ranked output or a later scan makes the task simpler.",
+      "focus": "Sorting; ordering; preprocessing",
+      "evidence": "A reasoned decision to sort or avoid sorting.",
+      "tier": "building",
+      "practiceCount": 5,
+      "activityStyle": "Order · compare · justify",
+      "published": false
+    },
+    {
+      "id": 54,
+      "stage": 6,
+      "title": "Handle stable order and tie-breaking",
+      "objective": "Understand when equal-key records must retain their original order or follow a secondary rule.",
+      "focus": "Stability; comparator; secondary key",
+      "evidence": "A correct sort-order specification including ties.",
+      "tier": "applied",
+      "practiceCount": 5,
+      "activityStyle": "Rank · repair · validate",
+      "published": false
+    },
+    {
+      "id": 55,
+      "stage": 6,
+      "title": "Find the top items without repeatedly sorting everything",
+      "objective": "Choose an appropriate strategy for selecting a small number of highest-ranked items from a larger collection.",
+      "focus": "Top-k; partial selection; heap intuition",
+      "evidence": "A selection strategy justified by k and input size.",
+      "tier": "applied",
+      "practiceCount": 6,
+      "activityStyle": "Compare · choose · estimate",
+      "published": false
+    },
+    {
+      "id": 56,
+      "stage": 6,
+      "title": "Filter, partition and group records",
+      "objective": "Separate records by predicates and organise them by categories without losing the intended relationship to each record.",
+      "focus": "Filtering; partitioning; grouping",
+      "evidence": "A correct grouping plan with all records accounted for.",
+      "tier": "applied",
+      "practiceCount": 5,
+      "activityStyle": "Classify · group · reconcile",
+      "published": false
+    },
+    {
+      "id": 57,
+      "stage": 6,
+      "title": "Merge two already ordered streams",
+      "objective": "Combine two sorted sequences into one sorted result while preserving all required items.",
+      "focus": "Two-stream merge; pointer movement; stability",
+      "evidence": "A complete merge trace with correct ordering and multiplicity.",
+      "tier": "applied",
+      "practiceCount": 6,
+      "activityStyle": "Trace · merge · verify",
+      "published": false
+    },
+    {
+      "id": 58,
+      "stage": 6,
+      "title": "Merge overlapping intervals",
+      "objective": "Sort and combine overlapping ranges while retaining non-overlapping ranges correctly.",
+      "focus": "Interval sorting; overlap; merge boundary",
+      "evidence": "A valid interval merge result for touching and overlapping cases.",
+      "tier": "applied",
+      "practiceCount": 6,
+      "activityStyle": "Draw · sort · merge",
+      "published": false
+    },
+    {
+      "id": 59,
+      "stage": 6,
+      "title": "Combine search with frequency information",
+      "objective": "Use counts or indexes to answer lookup and multiplicity questions without repeatedly scanning all records.",
+      "focus": "Search; indexing; frequency summaries",
+      "evidence": "A combined representation and lookup strategy.",
+      "tier": "applied",
+      "practiceCount": 6,
+      "activityStyle": "Model · query · compare",
+      "published": false
+    },
+    {
+      "id": 60,
+      "stage": 6,
+      "title": "Choose between search and selection strategies",
+      "objective": "Compare scans, sorting, binary search, hashing and partial selection under their actual preconditions.",
+      "focus": "Search/selection strategy selection",
+      "evidence": "A strategy matrix tied to input properties and required operations.",
+      "tier": "synthesis",
+      "practiceCount": 6,
+      "activityStyle": "Compare · eliminate · defend",
+      "published": false
+    },
+    {
+      "id": 61,
+      "stage": 7,
+      "title": "Understand recursion as a smaller version of the same task",
+      "objective": "Identify a smaller subproblem, the progress toward it and the condition that ends the recursive process.",
+      "focus": "Self-similarity; base case; progress",
+      "evidence": "A recursive problem definition with a terminating base case.",
+      "tier": "building",
+      "practiceCount": 4,
+      "activityStyle": "Recognise · complete · trace",
+      "published": false
+    },
+    {
+      "id": 62,
+      "stage": 7,
+      "title": "Build a divide-and-conquer solution",
+      "objective": "Split a problem into smaller parts, solve them and combine their results.",
+      "focus": "Divide; solve; combine; recurrence intuition",
+      "evidence": "A decomposition and merge plan with all subproblems covered.",
+      "tier": "applied",
+      "practiceCount": 5,
+      "activityStyle": "Decompose · combine · assess",
+      "published": false
+    },
+    {
+      "id": 63,
+      "stage": 7,
+      "title": "Explore alternatives with backtracking",
+      "objective": "Model decisions as choices, explore a path and undo a choice when it cannot lead to a valid solution.",
+      "focus": "Choice; constraint; explore; undo; prune",
+      "evidence": "A search tree with valid pruning and backtracking steps.",
+      "tier": "applied",
+      "practiceCount": 5,
+      "activityStyle": "Branch · trace · prune",
+      "published": false
+    },
+    {
+      "id": 64,
+      "stage": 7,
+      "title": "Traverse a tree depth first",
+      "objective": "Choose preorder, inorder, postorder or a general depth-first visit order to answer a tree question.",
+      "focus": "DFS; traversal order; subtree reasoning",
+      "evidence": "A correct traversal sequence and explanation of the chosen order.",
+      "tier": "applied",
+      "practiceCount": 6,
+      "activityStyle": "Trace · order · explain",
+      "published": false
+    },
+    {
+      "id": 65,
+      "stage": 7,
+      "title": "Explore a tree or graph level by level",
+      "objective": "Use breadth-first reasoning when distance in edges or nearest-level discovery matters.",
+      "focus": "BFS; queue; levels; unweighted distance",
+      "evidence": "A breadth-first traversal with correct visitation order.",
+      "tier": "applied",
+      "practiceCount": 6,
+      "activityStyle": "Queue trace · discover · verify",
+      "published": false
+    },
+    {
+      "id": 66,
+      "stage": 7,
+      "title": "Model a graph from a real relationship problem",
+      "objective": "Translate locations, users, dependencies or connections into vertices and edges with direction and weight where needed.",
+      "focus": "Graph modelling; directed/undirected; weighted/unweighted",
+      "evidence": "A graph model that preserves the domain relationships.",
+      "tier": "applied",
+      "practiceCount": 6,
+      "activityStyle": "Model · classify · interpret",
+      "published": false
+    },
+    {
+      "id": 67,
+      "stage": 7,
+      "title": "Detect reachability and cycles",
+      "objective": "Determine whether one entity can reach another and whether a path returns to a previously visited state.",
+      "focus": "Reachability; visited set; cycles; components",
+      "evidence": "A correct reachability/cycle reasoning trace.",
+      "tier": "applied",
+      "practiceCount": 6,
+      "activityStyle": "Trace · mark · diagnose",
+      "published": false
+    },
+    {
+      "id": 68,
+      "stage": 7,
+      "title": "Order tasks with dependencies",
+      "objective": "Identify a valid order for tasks that must follow prerequisite tasks and detect impossible dependency cycles.",
+      "focus": "Directed acyclic graph; topological ordering",
+      "evidence": "A valid dependency order or a justified cycle diagnosis.",
+      "tier": "applied",
+      "practiceCount": 6,
+      "activityStyle": "Order · detect · defend",
+      "published": false
+    },
+    {
+      "id": 69,
+      "stage": 7,
+      "title": "Reason about shortest paths",
+      "objective": "Distinguish unweighted shortest path from weighted shortest path and identify when a simple level search is insufficient.",
+      "focus": "Shortest path; distance; weights; nonnegative costs",
+      "evidence": "A suitable shortest-path method choice with assumptions stated.",
+      "tier": "advanced",
+      "practiceCount": 6,
+      "activityStyle": "Model · choose · compare",
+      "published": false
+    },
+    {
+      "id": 70,
+      "stage": 7,
+      "title": "Solve a graph-based scenario",
+      "objective": "Select a graph representation and traversal strategy for a practical connectivity, dependency or routing problem.",
+      "focus": "Graph synthesis; traversal; constraints",
+      "evidence": "A complete graph problem plan with a testable result.",
+      "tier": "synthesis",
+      "practiceCount": 7,
+      "activityStyle": "Scenario model · method selection · validation",
+      "published": false
+    },
+    {
+      "id": 71,
+      "stage": 8,
+      "title": "Count operations instead of timing a machine",
+      "objective": "Estimate how the number of elementary operations changes with input size.",
+      "focus": "Input size; primitive operations; growth",
+      "evidence": "A correct operation-count model for a simple procedure.",
+      "tier": "foundation",
+      "practiceCount": 4,
+      "activityStyle": "Count · tabulate · compare",
+      "published": false
+    },
+    {
+      "id": 72,
+      "stage": 8,
+      "title": "Interpret common growth rates",
+      "objective": "Compare constant, logarithmic, linear, linearithmic, quadratic and exponential growth conceptually.",
+      "focus": "Big-O; growth families; dominant term",
+      "evidence": "A correct growth-rate ranking and explanation.",
+      "tier": "building",
+      "practiceCount": 5,
+      "activityStyle": "Rank · plot mentally · explain",
+      "published": false
+    },
+    {
+      "id": 73,
+      "stage": 8,
+      "title": "Compare time and memory trade-offs",
+      "objective": "Evaluate whether extra storage can reduce repeated work or whether memory constraints favour recomputation.",
+      "focus": "Time-space trade-off; auxiliary memory",
+      "evidence": "A trade-off recommendation grounded in constraints.",
+      "tier": "building",
+      "practiceCount": 5,
+      "activityStyle": "Compare · estimate · defend",
+      "published": false
+    },
+    {
+      "id": 74,
+      "stage": 8,
+      "title": "Estimate nested and sequential costs",
+      "objective": "Combine operation counts for sequential steps and nested repetition without relying on code syntax.",
+      "focus": "Composition; nested growth; dominant cost",
+      "evidence": "A correct overall complexity estimate.",
+      "tier": "building",
+      "practiceCount": 5,
+      "activityStyle": "Count · combine · simplify",
+      "published": false
+    },
+    {
+      "id": 75,
+      "stage": 8,
+      "title": "Compare scanning, sorting and hashing costs",
+      "objective": "Choose a strategy based on the number of queries, update frequency, input properties and memory budget.",
+      "focus": "Scan; sort; hash; query volume",
+      "evidence": "A method comparison with preconditions and costs stated.",
+      "tier": "applied",
+      "practiceCount": 6,
+      "activityStyle": "Estimate · compare · choose",
+      "published": false
+    },
+    {
+      "id": 76,
+      "stage": 8,
+      "title": "Select structures for scale",
+      "objective": "Re-evaluate a data structure choice when the input grows or the operation mix changes.",
+      "focus": "Scale; workload; update/query ratio",
+      "evidence": "A structure choice that remains plausible at the stated scale.",
+      "tier": "applied",
+      "practiceCount": 6,
+      "activityStyle": "Scale · stress-test · revise",
+      "published": false
+    },
+    {
+      "id": 77,
+      "stage": 8,
+      "title": "Establish a brute-force baseline before optimising",
+      "objective": "Create a simple correct baseline and identify the repeated work an optimisation should remove.",
+      "focus": "Baseline; bottleneck; optimisation target",
+      "evidence": "A correct baseline and a specific, justified improvement.",
+      "tier": "applied",
+      "practiceCount": 6,
+      "activityStyle": "Baseline · inspect · improve",
+      "published": false
+    },
+    {
+      "id": 78,
+      "stage": 8,
+      "title": "Solve under streaming and memory constraints",
+      "objective": "Reason about data that arrives incrementally and cannot all be retained in memory.",
+      "focus": "Streaming; bounded memory; online processing",
+      "evidence": "A one-pass or bounded-memory strategy with stated limitations.",
+      "tier": "advanced",
+      "practiceCount": 6,
+      "activityStyle": "Constrain · model · choose",
+      "published": false
+    },
+    {
+      "id": 79,
+      "stage": 8,
+      "title": "Evaluate caching and recomputation",
+      "objective": "Decide when stored results are worth their memory, invalidation and staleness risks.",
+      "focus": "Caching; recomputation; invalidation; freshness",
+      "evidence": "A caching decision with correctness and freshness conditions.",
+      "tier": "advanced",
+      "practiceCount": 6,
+      "activityStyle": "Trade-off · scenario · review",
+      "published": false
+    },
+    {
+      "id": 80,
+      "stage": 8,
+      "title": "Optimise a solution without breaking its contract",
+      "objective": "Improve an approach under explicit time and memory constraints while preserving required behaviour.",
+      "focus": "Optimisation synthesis; correctness; performance",
+      "evidence": "A before/after plan with preserved acceptance criteria.",
+      "tier": "synthesis",
+      "practiceCount": 7,
+      "activityStyle": "Case analysis · optimisation · proof",
+      "published": false
+    },
+    {
+      "id": 81,
+      "stage": 9,
+      "title": "Turn requirements into test cases",
+      "objective": "Derive tests from normal behaviour, boundaries, constraints and acceptance criteria.",
+      "focus": "Test design; expected result; coverage",
+      "evidence": "A small, high-value test set linked to requirements.",
+      "tier": "building",
+      "practiceCount": 5,
+      "activityStyle": "Derive · classify · verify",
+      "published": false
+    },
+    {
+      "id": 82,
+      "stage": 9,
+      "title": "Design boundary and adversarial tests",
+      "objective": "Construct cases that challenge assumptions, expose overflow, duplicates, ordering errors and worst-case patterns.",
+      "focus": "Boundary tests; adversarial cases; counterexamples",
+      "evidence": "An adversarial test set with the defect each case targets.",
+      "tier": "applied",
+      "practiceCount": 5,
+      "activityStyle": "Generate · target · explain",
+      "published": false
+    },
+    {
+      "id": 83,
+      "stage": 9,
+      "title": "Use invariants to argue correctness",
+      "objective": "Explain why a procedure remains correct at each step by identifying a property that must always hold.",
+      "focus": "Loop invariants; proof outline; correctness",
+      "evidence": "A coherent correctness argument for a short procedure.",
+      "tier": "applied",
+      "practiceCount": 6,
+      "activityStyle": "State · maintain · conclude",
+      "published": false
+    },
+    {
+      "id": 84,
+      "stage": 9,
+      "title": "Trace a defect to its source",
+      "objective": "Use observed output, intermediate states and a minimal failing case to narrow a defect to its source.",
+      "focus": "Debugging; trace; minimal failing case",
+      "evidence": "A defect hypothesis supported by a reproducible trace.",
+      "tier": "applied",
+      "practiceCount": 6,
+      "activityStyle": "Reproduce · isolate · explain",
+      "published": false
+    },
+    {
+      "id": 85,
+      "stage": 9,
+      "title": "Diagnose a wrong algorithm, not just a wrong line",
+      "objective": "Recognise when a solution strategy fails for a class of inputs even if individual statements appear reasonable.",
+      "focus": "Algorithmic defects; counterexamples; strategy mismatch",
+      "evidence": "A counterexample and a corrected high-level approach.",
+      "tier": "advanced",
+      "practiceCount": 6,
+      "activityStyle": "Challenge · disprove · redesign",
+      "published": false
+    },
+    {
+      "id": 86,
+      "stage": 9,
+      "title": "Check regressions and unintended side effects",
+      "objective": "Verify that a proposed change fixes the target issue without breaking earlier behaviour or altering unrelated data.",
+      "focus": "Regression; side effects; scope of change",
+      "evidence": "A regression checklist with targeted tests.",
+      "tier": "advanced",
+      "practiceCount": 6,
+      "activityStyle": "Compare · test · review",
+      "published": false
+    },
+    {
+      "id": 87,
+      "stage": 9,
+      "title": "Handle missing, malformed and inconsistent data",
+      "objective": "Choose safe behaviour for absent fields, invalid formats, duplicate identifiers and contradictory records.",
+      "focus": "Validation; robustness; defensive reasoning",
+      "evidence": "A defensive data-handling policy with explicit outcomes.",
+      "tier": "advanced",
+      "practiceCount": 6,
+      "activityStyle": "Classify · decide · justify",
+      "published": false
+    },
+    {
+      "id": 88,
+      "stage": 9,
+      "title": "Review generated code or pseudocode critically",
+      "objective": "Inspect a supplied solution for requirement mismatch, faulty assumptions, hidden complexity and missing tests.",
+      "focus": "Code review; requirement fit; correctness; complexity",
+      "evidence": "A review containing specific defects, evidence and recommended changes.",
+      "tier": "advanced",
+      "practiceCount": 6,
+      "activityStyle": "Inspect · annotate · prioritise",
+      "published": false
+    },
+    {
+      "id": 89,
+      "stage": 9,
+      "title": "Verify an AI suggestion independently",
+      "objective": "Treat AI output as a proposal, then validate its assumptions, behaviour, edge cases and evidence before accepting it.",
+      "focus": "AI output evaluation; independent testing; steering",
+      "evidence": "A keep/change/reject decision backed by tests and reasoning.",
+      "tier": "advanced",
+      "practiceCount": 6,
+      "activityStyle": "Audit · test · decide",
+      "published": false
+    },
+    {
+      "id": 90,
+      "stage": 9,
+      "title": "Make an engineering judgement under uncertainty",
+      "objective": "Balance correctness, risk, scope, maintainability and time when information is incomplete.",
+      "focus": "Risk; uncertainty; judgement; communication",
+      "evidence": "A recommendation with assumptions, trade-offs and a validation plan.",
+      "tier": "synthesis",
+      "practiceCount": 7,
+      "activityStyle": "Scenario review · prioritise · defend",
+      "published": false
+    },
+    {
+      "id": 91,
+      "stage": 10,
+      "title": "Solve an event-registration data problem",
+      "objective": "Count distinct participants from noisy form submissions while preserving the source data and stating the output contract.",
+      "focus": "Deduplication; identity; counting; data quality",
+      "evidence": "A complete approach and tests for repeated, empty and unique records.",
+      "tier": "applied",
+      "practiceCount": 6,
+      "activityStyle": "Real-world case · model · validate",
+      "published": false
+    },
+    {
+      "id": 92,
+      "stage": 10,
+      "title": "Resolve booking and schedule conflicts",
+      "objective": "Detect overlapping reservations and propose a correct conflict policy for time-based records.",
+      "focus": "Intervals; overlap; sorting; boundary policy",
+      "evidence": "A schedule-conflict approach with endpoint rules and tests.",
+      "tier": "applied",
+      "practiceCount": 6,
+      "activityStyle": "Case model · compare · test",
+      "published": false
+    },
+    {
+      "id": 93,
+      "stage": 10,
+      "title": "Reason about inventory changes and audit trails",
+      "objective": "Track stock movements without losing the distinction between current quantity and historical events.",
+      "focus": "State; event logs; aggregation; consistency",
+      "evidence": "A stock-update model and an auditable validation approach.",
+      "tier": "applied",
+      "practiceCount": 6,
+      "activityStyle": "Model · trace · reconcile",
+      "published": false
+    },
+    {
+      "id": 94,
+      "stage": 10,
+      "title": "Plan deliveries with routes and capacity constraints",
+      "objective": "Model delivery stops and constraints, then reason about feasible routes and priorities.",
+      "focus": "Graphs; capacity; constraints; trade-offs",
+      "evidence": "A route-planning strategy with assumptions and feasibility checks.",
+      "tier": "advanced",
+      "practiceCount": 6,
+      "activityStyle": "Model · constrain · choose",
+      "published": false
+    },
+    {
+      "id": 95,
+      "stage": 10,
+      "title": "Design a search and ranking workflow",
+      "objective": "Separate filtering eligibility from ranking relevance and define how ties and missing attributes are handled.",
+      "focus": "Filtering; scoring; ranking; tie-breaking",
+      "evidence": "A defensible search-and-ranking pipeline.",
+      "tier": "advanced",
+      "practiceCount": 7,
+      "activityStyle": "Pipeline · rank · critique",
+      "published": false
+    },
+    {
+      "id": 96,
+      "stage": 10,
+      "title": "Investigate logs, alerts and an incident",
+      "objective": "Use event sequences and symptoms to isolate a likely failure point and prioritise checks.",
+      "focus": "Event ordering; aggregation; root cause; triage",
+      "evidence": "An incident investigation plan with evidence and next tests.",
+      "tier": "advanced",
+      "practiceCount": 7,
+      "activityStyle": "Triage · trace · communicate",
+      "published": false
+    },
+    {
+      "id": 97,
+      "stage": 10,
+      "title": "Interpret an unfamiliar task and code excerpt",
+      "objective": "Read an unfamiliar code or pseudocode fragment, infer its behaviour and relate it to a practical requirement.",
+      "focus": "Code comprehension; tracing; task alignment",
+      "evidence": "A behaviour trace, requirement check and defect hypothesis.",
+      "tier": "advanced",
+      "practiceCount": 7,
+      "activityStyle": "Read · trace · critique",
+      "published": false
+    },
+    {
+      "id": 98,
+      "stage": 10,
+      "title": "Plan, build and review under changing requirements",
+      "objective": "Organise a solution when requirements evolve, distinguish essential changes from scope creep and revise tests.",
+      "focus": "Plan-build-review; change impact; AI-aware judgement",
+      "evidence": "A revised plan with changed assumptions, tests and review notes.",
+      "tier": "synthesis",
+      "practiceCount": 7,
+      "activityStyle": "Multi-step case · re-plan · defend",
+      "published": false
+    },
+    {
+      "id": 99,
+      "stage": 10,
+      "title": "Timed mixed problem-solving assessment",
+      "objective": "Solve unfamiliar tasks under interview-style time pressure using comprehension, modelling, algorithm choice and verification.",
+      "focus": "Transfer; prioritisation; explanation; time management",
+      "evidence": "A timed solution dossier and a gap analysis across competencies.",
+      "tier": "capstone",
+      "practiceCount": 2,
+      "activityStyle": "Two integrated interview cases",
+      "published": false
+    },
+    {
+      "id": 100,
+      "stage": 10,
+      "title": "End-to-end problem-solving capstone",
+      "objective": "Independently interpret, model, choose, express, test, verify and defend a solution to a novel scenario without writing code.",
+      "focus": "Full-cycle reasoning; correctness; efficiency; judgement",
+      "evidence": "A complete, evidence-backed solution dossier scored against a common rubric.",
+      "tier": "capstone",
+      "practiceCount": 1,
+      "activityStyle": "One integrated capstone dossier",
+      "published": false
+    }
+  ],
+  "timings": {
+    "foundation": [
+      [
+        "Learn one idea",
+        12
+      ],
+      [
+        "Study a worked example",
+        10
+      ],
+      [
+        "Guided practice",
+        13
+      ],
+      [
+        "Independent practice",
+        18
+      ],
+      [
+        "Mastery check",
+        5
+      ],
+      [
+        "Review",
+        2
+      ]
+    ],
+    "building": [
+      [
+        "Focused explanation",
+        10
+      ],
+      [
+        "Worked example",
+        8
+      ],
+      [
+        "Guided practice",
+        12
+      ],
+      [
+        "Independent practice",
+        23
+      ],
+      [
+        "Mastery check",
+        5
+      ],
+      [
+        "Review",
+        2
+      ]
+    ],
+    "applied": [
+      [
+        "Problem framing",
+        8
+      ],
+      [
+        "Modelled approach",
+        8
+      ],
+      [
+        "Guided application",
+        12
+      ],
+      [
+        "Independent application",
+        25
+      ],
+      [
+        "Mastery check",
+        5
+      ],
+      [
+        "Review",
+        2
+      ]
+    ],
+    "advanced": [
+      [
+        "Targeted concept",
+        7
+      ],
+      [
+        "Worked analysis",
+        7
+      ],
+      [
+        "Guided challenge",
+        10
+      ],
+      [
+        "Independent challenge",
+        28
+      ],
+      [
+        "Mastery check",
+        6
+      ],
+      [
+        "Review",
+        2
+      ]
+    ],
+    "synthesis": [
+      [
+        "Brief and success criteria",
+        6
+      ],
+      [
+        "Worked case analysis",
+        7
+      ],
+      [
+        "Scaffolded planning",
+        10
+      ],
+      [
+        "Independent case work",
+        29
+      ],
+      [
+        "Mastery check",
+        6
+      ],
+      [
+        "Review",
+        2
+      ]
+    ],
+    "capstone": [
+      [
+        "Read and scope the task",
+        5
+      ],
+      [
+        "Plan the model",
+        8
+      ],
+      [
+        "Build the solution dossier",
+        30
+      ],
+      [
+        "Test and critique",
+        12
+      ],
+      [
+        "Mastery review",
+        5
+      ]
+    ]
+  }
+}
