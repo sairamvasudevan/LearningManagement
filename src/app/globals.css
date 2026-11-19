@@ -954,6 +954,335 @@
   flex-wrap: wrap;
 }
 
+/* ==========================================================================
+   Coding Ninjas / CodeStudio Lively Animation & Gamification System
+   ========================================================================== */
+
+@keyframes cnPulse {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 106, 0, 0.7); }
+  70% { transform: scale(1.05); box-shadow: 0 0 0 8px rgba(255, 106, 0, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 106, 0, 0); }
+}
+
+@keyframes cnPulseGreen {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  70% { transform: scale(1.05); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+@keyframes cnFloat {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-7px); }
+}
+
+@keyframes cnFloatDelay {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-9px); }
+}
+
+@keyframes cnShimmerSweep {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+@keyframes cnGlowPulse {
+  0%, 100% { opacity: 0.85; filter: drop-shadow(0 0 8px rgba(255, 106, 0, 0.4)); }
+  50% { opacity: 1; filter: drop-shadow(0 0 16px rgba(255, 106, 0, 0.75)); }
+}
+
+/* Lively Orange Action Button */
+.button-cn-primary {
+  background: linear-gradient(135deg, #ff5722 0%, #ff8f00 100%) !important;
+  border: 1px solid #ff7a18 !important;
+  color: #fff !important;
+  font-weight: 800 !important;
+  box-shadow: 0 8px 24px rgba(255, 87, 34, 0.35) !important;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.16s ease, box-shadow 0.16s ease !important;
+}
+.button-cn-primary:hover:not(:disabled) {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 14px 34px rgba(255, 87, 34, 0.5) !important;
+}
+.button-cn-primary::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+  transform: translateX(-100%);
+}
+.button-cn-primary:hover::after {
+  animation: cnShimmerSweep 0.8s ease;
+}
+
+/* Pulse Dots */
+.cn-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff6a00;
+  display: inline-block;
+  animation: cnPulse 1.8s infinite;
+}
+.cn-pulse-dot-green {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  display: inline-block;
+  animation: cnPulseGreen 1.8s infinite;
+}
+
+/* Floating Elements */
+.cn-floating-badge {
+  animation: cnFloat 4.5s ease-in-out infinite;
+}
+.cn-floating-badge-delayed {
+  animation: cnFloatDelay 5.2s ease-in-out infinite;
+}
+
+/* Coding Ninjas CodeStudio Interactive Terminal */
+.cn-terminal-window {
+  background: #0d1726;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.45), 0 0 35px rgba(255, 106, 0, 0.12);
+  color: #d1e2f3;
+  display: flex;
+  flex-direction: column;
+}
+.cn-terminal-topbar {
+  background: #09101b;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.cn-mac-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.cn-mac-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.dot-red { background: #ff5f56; }
+.dot-yellow { background: #ffbd2e; }
+.dot-green { background: #27c93f; }
+.cn-terminal-title {
+  font: 700 11px 'DM Sans', monospace;
+  color: #7d96af;
+}
+.cn-terminal-mode-badge {
+  font: 800 9px Manrope, sans-serif;
+  letter-spacing: 0.1em;
+  background: rgba(255, 106, 0, 0.18);
+  color: #ff8a00;
+  border: 1px solid rgba(255, 106, 0, 0.35);
+  padding: 3px 8px;
+  border-radius: 99px;
+  text-transform: uppercase;
+}
+
+/* Terminal Tabs */
+.cn-terminal-tabs {
+  background: #0a121e;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  gap: 2px;
+  padding: 0 8px;
+}
+.cn-tab-item {
+  border: 0;
+  background: transparent;
+  color: #7188a1;
+  font: 700 11.5px monospace;
+  padding: 9px 13px;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.14s;
+}
+.cn-tab-item:hover {
+  color: #d8e6f5;
+  background: rgba(255, 255, 255, 0.03);
+}
+.cn-tab-item.active {
+  color: #ff9100;
+  border-bottom-color: #ff9100;
+  background: rgba(255, 145, 0, 0.06);
+  font-weight: 800;
+}
+
+/* Editor Body */
+.cn-editor-body {
+  padding: 14px 16px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11.5px;
+  line-height: 1.62;
+  background: #0b1320;
+  min-height: 200px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+.cn-code-line {
+  display: flex;
+  gap: 12px;
+}
+.cn-line-num {
+  color: #40566e;
+  user-select: none;
+  min-width: 22px;
+  text-align: right;
+}
+.cn-code-text {
+  color: #cbdbee;
+  flex: 1;
+}
+.cn-kwd { color: #ff7b72; font-weight: 700; }
+.cn-fn { color: #d2a8ff; }
+.cn-type { color: #79c0ff; }
+.cn-var { color: #ffa657; }
+.cn-num { color: #7ee787; }
+.cn-str { color: #a5d6ff; }
+.cn-comment { color: #8b949e; font-style: italic; }
+
+/* Interactive Terminal Action Bar */
+.cn-terminal-actions {
+  background: #0a111c;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 11px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.cn-run-btn {
+  background: linear-gradient(135deg, #ff5722 0%, #ff8f00 100%);
+  border: 1px solid #ff7a18;
+  color: #fff;
+  border-radius: 9px;
+  padding: 8px 16px;
+  font: 800 11.5px Manrope, sans-serif;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  box-shadow: 0 4px 15px rgba(255, 87, 34, 0.4);
+  transition: all 0.15s;
+}
+.cn-run-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(255, 87, 34, 0.6);
+}
+.cn-test-output {
+  margin: 10px 14px;
+  background: #070c14;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-family: monospace;
+  font-size: 11px;
+}
+.cn-test-case-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+.cn-test-case-row:last-child {
+  border-bottom: 0;
+}
+.cn-test-pass {
+  color: #34d399;
+  font-weight: 700;
+}
+.cn-runtime-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: 800 10px Manrope, sans-serif;
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 3px 8px;
+  border-radius: 99px;
+}
+.cn-xp-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font: 800 10px Manrope, sans-serif;
+  background: rgba(255, 180, 0, 0.18);
+  color: #ffd043;
+  border: 1px solid rgba(255, 180, 0, 0.35);
+  padding: 3px 8px;
+  border-radius: 99px;
+}
+
+/* Hiring & Alumni Marquee (Coding Ninjas Style) */
+.cn-hiring-section {
+  background: #060d16;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 24px 0;
+  overflow: hidden;
+  color: #fff;
+}
+.cn-hiring-head {
+  text-align: center;
+  font: 800 11px Manrope, sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #8da4bb;
+  margin-bottom: 16px;
+}
+.cn-hiring-companies {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.cn-company-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 7px 15px;
+  border-radius: 12px;
+  font: 800 12.5px Manrope, sans-serif;
+  color: #dce7f2;
+  transition: all 0.15s;
+}
+.cn-company-pill:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 106, 0, 0.4);
+  transform: translateY(-2px);
+  color: #fff;
+}
+
+/* Flame Badge */
+.badge-flame {
+  background: linear-gradient(135deg, #ff4500, #ff8c00);
+  color: #fff;
+  font: 800 9px Manrope, sans-serif;
+  letter-spacing: 0.1em;
+  box-shadow: 0 3px 10px rgba(255, 69, 0, 0.35);
+  animation: cnGlowPulse 2.5s infinite;
+}
+
 @media(max-width:1040px){
   .ed-hero-inner{grid-template-columns:1fr;gap:30px}
   .ed-course-grid{grid-template-columns:repeat(2,minmax(0,1fr))}

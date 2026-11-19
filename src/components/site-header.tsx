@@ -68,14 +68,16 @@ export function SiteHeader({
     <>
       {/* Top Coursera/Udemy style announcement ribbon */}
       {!topBannerDismissed && (
-        <div className="ed-top-banner">
+        <div className="ed-top-banner" style={{ background: "linear-gradient(90deg, #111d2e 0%, #1e1308 50%, #111d2e 100%)" }}>
           <div className="ed-top-banner-inner">
-            <span className="ed-banner-tag">FREE ENROLLMENT ACTIVE</span>
+            <span className="badge-flame" style={{ padding: "3px 8px", borderRadius: 99, marginRight: 4 }}>
+              🔥 SCHOLARSHIP ENROLLMENT ACTIVE
+            </span>
             <span className="ed-banner-text">
               Master 100 hours of systematic problem solving with zero tuition fee. Flagship course is{" "}
               <strong>100% Free (₹0)</strong> for verified students.
             </span>
-            <Link href="/register?course=problem-solving-lab" className="ed-banner-cta">
+            <Link href="/register?course=problem-solving-lab" className="ed-banner-cta" style={{ color: "#ff8a00" }}>
               Enroll Free →
             </Link>
             <button
@@ -94,7 +96,9 @@ export function SiteHeader({
       <header className="site-header site-header-sticky">
         <div className="header-left">
           <Link href="/" className="wordmark" aria-label="Nexus Academy home">
-            <span className="mark">NA</span>
+            <span className="mark" style={{ background: "linear-gradient(135deg, #ff5722, #ff9800)", color: "#fff" }}>
+              ⚡
+            </span>
             <span>
               <b>{PLATFORM_NAME}</b>
               <small>{PLATFORM_SUBTITLE}</small>
@@ -260,7 +264,7 @@ export function SiteHeader({
                 Sign In
               </Link>
               <Link
-                className="button button-primary header-enroll-btn"
+                className="button button-cn-primary header-enroll-btn"
                 href="/register?course=problem-solving-lab"
               >
                 Join Free (₹0)

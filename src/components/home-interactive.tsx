@@ -6,13 +6,51 @@ import catalog from "@/lib/course-catalog.json";
 import { COURSE_PACKAGES } from "@/lib/courses";
 
 /* -------------------------------------------------------------------------- */
-/* 1. Udemy/Coursera-Style Interactive Hero Preview Challenge                */
+/* 1. Coding Ninjas CodeStudio-Style Interactive Terminal Sandbox              */
 /* -------------------------------------------------------------------------- */
+
+const CODE_STUDIO_TABS = [
+  {
+    id: "solution",
+    filename: "DistinctRiders.cpp",
+    badge: "Optimal C++20",
+    lines: [
+      { num: 1, text: "#include <iostream>", type: "kwd" },
+      { num: 2, text: "#include <unordered_set>", type: "kwd" },
+      { num: 3, text: "#include <vector>", type: "kwd" },
+      { num: 4, text: "", type: "plain" },
+      { num: 5, text: "// Module 01: Invariant-Based Deduplication", type: "comment" },
+      { num: 6, text: "int solveDistinct(const std::vector<TapLog>& logs) {", type: "fn" },
+      { num: 7, text: "    std::unordered_set<int> uniqueStudents;", type: "type" },
+      { num: 8, text: "    for (const auto& log : logs) {", type: "kwd" },
+      { num: 9, text: '        if (log.route == "Route B" && log.day == "Tue") {', type: "kwd" },
+      { num: 10, text: "            uniqueStudents.insert(log.studentId); // O(1) avg insert", type: "var" },
+      { num: 11, text: "        }", type: "plain" },
+      { num: 12, text: "    }", type: "plain" },
+      { num: 13, text: "    return uniqueStudents.size(); // Time: O(N) | Space: O(D)", type: "fn" },
+      { num: 14, text: "}", type: "plain" },
+    ],
+  },
+  {
+    id: "asymptotics",
+    filename: "GaussSummation.py",
+    badge: "Big-O Analysis",
+    lines: [
+      { num: 1, text: "# Module 01: Asymptotic Scale Analysis", type: "comment" },
+      { num: 2, text: "def calculate_nested_iterations(N: int) -> int:", type: "fn" },
+      { num: 3, text: "    # Outer runs N times; inner runs 0 to i", type: "comment" },
+      { num: 4, text: "    # Total = 0 + 1 + 2 + ... + (N - 1)", type: "comment" },
+      { num: 5, text: "    total_steps = (N * (N - 1)) // 2", type: "var" },
+      { num: 6, text: '    complexity_class = "O(N^2) Quadratic"', type: "str" },
+      { num: 7, text: "    return total_steps, complexity_class", type: "fn" },
+    ],
+  },
+];
 
 const SAMPLE_CHALLENGES = [
   {
     id: "nested-loops",
-    kicker: "MODULE 01 PREVIEW · ASYMPTOTIC THINKING",
+    kicker: "ASYMPTOTIC SCALE · MODULE 01 PREVIEW",
     title: "Predict the exact scale behavior of nested loops",
     prompt:
       "A junior engineer writes a search routine where an outer loop runs N times, and for each step, an inner loop runs from 0 up to i (where i is the current outer iteration index). Which time complexity class does this algorithm belong to?",
@@ -33,7 +71,7 @@ const SAMPLE_CHALLENGES = [
   },
   {
     id: "story-vs-task",
-    kicker: "MODULE 01 PREVIEW · PROBLEM FORMULATION",
+    kicker: "PROBLEM FORMULATION · MODULE 01 PREVIEW",
     title: "Separate the real task from the business narrative",
     prompt:
       "A campus shuttle app logs every card tap when riders board. Some riders tap twice when the reader beeps slowly. The transport office asks: “How many different students rode Route B on Tuesday?” What should your solution count?",
@@ -54,162 +92,353 @@ const SAMPLE_CHALLENGES = [
 ];
 
 export function HeroTryChallenge() {
-  const [activeChallengeIdx, setActiveChallengeIdx] = useState(0);
+  const [activeMode, setActiveMode] = useState<"terminal" | "quiz">("terminal");
+  const [activeTab, setActiveTab] = useState("solution");
+  const [isRunningTests, setIsRunningTests] = useState(false);
+  const [testResultsVisible, setTestResultsVisible] = useState(false);
+
+  // Quiz state
+  const [quizIdx, setQuizIdx] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [checked, setChecked] = useState(false);
   const [hintStep, setHintStep] = useState(0);
 
-  const problem = SAMPLE_CHALLENGES[activeChallengeIdx];
+  const currentTab = CODE_STUDIO_TABS.find((t) => t.id === activeTab) || CODE_STUDIO_TABS[0];
+  const problem = SAMPLE_CHALLENGES[quizIdx];
   const isCorrect = checked && selected === problem.correctIndex;
 
-  function switchChallenge(idx: number) {
-    setActiveChallengeIdx(idx);
-    setSelected(null);
-    setChecked(false);
-    setHintStep(0);
+  function runCodeStudioTests() {
+    setIsRunningTests(true);
+    setTestResultsVisible(false);
+    setTimeout(() => {
+      setIsRunningTests(false);
+      setTestResultsVisible(true);
+    }, 600);
   }
 
   return (
-    <div className="hero-widget-card" aria-label="Interactive course preview">
-      {/* Video / Interactive Header Tab */}
-      <div className="hero-widget-header">
-        <div className="hw-tabs">
-          <button
-            type="button"
-            className={`hw-tab ${activeChallengeIdx === 0 ? "active" : ""}`}
-            onClick={() => switchChallenge(0)}
-          >
-            <span>⚡ Challenge 1: Asymptotics</span>
-          </button>
-          <button
-            type="button"
-            className={`hw-tab ${activeChallengeIdx === 1 ? "active" : ""}`}
-            onClick={() => switchChallenge(1)}
-          >
-            <span>🎯 Challenge 2: Problem Framing</span>
-          </button>
+    <div className="cn-terminal-window" aria-label="CodeStudio interactive playground">
+      {/* Top Mac-style bar */}
+      <div className="cn-terminal-topbar">
+        <div className="cn-mac-dots">
+          <span className="cn-mac-dot dot-red" />
+          <span className="cn-mac-dot dot-yellow" />
+          <span className="cn-mac-dot dot-green" />
+          <span className="cn-terminal-title">CodeStudio v2.4 · Module 01 Sandbox</span>
         </div>
-        <span className="badge badge-live">Interactive Sandbox</span>
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <span className="cn-xp-chip">⚡ +50 XP</span>
+          <span className="cn-terminal-mode-badge">
+            <span className="cn-pulse-dot" style={{ marginRight: 5 }} />
+            Interactive
+          </span>
+        </div>
       </div>
 
-      <div className="hero-widget-body">
-        <div className="hero-widget-kicker-row">
-          <span className="hw-kicker">{problem.kicker}</span>
-          <span className="hw-stars">★★★★★ 4.9 (1,480 ratings)</span>
-        </div>
+      {/* Mode Switcher Tabs */}
+      <div className="cn-terminal-tabs">
+        <button
+          type="button"
+          className={`cn-tab-item ${activeMode === "terminal" ? "active" : ""}`}
+          onClick={() => setActiveMode("terminal")}
+        >
+          💻 CodeStudio Runner
+        </button>
+        <button
+          type="button"
+          className={`cn-tab-item ${activeMode === "quiz" ? "active" : ""}`}
+          onClick={() => setActiveMode("quiz")}
+        >
+          🎯 Checkpoint Challenge
+        </button>
+      </div>
 
-        <h3 className="hero-widget-title">{problem.title}</h3>
-        <p className="hero-widget-prompt">{problem.prompt}</p>
-
-        <div className="hero-widget-options" role="radiogroup" aria-label="Answer options">
-          {problem.options.map((opt, idx) => {
-            const isChosen = selected === idx;
-            const isRightOption = checked && idx === problem.correctIndex;
-            const isWrongChosen = checked && isChosen && idx !== problem.correctIndex;
-
-            return (
+      {activeMode === "terminal" ? (
+        <>
+          {/* Sub tabs for files */}
+          <div style={{ display: "flex", background: "#080e18", padding: "6px 12px", gap: 6 }}>
+            {CODE_STUDIO_TABS.map((t) => (
               <button
-                key={opt}
+                key={t.id}
                 type="button"
-                role="radio"
-                aria-checked={isChosen}
-                className={[
-                  "hw-option",
-                  isChosen ? "is-selected" : "",
-                  isRightOption ? "is-correct" : "",
-                  isWrongChosen ? "is-wrong" : "",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-                onClick={() => {
-                  setSelected(idx);
-                  setChecked(false);
+                onClick={() => setActiveTab(t.id)}
+                style={{
+                  border: 0,
+                  background: activeTab === t.id ? "rgba(255,106,0,0.18)" : "transparent",
+                  color: activeTab === t.id ? "#ff9500" : "#7992ad",
+                  font: "700 11px monospace",
+                  padding: "4px 8px",
+                  borderRadius: 6,
+                  cursor: "pointer",
                 }}
               >
-                <span className="hw-letter">{String.fromCharCode(65 + idx)}</span>
-                <span className="hw-text">{opt}</span>
-                <span className="hw-mark">
-                  {isRightOption ? "✓" : isWrongChosen ? "×" : isChosen ? "●" : ""}
-                </span>
+                {t.filename} ({t.badge})
               </button>
-            );
-          })}
-        </div>
-
-        {hintStep > 0 && (
-          <div className="hw-hints">
-            {problem.hints.slice(0, hintStep).map((hint, idx) => (
-              <p key={hint}>
-                <b>Hint {idx + 1}:</b> {hint}
-              </p>
             ))}
           </div>
-        )}
 
-        <div className="hw-actions">
-          <button
-            type="button"
-            className="button button-primary"
-            disabled={selected === null}
-            onClick={() => setChecked(true)}
-          >
-            Check reasoning
-          </button>
+          {/* Syntax Highlighted Editor View */}
+          <div className="cn-editor-body">
+            {currentTab.lines.map((line, idx) => (
+              <div className="cn-code-line" key={idx}>
+                <span className="cn-line-num">{line.num}</span>
+                <span className={`cn-code-text cn-${line.type}`}>{line.text}</span>
+              </div>
+            ))}
+          </div>
 
-          {hintStep < problem.hints.length && !checked && (
+          {/* Action Bar */}
+          <div className="cn-terminal-actions">
             <button
               type="button"
-              className="hw-hint-btn"
-              onClick={() => setHintStep((n) => Math.min(problem.hints.length, n + 1))}
+              className="cn-run-btn"
+              onClick={runCodeStudioTests}
+              disabled={isRunningTests}
             >
-              {hintStep === 0 ? "Need a hint?" : `Show hint ${hintStep + 1}`}
+              {isRunningTests ? "⏳ Running Test Cases…" : "▶ Run Test Cases against Invariants"}
             </button>
-          )}
+            <span style={{ fontSize: 11, color: "#8da3b8" }}>
+              Invariant: <b>O(1) Memory Lookup</b> · Deduplicated
+            </span>
+          </div>
 
-          {checked && (
-            <button
-              type="button"
-              className="hw-hint-btn"
-              onClick={() => {
-                setSelected(null);
-                setChecked(false);
-                setHintStep(0);
+          {/* Test Case Output Box */}
+          {testResultsVisible && (
+            <div className="cn-test-output">
+              <div className="cn-test-case-row">
+                <span>
+                  <b className="cn-test-pass">✓ Test Case 1:</b> Double tap deduplication
+                </span>
+                <span className="cn-runtime-chip">0.8 ms · PASSED</span>
+              </div>
+              <div className="cn-test-case-row">
+                <span>
+                  <b className="cn-test-pass">✓ Test Case 2:</b> Multi-route filtering (Route B)
+                </span>
+                <span className="cn-runtime-chip">0.5 ms · PASSED</span>
+              </div>
+              <div className="cn-test-case-row">
+                <span>
+                  <b className="cn-test-pass">✓ Test Case 3:</b> N = 100,000 scale boundary
+                </span>
+                <span className="cn-runtime-chip">1.2 ms · PASSED</span>
+              </div>
+              <div
+                style={{
+                  marginTop: 8,
+                  paddingTop: 8,
+                  borderTop: "1px solid rgba(255,255,255,0.08)",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <span style={{ color: "#34d399", fontWeight: 800 }}>
+                  🏆 3/3 Test Cases Passed · Runtime beats 99.4%
+                </span>
+                <Link
+                  href="/register?course=problem-solving-lab"
+                  style={{ color: "#ff8a00", fontWeight: 800, textDecoration: "underline" }}
+                >
+                  Enroll Free to Unlock Full Studio →
+                </Link>
+              </div>
+            </div>
+          )}
+        </>
+      ) : (
+        /* Quiz Mode */
+        <div style={{ padding: 18, background: "#0b1320" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+            <span style={{ font: "800 10px Manrope", color: "#ff8a00", letterSpacing: "0.1em" }}>
+              {problem.kicker}
+            </span>
+            <div style={{ display: "flex", gap: 6 }}>
+              <button
+                type="button"
+                style={{
+                  border: 0,
+                  background: quizIdx === 0 ? "#ff7a18" : "#1a2738",
+                  color: "#fff",
+                  fontSize: 10,
+                  padding: "3px 8px",
+                  borderRadius: 6,
+                  cursor: "pointer",
+                }}
+                onClick={() => {
+                  setQuizIdx(0);
+                  setSelected(null);
+                  setChecked(false);
+                  setHintStep(0);
+                }}
+              >
+                Q1
+              </button>
+              <button
+                type="button"
+                style={{
+                  border: 0,
+                  background: quizIdx === 1 ? "#ff7a18" : "#1a2738",
+                  color: "#fff",
+                  fontSize: 10,
+                  padding: "3px 8px",
+                  borderRadius: 6,
+                  cursor: "pointer",
+                }}
+                onClick={() => {
+                  setQuizIdx(1);
+                  setSelected(null);
+                  setChecked(false);
+                  setHintStep(0);
+                }}
+              >
+                Q2
+              </button>
+            </div>
+          </div>
+
+          <h4 style={{ font: "800 15px Manrope", color: "#fff", margin: "0 0 8px" }}>
+            {problem.title}
+          </h4>
+          <p style={{ fontSize: 12, color: "#9db3c9", lineHeight: 1.6, margin: "0 0 12px" }}>
+            {problem.prompt}
+          </p>
+
+          <div style={{ display: "grid", gap: 7, marginBottom: 12 }}>
+            {problem.options.map((opt, idx) => {
+              const isChosen = selected === idx;
+              const isRight = checked && idx === problem.correctIndex;
+              const isWrong = checked && isChosen && idx !== problem.correctIndex;
+
+              return (
+                <button
+                  key={opt}
+                  type="button"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    textAlign: "left",
+                    padding: "8px 12px",
+                    borderRadius: 9,
+                    border: `1px solid ${isRight ? "#10b981" : isWrong ? "#ef4444" : isChosen ? "#ff7a18" : "rgba(255,255,255,0.12)"}`,
+                    background: isRight
+                      ? "rgba(16,185,129,0.18)"
+                      : isWrong
+                        ? "rgba(239,68,68,0.18)"
+                        : isChosen
+                          ? "rgba(255,122,24,0.15)"
+                          : "rgba(255,255,255,0.03)",
+                    color: "#dce8f5",
+                    fontSize: 11.5,
+                    cursor: "pointer",
+                  }}
+                  onClick={() => {
+                    setSelected(idx);
+                    setChecked(false);
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 18,
+                      height: 18,
+                      borderRadius: 4,
+                      background: isChosen ? "#ff7a18" : "#172334",
+                      color: "#fff",
+                      display: "grid",
+                      placeItems: "center",
+                      fontWeight: 800,
+                      fontSize: 10,
+                    }}
+                  >
+                    {String.fromCharCode(65 + idx)}
+                  </span>
+                  <span style={{ flex: 1 }}>{opt}</span>
+                  {isRight ? "✓" : isWrong ? "×" : ""}
+                </button>
+              );
+            })}
+          </div>
+
+          {hintStep > 0 && (
+            <div
+              style={{
+                background: "rgba(255,145,0,0.1)",
+                border: "1px solid rgba(255,145,0,0.25)",
+                borderRadius: 8,
+                padding: "8px 10px",
+                fontSize: 11,
+                color: "#ffc266",
+                marginBottom: 10,
               }}
             >
-              Reset challenge
+              <b>Hint:</b> {problem.hints[hintStep - 1]}
+            </div>
+          )}
+
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <button
+              type="button"
+              className="button-cn-primary"
+              style={{ padding: "7px 14px", borderRadius: 8, fontSize: 11 }}
+              disabled={selected === null}
+              onClick={() => setChecked(true)}
+            >
+              Submit Checkpoint
             </button>
+            {hintStep < problem.hints.length && !checked && (
+              <button
+                type="button"
+                style={{
+                  border: 0,
+                  background: "transparent",
+                  color: "#ff9d42",
+                  fontSize: 11,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
+                onClick={() => setHintStep((n) => Math.min(problem.hints.length, n + 1))}
+              >
+                {hintStep === 0 ? "Need a Hint?" : `Show Hint ${hintStep + 1}`}
+              </button>
+            )}
+          </div>
+
+          {checked && (
+            <div
+              style={{
+                marginTop: 10,
+                padding: 10,
+                borderRadius: 8,
+                background: isCorrect ? "rgba(16,185,129,0.14)" : "rgba(255,145,0,0.14)",
+                border: `1px solid ${isCorrect ? "#10b981" : "#ff9500"}`,
+                fontSize: 11,
+                color: "#e2ecf5",
+                lineHeight: 1.5,
+              }}
+            >
+              <b>{isCorrect ? "Mastery Confirmed!" : "Review the Invariant:"}</b> {problem.explanation}
+            </div>
           )}
         </div>
+      )}
 
-        {checked && (
-          <div className={`hw-feedback ${isCorrect ? "good" : "review"}`}>
-            <div className="hw-feedback-head">
-              <b>{isCorrect ? "Mastery confirmed! Flawless reasoning." : "Not quite — review the breakdown below."}</b>
-              <span>{isCorrect ? "+2/2 Score" : "Review Checkpoint"}</span>
-            </div>
-            <p>{problem.explanation}</p>
-            <Link className="hw-next-link" href="/register?course=problem-solving-lab">
-              Enroll Free in Problem Solving Lab to continue (₹0) →
-            </Link>
-          </div>
-        )}
-      </div>
-
+      {/* Terminal Footer */}
       <div className="hw-footer">
         <div className="hw-meta-stat">
           <b>100 Hours</b>
-          <span>Structured Path</span>
+          <span>10 Paths</span>
         </div>
         <div className="hw-meta-stat">
-          <b>80% Threshold</b>
-          <span>Mastery Checkpoint</span>
+          <b>80% Score</b>
+          <span>Mastery Gate</span>
         </div>
         <div className="hw-meta-stat">
           <b>Dual Tracking</b>
-          <span>Student &amp; Admin</span>
+          <span>Student &amp; Mentor</span>
         </div>
         <div className="hw-meta-stat">
-          <b style={{ color: "var(--teal)" }}>₹0 / Free</b>
+          <b style={{ color: "#ff8a00" }}>₹0 / Free</b>
           <span>100% Scholarship</span>
         </div>
       </div>
@@ -218,12 +447,12 @@ export function HeroTryChallenge() {
 }
 
 /* -------------------------------------------------------------------------- */
-/* 2. Udemy-Style Marketplace Course Catalog with Filter & Search             */
+/* 2. Coding Ninjas Style Lively Course Marketplace Catalog                   */
 /* -------------------------------------------------------------------------- */
 
 const CATEGORY_TABS = [
-  { id: "all", label: "All Programs" },
-  { id: "available", label: "Available Now (Free)" },
+  { id: "all", label: "🔥 All Programs" },
+  { id: "available", label: "⚡ Available Free (Flagship)" },
   { id: "Core Algorithmic Reasoning", label: "Problem Solving" },
   { id: "System Design", label: "System Design" },
   { id: "Artificial Intelligence", label: "Generative AI" },
@@ -254,11 +483,13 @@ export function CourseCatalogSection() {
     <section id="courses" className="ed-section">
       <div className="ed-section-head">
         <div>
-          <span className="eyebrow">COURSE CATALOGUE &amp; SPECIALIZATIONS</span>
+          <span className="eyebrow" style={{ color: "#ff6a00" }}>
+            🔥 INDUSTRY-LEADING LEARNING TRACKS
+          </span>
           <h2>Explore Engineering Programs</h2>
           <p>
-            Start with our flagship <strong>Problem Solving Lab</strong> package—100% free for verified
-            students—or preview upcoming advanced engineering tracks sharing the same platform.
+            Start with our flagship <strong>Problem Solving Lab</strong>—100% free with lifetime
+            scholarship—or preview upcoming tracks engineered for Tier-1 placements.
           </p>
         </div>
 
@@ -299,9 +530,20 @@ export function CourseCatalogSection() {
             className={`ed-course-card ${course.status === "available" ? "ed-card-featured" : "ed-card-upcoming"}`}
           >
             {/* Visual Thumbnail Card */}
-            <div className={`ed-course-thumb-box thumb-${course.slug.includes("system") ? "indigo" : course.slug.includes("ai") ? "amber" : course.slug.includes("programming") ? "slate" : "teal"}`}>
+            <div
+              className={`ed-course-thumb-box thumb-${course.slug.includes("system") ? "indigo" : course.slug.includes("ai") ? "amber" : course.slug.includes("programming") ? "slate" : "teal"}`}
+              style={{
+                background: course.status === "available"
+                  ? "linear-gradient(130deg, #10253d 0%, #173854 50%, #1c4b43 100%)"
+                  : "linear-gradient(130deg, #141f2d 0%, #202b3b 100%)",
+              }}
+            >
               <div className="thumb-badges-top">
-                {course.badge && <span className="thumb-badge-hero">{course.badge}</span>}
+                {course.status === "available" ? (
+                  <span className="badge-flame">🔥 BESTSELLER · 100% SCHOLARSHIP</span>
+                ) : (
+                  <span className="thumb-badge-hero">{course.badge}</span>
+                )}
                 <span className="thumb-badge-hours">{course.totalHours} Hours</span>
               </div>
               <div className="thumb-art-center">
@@ -311,7 +553,7 @@ export function CourseCatalogSection() {
                 <span className="thumb-art-title">{course.category}</span>
               </div>
               <div className="thumb-meta-bottom">
-                <span>{course.totalModules} Structured Modules</span>
+                <span>{course.totalModules} Structured Lessons</span>
                 <span>{course.level}</span>
               </div>
             </div>
@@ -319,7 +561,10 @@ export function CourseCatalogSection() {
             <div className="ed-course-body">
               <div className="ed-course-meta-top">
                 <span className="badge badge-category">{course.category}</span>
-                <span className="ed-level-tag">{course.level}</span>
+                <span className="ed-level-tag">
+                  <span className="cn-pulse-dot-green" style={{ marginRight: 5 }} />
+                  {course.level}
+                </span>
               </div>
 
               <h3>{course.title}</h3>
@@ -352,13 +597,13 @@ export function CourseCatalogSection() {
               <div className="ed-course-footer">
                 <div className="ed-price-block">
                   <div className="price-tag-row">
-                    <strong className={course.isFree ? "price-free" : "price-standard"}>
+                    <strong style={{ color: course.isFree ? "#ff6a00" : "var(--navy)", fontSize: 22 }}>
                       {course.priceLabel}
                     </strong>
                     {course.originalPrice && <del className="price-struck">{course.originalPrice}</del>}
                   </div>
                   <small className="price-subtext">
-                    {course.status === "available" ? "100% Scholarship · Student Access" : "Cohort Registration Upcoming"}
+                    {course.status === "available" ? "100% Scholarship · Free for Students" : "Cohort Launching Soon"}
                   </small>
                 </div>
 
@@ -369,7 +614,7 @@ export function CourseCatalogSection() {
                         Syllabus
                       </Link>
                       <Link
-                        className="button button-primary"
+                        className="button button-cn-primary"
                         href={`/register?course=${course.slug}`}
                       >
                         Enroll Free →
@@ -397,7 +642,7 @@ export function CourseCatalogSection() {
 }
 
 /* -------------------------------------------------------------------------- */
-/* 3. Coursera-Style 10-Path Interactive Curriculum Roadmap                   */
+/* 3. Gamified 10-Path Ninja Skill Tree & Curriculum Explorer                 */
 /* -------------------------------------------------------------------------- */
 
 const HOUR_RHYTHM = [
@@ -419,12 +664,13 @@ export function CurriculumExplorer() {
     <section id="curriculum" className="ed-section">
       <div className="ed-section-head">
         <div>
-          <span className="eyebrow">SYSTEMATIC 100-HOUR ROADMAP · PROBLEM SOLVING LAB</span>
-          <h2>Explore All 10 Progressive Learning Paths</h2>
+          <span className="eyebrow" style={{ color: "#ff6a00" }}>
+            ⚔️ GAMIFIED 10-PATH LEARNING ROADMAP
+          </span>
+          <h2>The 100-Hour Problem Solving Path</h2>
           <p>
-            Designed like top engineering degree specializations. Students must master each checkpoint
-            with at least 80% marks to unlock the next lesson. Module 01 is live today; Modules 02–100
-            are authored and released sequentially.
+            Advance from fundamentals to advanced algorithmic engineering. Passing each checkpoint
+            at 80% unlocks the next lesson. Module 01 is live today; Modules 02–100 unlock sequentially.
           </p>
         </div>
         <Link className="button button-dark" href="/courses/problem-solving-lab">
@@ -450,7 +696,15 @@ export function CurriculumExplorer() {
                 <span className="es-num">{String(stage.id).padStart(2, "0")}</span>
                 <span className="es-copy">
                   <b>{stage.title}</b>
-                  <small>{liveCount > 0 ? `${liveCount}/10 lessons live now` : "10 planned lessons"}</small>
+                  <small>
+                    {liveCount > 0 ? (
+                      <span style={{ color: "#10b981", fontWeight: 800 }}>
+                        ● {liveCount}/10 lessons live
+                      </span>
+                    ) : (
+                      "10 planned lessons"
+                    )}
+                  </small>
                 </span>
                 <span className="es-arrow">›</span>
               </button>
@@ -461,14 +715,14 @@ export function CurriculumExplorer() {
         <div className="explorer-panel">
           <div className="explorer-panel-head">
             <div>
-              <span className="eyebrow">
-                PATH {String(activeStage.id).padStart(2, "0")} OF 10 · 10 INTENSIVE HOURS
+              <span className="eyebrow" style={{ color: "#ff6a00" }}>
+                PATH {String(activeStage.id).padStart(2, "0")} OF 10 · 10 INTENSIVE HOURS · +1,000 XP
               </span>
               <h3>{activeStage.title}</h3>
               <p>{activeStage.description}</p>
             </div>
             <Link
-              className="button button-primary"
+              className="button button-cn-primary"
               href="/register?course=problem-solving-lab"
             >
               Start Path 01 Free →
@@ -519,11 +773,13 @@ export function PedagogySection() {
     <section id="pedagogy" className="ed-section">
       <div className="ed-section-head">
         <div>
-          <span className="eyebrow">THE SCIENCE OF LEARNING</span>
-          <h2>Engineered for Deep Retention, Not Surface Memory</h2>
+          <span className="eyebrow" style={{ color: "#ff6a00" }}>
+            🧠 EVIDENCE-BASED PEDAGOGY
+          </span>
+          <h2>Why Active Problem Solving Outperforms Video Bingeing</h2>
           <p>
-            Most coding tutorials encourage passive video watching that vanishes in real interviews.
-            Our 100-hour system is constructed on 4 evidence-based cognitive science principles.
+            Traditional video tutorials give you an illusion of learning that evaporates in technical
+            interviews. Here are the 4 cognitive science pillars backing our lab:
           </p>
         </div>
       </div>
@@ -582,10 +838,12 @@ export function ComparisonSection() {
     <section className="ed-section">
       <div className="ed-section-head">
         <div>
-          <span className="eyebrow">DIRECT PLATFORM COMPARISON</span>
-          <h2>Why Traditional Tutorials Fail You in Real Interviews</h2>
+          <span className="eyebrow" style={{ color: "#ff6a00" }}>
+            ⚖️ PLATFORM COMPARISON
+          </span>
+          <h2>Why Students Excel with Active Retrieval</h2>
           <p>
-            Here is how passive tutorial bingeing compares to our mastery-gated problem solving lab.
+            See how passive video tutorial platforms compare to our mastery-gated problem solving engine.
           </p>
         </div>
       </div>
@@ -596,7 +854,7 @@ export function ComparisonSection() {
             <tr>
               <th style={{ width: "32%" }}>Dimension</th>
               <th style={{ width: "34%" }}>Traditional Video Tutorials</th>
-              <th style={{ width: "34%", background: "#f0faf7", color: "var(--teal)" }}>
+              <th style={{ width: "34%", background: "#fff5eb", color: "#ff6a00" }}>
                 Problem Solving Lab (Flagship)
               </th>
             </tr>
@@ -607,7 +865,7 @@ export function ComparisonSection() {
                 <b>Learning Mode</b>
               </td>
               <td>Passive video watching (illusion of competence)</td>
-              <td style={{ background: "#fbfefe" }}>
+              <td style={{ background: "#fffbf7" }}>
                 <b>Active retrieval &amp; hands-on checkpoint evaluation</b>
               </td>
             </tr>
@@ -616,7 +874,7 @@ export function ComparisonSection() {
                 <b>Progression Barrier</b>
               </td>
               <td>Click next anytime; zero mastery required</td>
-              <td style={{ background: "#fbfefe" }}>
+              <td style={{ background: "#fffbf7" }}>
                 <b>Strict 80% checkpoint score required to unlock next lesson</b>
               </td>
             </tr>
@@ -625,7 +883,7 @@ export function ComparisonSection() {
                 <b>Syntax vs Principles</b>
               </td>
               <td>Heavy syntax memorization in one chosen language</td>
-              <td style={{ background: "#fbfefe" }}>
+              <td style={{ background: "#fffbf7" }}>
                 <b>Language-independent algorithmic modeling &amp; invariants</b>
               </td>
             </tr>
@@ -634,7 +892,7 @@ export function ComparisonSection() {
                 <b>Mistake Diagnosis</b>
               </td>
               <td>Generic error messages or forum threads</td>
-              <td style={{ background: "#fbfefe" }}>
+              <td style={{ background: "#fffbf7" }}>
                 <b>Option-by-option explanations of why wrong answers fail</b>
               </td>
             </tr>
@@ -643,7 +901,7 @@ export function ComparisonSection() {
                 <b>Institutional Visibility</b>
               </td>
               <td>None; college faculty cannot verify student effort</td>
-              <td style={{ background: "#fbfefe" }}>
+              <td style={{ background: "#fffbf7" }}>
                 <b>Full Admin Portal: cohort analytics, attempts, and verification</b>
               </td>
             </tr>
@@ -652,8 +910,8 @@ export function ComparisonSection() {
                 <b>Cost to Students</b>
               </td>
               <td>₹4,000 – ₹25,000 subscription fees</td>
-              <td style={{ background: "#fbfefe" }}>
-                <b style={{ color: "var(--teal)" }}>₹0 / Free Flagship Access</b>
+              <td style={{ background: "#fffbf7" }}>
+                <b style={{ color: "#ff6a00" }}>₹0 / Free Flagship Access</b>
               </td>
             </tr>
           </tbody>
@@ -674,7 +932,9 @@ export function RolePreviewTabs() {
     <section id="platform" className="ed-section">
       <div className="ed-section-head">
         <div>
-          <span className="eyebrow">DUAL-PORTAL ARCHITECTURE</span>
+          <span className="eyebrow" style={{ color: "#ff6a00" }}>
+            🛡️ DUAL-PORTAL ARCHITECTURE
+          </span>
           <h2>Built for Both Ambitious Learners and College Mentors</h2>
           <p>
             Students always know their exact unlocked path. Placement coordinators and professors get
@@ -707,7 +967,9 @@ export function RolePreviewTabs() {
       {role === "student" ? (
         <div className="role-showcase">
           <div className="role-benefits">
-            <span className="eyebrow">STUDENT PORTAL EXPERIENCE</span>
+            <span className="eyebrow" style={{ color: "#ff6a00" }}>
+              STUDENT WORKSPACE
+            </span>
             <h3>Track Your Growth Across 10 Progressive Paths</h3>
             <ul className="role-list">
               <li>
@@ -724,7 +986,7 @@ export function RolePreviewTabs() {
               </li>
             </ul>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              <Link className="button button-primary" href="/register?course=problem-solving-lab">
+              <Link className="button button-cn-primary" href="/register?course=problem-solving-lab">
                 Create Free Student Account →
               </Link>
               <Link className="button" href="/login">
@@ -786,7 +1048,9 @@ export function RolePreviewTabs() {
       ) : (
         <div className="role-showcase">
           <div className="role-benefits">
-            <span className="eyebrow">ADMINISTRATOR PORTAL EXPERIENCE</span>
+            <span className="eyebrow" style={{ color: "#ff6a00" }}>
+              COLLEGE PLACEMENT HUB
+            </span>
             <h3>Complete Visibility Over Cohort Progress</h3>
             <ul className="role-list">
               <li>
@@ -891,7 +1155,9 @@ export function TestimonialSection() {
     <section className="ed-section">
       <div className="ed-section-head">
         <div>
-          <span className="eyebrow">STUDENT &amp; FACULTY TESTIMONIALS</span>
+          <span className="eyebrow" style={{ color: "#ff6a00" }}>
+            ⭐️ STUDENT &amp; FACULTY EXPERIENCES
+          </span>
           <h2>Validated by Top Campus Engineers</h2>
           <p>Read what students and placement coordinators say about our structured learning engine.</p>
         </div>
@@ -954,7 +1220,9 @@ export function FaqAccordion() {
     <section id="faq" className="ed-section">
       <div className="ed-section-head">
         <div>
-          <span className="eyebrow">FREQUENTLY ASKED QUESTIONS</span>
+          <span className="eyebrow" style={{ color: "#ff6a00" }}>
+            💡 FREQUENTLY ASKED QUESTIONS
+          </span>
           <h2>Everything You Need to Know</h2>
         </div>
       </div>

@@ -89,3 +89,4 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Failed to process auth session." }, { status: 500 });
   }
 }
+

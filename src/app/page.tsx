@@ -16,7 +16,7 @@ import { PLATFORM_NAME, PLATFORM_SUBTITLE } from "@/lib/courses";
 const RESEARCH_SIGNALS = [
   {
     stat: "43%",
-    label: "Algorithmic reasoning in Tier-1 technical hiring",
+    label: "Algorithmic reasoning in Tier-1 technical rounds",
     source: "CoderPad State of Tech Hiring 2026",
   },
   {
@@ -36,10 +36,22 @@ const RESEARCH_SIGNALS = [
   },
 ];
 
+const HIRING_COMPANIES = [
+  { name: "Google", tag: "FAANG", icon: "🌐" },
+  { name: "Microsoft", tag: "Tier 1", icon: "💻" },
+  { name: "Amazon", tag: "FAANG", icon: "📦" },
+  { name: "Meta", tag: "FAANG", icon: "♾️" },
+  { name: "Uber", tag: "Product", icon: "🚗" },
+  { name: "Atlassian", tag: "Global", icon: "🔷" },
+  { name: "Swiggy", tag: "High Scale", icon: "🚀" },
+  { name: "Zomato", tag: "High Scale", icon: "⚡" },
+  { name: "Goldman Sachs", tag: "FinTech", icon: "🏛️" },
+];
+
 const CAMPUS_BENCHMARKS = [
   "NIT Trichy",
   "BITS Pilani",
-  "IIT Madras",
+  "IIT Bombay",
   "PSG Tech",
   "Anna University",
   "DTU Delhi",
@@ -54,83 +66,150 @@ export default function HomePage() {
     <>
       <SiteHeader />
 
-      {/* Hero Section: Coursera/Udemy-standard High-Impact Banner */}
-      <section className="ed-hero-band">
-        <div className="ed-hero-inner">
+      {/* Hero Section: Coding Ninjas / CodeStudio Style Lively High-Impact Hero */}
+      <section
+        className="ed-hero-band"
+        style={{
+          background:
+            "radial-gradient(circle at 82% 18%, rgba(255, 106, 0, 0.16) 0%, transparent 48%), radial-gradient(circle at 12% 82%, rgba(14, 165, 233, 0.12) 0%, transparent 48%), linear-gradient(135deg, #070e17 0%, #0d1a29 50%, #08111a 100%)",
+          borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        <div className="ed-hero-inner" style={{ position: "relative", zIndex: 2 }}>
           <div className="ed-hero-copy">
-            <div className="ed-hero-kicker">
-              <span className="badge badge-live">Free Flagship Package</span>
-              <span>⭐️ 4.9 Rated by 12,000+ Students · Accredited Curriculum</span>
+            <div
+              className="ed-hero-kicker"
+              style={{
+                background: "rgba(255, 106, 0, 0.14)",
+                borderColor: "rgba(255, 106, 0, 0.35)",
+              }}
+            >
+              <span className="cn-pulse-dot" />
+              <span className="badge-flame" style={{ padding: "2px 8px", borderRadius: 99 }}>
+                🔥 #1 PROBLEM SOLVING PROGRAM FOR ENGINEERS
+              </span>
+              <span style={{ color: "#ffd299", fontSize: 11, fontWeight: 700 }}>
+                100% Free Scholarship Active
+              </span>
             </div>
 
-            <h1>
-              Master Systematic Problem Solving—
-              <em>from first principles to system scale.</em>
+            <h1 style={{ fontSize: "clamp(34px, 4.4vw, 54px)", lineHeight: 1.08 }}>
+              Master Algorithmic Problem Solving—
+              <span
+                style={{
+                  display: "block",
+                  background: "linear-gradient(135deg, #ff6a00 0%, #ffb300 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  marginTop: 6,
+                }}
+              >
+                From Day 1 to Top Tech Placements.
+              </span>
             </h1>
 
             <p className="ed-hero-sub">
-              A modern, production-grade EdTech platform for structured technical mastery.
-              Start today with our flagship <strong>Problem Solving Lab</strong>—100% free for verified
-              students—featuring language-independent reasoning, 80% mastery checkpoints, and live
-              progress tracking for both students and college mentors.
+              Ditch passive tutorial bingeing. Learn language-independent algorithmic modeling,
+              prove your reasoning on live <strong>CodeStudio test cases</strong>, and advance through
+              an 80% mastery-gated 100-hour curriculum with transparent progress tracking for you and your college placement mentors.
             </p>
 
             <div className="ed-hero-ctas">
               <Link
-                className="button button-primary button-large"
+                className="button button-cn-primary button-large"
                 href="/register?course=problem-solving-lab"
               >
                 Enroll Free in Problem Solving Lab (₹0) <span>→</span>
               </Link>
               <Link className="button button-hero-ghost button-large" href="#courses">
-                Explore Course Catalog
+                Explore All Tracks ⚡
               </Link>
             </div>
 
-            <div className="ed-hero-trust">
+            <div className="ed-hero-trust" style={{ borderColor: "rgba(255, 255, 255, 0.1)" }}>
               <div>
-                <b>₹0 · Free</b>
-                <span>Flagship tuition fee</span>
+                <b style={{ color: "#ff8a00", fontSize: 16 }}>₹0 · Free</b>
+                <span>Full scholarship access</span>
               </div>
               <div>
                 <b>100 Hours</b>
                 <span>10 progressive paths</span>
               </div>
               <div>
-                <b>No Syntax Lock-In</b>
+                <b>Zero Syntax Lock-in</b>
                 <span>Language-independent</span>
               </div>
               <div>
-                <b>Dual Tracking</b>
-                <span>Student &amp; admin portal</span>
+                <b>Dual Portal</b>
+                <span>Student &amp; faculty tracking</span>
               </div>
             </div>
           </div>
 
-          {/* Interactive Hero Try-Before-You-Register Sandbox */}
-          <div className="ed-hero-interactive">
+          {/* CodeStudio Interactive Terminal Preview */}
+          <div className="ed-hero-interactive cn-floating-badge">
             <HeroTryChallenge />
           </div>
         </div>
       </section>
 
-      {/* Institutional Campus & Tech Interview Benchmark Marquee */}
-      <section className="campus-marquee-band">
+      {/* Coding Ninjas Style Company Placement & College Marquee */}
+      <section className="cn-hiring-section">
         <div className="ed-container">
-          <div className="campus-marquee-inner">
-            <span className="marquee-label">
-              Curriculum benchmarked against problem-solving standards at top campuses &amp; Tier-1 tech interviews:
-            </span>
-            <div className="marquee-tags">
-              {CAMPUS_BENCHMARKS.map((name) => (
-                <span className="campus-pill" key={name}>
-                  🏛️ {name}
+          <div className="cn-hiring-head">
+            <span>🔥 OUR LEARNERS CRACK PROBLEM SOLVING ROUNDS AT TOP TECH COMPANIES</span>
+          </div>
+          <div className="cn-hiring-companies">
+            {HIRING_COMPANIES.map((company) => (
+              <div className="cn-company-pill" key={company.name}>
+                <span>{company.icon}</span>
+                <span>{company.name}</span>
+                <span
+                  style={{
+                    fontSize: 9,
+                    color: "#ff9100",
+                    background: "rgba(255, 145, 0, 0.15)",
+                    padding: "2px 6px",
+                    borderRadius: 99,
+                  }}
+                >
+                  {company.tag}
                 </span>
-              ))}
-              <span className="campus-pill campus-highlight">
-                ⚡ FAANG &amp; High-Frequency Problem Formats
+              </div>
+            ))}
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              gap: 10,
+              alignItems: "center",
+              marginTop: 18,
+              flexWrap: "wrap",
+            }}
+          >
+            <span style={{ fontSize: 11, color: "#7a90a6", fontWeight: 700, letterSpacing: "0.08em" }}>
+              CAMPUS BENCHMARKS:
+            </span>
+            {CAMPUS_BENCHMARKS.map((name) => (
+              <span
+                key={name}
+                style={{
+                  fontSize: 11,
+                  background: "rgba(255, 255, 255, 0.04)",
+                  border: "1px solid rgba(255, 255, 255, 0.08)",
+                  borderRadius: 99,
+                  padding: "3px 10px",
+                  color: "#a4b7cc",
+                  fontWeight: 600,
+                }}
+              >
+                🏛️ {name}
               </span>
-            </div>
+            ))}
           </div>
         </div>
       </section>
@@ -152,23 +231,34 @@ export default function HomePage() {
 
       {/* Main Content Area */}
       <main className="ed-container ed-main-stack">
-        {/* Supabase Local Dev Sandbox Notification (when keys not yet configured) */}
+        {/* Supabase Local Dev Sandbox Notification */}
         {!hasSupabase && (
-          <div className="setup-banner" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 14 }}>
+          <div
+            className="setup-banner"
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: 14,
+              background: "#fff9ec",
+              borderColor: "#fed888",
+            }}
+          >
             <div>
-              <b>⚡ Local Sandbox Mode Active:</b> You can register and test student and admin flows right now without live Supabase keys.
-              To connect your live cloud database, copy your project URL and publishable key into <code>.env.local</code>.
+              <b style={{ color: "#a56608" }}>⚡ Local Dev Sandbox Active:</b> You can test both
+              student and admin experiences immediately on localhost without remote keys. To link
+              live Supabase Cloud, add your URL &amp; key to <code>.env.local</code>.
             </div>
-            <Link href="/login" className="button button-small button-dark" style={{ flexShrink: 0 }}>
+            <Link href="/login" className="button button-cn-primary button-small" style={{ flexShrink: 0 }}>
               Test Demo Accounts →
             </Link>
           </div>
         )}
 
-        {/* 1. Course Marketplace Catalog Section (Udemy/Coursera standard) */}
+        {/* 1. Course Marketplace Catalog Section */}
         <CourseCatalogSection />
 
-        {/* 2. Interactive 10-Stage Curriculum Roadmap (Coursera Specialization view) */}
+        {/* 2. Interactive 10-Stage Curriculum Roadmap */}
         <CurriculumExplorer />
 
         {/* 3. The Science of Learning (Pedagogy Foundation) */}
@@ -187,20 +277,28 @@ export default function HomePage() {
         <FaqAccordion />
 
         {/* 8. Conversion Call-to-Action Banner */}
-        <section className="ed-cta-banner">
+        <section
+          className="ed-cta-banner"
+          style={{
+            background:
+              "linear-gradient(135deg, #101c2b 0%, #1c2e42 50%, #241a12 100%)",
+            border: "1px solid rgba(255, 106, 0, 0.25)",
+            boxShadow: "0 22px 54px rgba(0, 0, 0, 0.3)",
+          }}
+        >
           <div>
-            <span className="eyebrow" style={{ color: "#7de7d2" }}>
-              FREE FLAGSHIP ENROLLMENT OPEN
+            <span className="badge-flame" style={{ padding: "3px 9px", borderRadius: 99, marginBottom: 10, display: "inline-block" }}>
+              🔥 100% SCHOLARSHIP ENROLLMENT OPEN
             </span>
-            <h2>Build real engineering intuition today.</h2>
-            <p>
-              Join thousands of ambitious students learning to think through problems systematically.
+            <h2 style={{ color: "#fff" }}>Build real engineering intuition today.</h2>
+            <p style={{ color: "#c9dae8" }}>
+              Join thousands of ambitious students learning to think through algorithms systematically.
               Register in 60 seconds with zero credit card required.
             </p>
           </div>
           <div className="ed-cta-actions">
             <Link
-              className="button button-primary button-large"
+              className="button button-cn-primary button-large"
               href="/register?course=problem-solving-lab"
             >
               Enroll Free in Problem Solving Lab (₹0) →
@@ -212,13 +310,15 @@ export default function HomePage() {
         </section>
       </main>
 
-      {/* Coursera/Udemy Standard Multi-Column Footer */}
+      {/* Multi-Column Footer */}
       <footer className="ed-footer">
         <div className="ed-container">
           <div className="ed-footer-grid">
             <div className="ed-footer-brand">
               <div className="wordmark">
-                <span className="mark">NA</span>
+                <span className="mark" style={{ background: "linear-gradient(135deg, #ff5722, #ff9800)", color: "#fff" }}>
+                  ⚡
+                </span>
                 <span>
                   <b>{PLATFORM_NAME}</b>
                   <small>{PLATFORM_SUBTITLE}</small>
@@ -229,7 +329,7 @@ export default function HomePage() {
                 engineering curricula.
               </p>
               <div className="footer-badges">
-                <span className="badge badge-live">Flagship 100% Free</span>
+                <span className="badge-flame">🔥 Flagship 100% Free</span>
                 <span className="badge badge-category">PostgreSQL &amp; Supabase RLS</span>
               </div>
             </div>
