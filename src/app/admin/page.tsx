@@ -2,16 +2,20 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { getAdminMetrics } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminHome() {
   const identity = await requireAdmin();
-  let studentCount = 48;
-  let approvedCount = 42;
-  let pendingCount = 6;
-  let completedLessonsCount = 142;
-  let registrationMode = "approval";
+
+  // Load live SQLite metrics
+  const metrics = getAdminMetrics();
+  let studentCount = metrics.totalStudents;
+  let approvedCount = metrics.approvedStudents;
+  let pendingCount = Math.max(0, metrics.totalStudents - metrics.approvedStudents);
+  let completedLessonsCount = metrics.totalModulesMastered;
+  let registrationMode = "open";
 
   if (isSupabaseConfigured() && !identity.isDevSession) {
     try {
@@ -42,13 +46,13 @@ export default async function AdminHome() {
           .eq("singleton", true)
           .maybeSingle(),
       ]);
-      studentCount = sCount || 0;
-      approvedCount = aCount || 0;
-      pendingCount = pCount || 0;
-      completedLessonsCount = cCount || 0;
+      studentCount = sCount || studentCount;
+      approvedCount = aCount || approvedCount;
+      pendingCount = pCount || pendingCount;
+      completedLessonsCount = cCount || completedLessonsCount;
       if (modeRow?.registration_mode) registrationMode = modeRow.registration_mode;
     } catch {
-      // Fallback kept
+      // Keep SQLite metrics
     }
   }
 
@@ -63,20 +67,18 @@ export default async function AdminHome() {
           </p>
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          {!isSupabaseConfigured() && (
-            <span
-              style={{
-                fontSize: 10,
-                fontWeight: 800,
-                color: "#926315",
-                background: "#fef3c7",
-                padding: "6px 10px",
-                borderRadius: 99,
-              }}
-            >
-              ⚡ Local Dev Sandbox
-            </span>
-          )}
+          <span
+            style={{
+              fontSize: 10,
+              fontWeight: 800,
+              color: "#065f46",
+              background: "#d1fae5",
+              padding: "6px 10px",
+              borderRadius: 99,
+            }}
+          >
+            ⚡ Persistent SQLite Engine
+          </span>
           <span className="admin-chip">ADMIN</span>
         </div>
       </div>
@@ -146,12 +148,12 @@ export default async function AdminHome() {
               <tr>
                 <td>
                   <b>Problem Solving Lab</b>
-                  <small>100 modules · 10 paths · Module 01 live</small>
+                  <small>100 modules · 10 paths · Stage 01 (10 Modules) live</small>
                 </td>
                 <td>Core Algorithmic Reasoning</td>
                 <td>100 hrs</td>
                 <td>
-                  <span className="badge badge-live">Free / ₹0</span>
+                  <span className="badge badge-live">Free / ₹0 Scholarship</span>
                 </td>
                 <td>
                   <span className="table-status approved">Active Flagship</span>

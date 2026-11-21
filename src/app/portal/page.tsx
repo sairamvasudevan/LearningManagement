@@ -1,175 +1,50 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
 import { SiteHeader } from "@/components/site-header";
 import { requireIdentity, getRole } from "@/lib/auth";
-import { createClient } from "@/lib/supabase/server";
-import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { getUserProgress, getUserAttempts, getUserById } from "@/lib/db";
 import { COURSE_PACKAGES } from "@/lib/courses";
-import catalog from "@/lib/course-catalog.json";
+import { MODULES_CURRICULUM } from "@/lib/curriculum-data";
 
 export const dynamic = "force-dynamic";
-
-type CourseModule = {
-  module_number: number;
-  stage_number: number;
-  title: string;
-  objective: string;
-  content_status: string;
-};
-type Progress = {
-  module_number: number;
-  status: string;
-  best_score: number;
-  total_marks: number;
-  attempts: number;
-  first_started_at: string | null;
-  completed_at: string | null;
-};
-type AttemptRow = {
-  id: string;
-  module_number: number;
-  status: string;
-  score: number;
-  total_marks: number;
-  started_at: string;
-  submitted_at: string | null;
-};
 
 export default async function StudentPortalPage() {
   const identity = await requireIdentity();
   if ((await getRole(identity.id)) === "admin") redirect("/admin");
 
-  const cookieStore = await cookies();
-  const progressCookie = cookieStore.get("psl_progress");
-
-  let profile = {
-    full_name: identity.fullName || identity.email.split("@")[0] || "Enrolled Student",
-    email: identity.email,
-    phone: "+91 98401 23456",
-    college: identity.college || "Engineering College",
-    register_number: identity.registerNumber || "REG-2026-001",
-    department: identity.department || "Computer Science and Engineering",
-    degree: identity.degree || "B.Tech Computer Science",
-    graduation_year: identity.graduationYear ?? 2026,
+  const dbUser = getUserById(identity.id);
+  const profile = {
+    full_name: dbUser?.full_name || identity.fullName || identity.email.split("@")[0] || "Enrolled Student",
+    email: dbUser?.email || identity.email,
+    phone: dbUser?.phone || "+91 98401 23456",
+    college: dbUser?.college || identity.college || "Engineering College",
+    register_number: dbUser?.register_number || identity.registerNumber || "REG-2026-001",
+    department: dbUser?.department || identity.department || "Computer Science and Engineering",
+    degree: dbUser?.degree || identity.degree || "B.Tech Computer Science",
+    graduation_year: dbUser?.graduation_year || identity.graduationYear || 2026,
+    enrollment_status: dbUser?.enrollment_status || "approved",
   };
 
-  let enrollment = {
-    status: "approved",
-    access_source: "self_registration",
-    enrolled_at: "2026-11-18T10:00:00Z",
-  };
+  // Real SQLite progress & attempts
+  const progressList = getUserProgress(identity.id);
+  const attemptsList = getUserAttempts(identity.id);
 
-  let moduleRows: CourseModule[] = catalog.modules.map((m) => ({
-    module_number: m.id,
-    stage_number: m.stage,
-    title: m.title,
-    objective: m.objective,
-    content_status: m.published ? "published" : "planned",
-  }));
-
-  // Dynamic progress from cookie in local session mode
-  let progressList: Progress[] = [];
-  let attemptsList: AttemptRow[] = [];
-
-  if (progressCookie?.value) {
-    try {
-      progressList = JSON.parse(decodeURIComponent(progressCookie.value)) || [];
-      attemptsList = progressList.map((p, idx) => ({
-        id: `att-local-${idx + 1}`,
-        module_number: p.module_number,
-        status: p.status === "completed" ? "passed" : "active",
-        score: p.best_score,
-        total_marks: p.total_marks,
-        started_at: p.first_started_at || new Date().toISOString(),
-        submitted_at: p.completed_at || new Date().toISOString(),
-      }));
-    } catch {
-      progressList = [];
-      attemptsList = [];
-    }
-  }
-
-  // Live Supabase Mode if keys present
-  if (isSupabaseConfigured() && !identity.isDevSession) {
-    try {
-      const supabase = await createClient();
-      const [{ data: liveProfile }, { data: enrollmentData }] = await Promise.all([
-        supabase
-          .from("profiles")
-          .select(
-            "full_name,email,phone,college,register_number,department,degree,graduation_year",
-          )
-          .eq("id", identity.id)
-          .maybeSingle(),
-        supabase
-          .from("course_enrollments")
-          .select("status,access_source,enrolled_at")
-          .eq("student_id", identity.id)
-          .order("enrolled_at", { ascending: false })
-          .limit(1)
-          .maybeSingle(),
-      ]);
-
-      if (liveProfile) profile = liveProfile;
-
-      let liveEnrollment = enrollmentData;
-      if (!liveEnrollment) {
-        const { data } = await supabase.rpc("request_course_enrollment");
-        if (data && typeof data === "object" && "status" in data) {
-          liveEnrollment = {
-            status: String(data.status),
-            access_source: "self_registration",
-            enrolled_at: "2026-11-18T10:00:00Z",
-          };
-        }
-      }
-      if (liveEnrollment) enrollment = liveEnrollment;
-
-      if (enrollment?.status === "approved") {
-        const [{ data: modules }, { data: progressRows }, { data: attemptRows }] =
-          await Promise.all([
-            supabase
-              .from("course_modules")
-              .select("module_number,stage_number,title,objective,content_status")
-              .order("module_number"),
-            supabase
-              .from("lesson_progress")
-              .select(
-                "module_number,status,best_score,total_marks,attempts,first_started_at,completed_at",
-              )
-              .eq("student_id", identity.id),
-            supabase
-              .from("assessment_attempts")
-              .select("id,module_number,status,score,total_marks,started_at,submitted_at")
-              .eq("student_id", identity.id)
-              .order("started_at", { ascending: false })
-              .limit(10),
-          ]);
-        if (modules) moduleRows = modules as CourseModule[];
-        if (progressRows) progressList = progressRows as Progress[];
-        if (attemptRows) attemptsList = attemptRows as AttemptRow[];
-      }
-    } catch {
-      // Fallback kept
-    }
-  }
-
-  const approved = enrollment?.status === "approved";
+  const approved = profile.enrollment_status === "approved";
   const progressMap = new Map(progressList.map((p) => [p.module_number, p]));
+  const completedSet = new Set(
+    progressList.filter((p) => p.status === "completed").map((p) => p.module_number),
+  );
 
-  const completed = progressList.filter((p) => p.status === "completed").length;
-  const inProgress = progressList.filter((p) => p.status === "in_progress").length;
-  const publishedModules = moduleRows.filter((m) => m.content_status === "published");
+  const completed = completedSet.size;
   const totalBestScore = progressList.reduce((sum, p) => sum + p.best_score, 0);
   const totalPossibleMarks = progressList.reduce((sum, p) => sum + p.total_marks, 0);
 
-  const nextModule =
-    Array.from({ length: 100 }, (_, i) => i + 1).find(
-      (n) => !progressMap.get(n) || progressMap.get(n)?.status !== "completed",
-    ) || 0;
+  // Determine current active module (1 to 10)
+  const stage01Modules = Array.from({ length: 10 }, (_, i) => i + 1);
+  const nextModule = stage01Modules.find((n) => !completedSet.has(n)) || 11;
 
-  const displayName = profile?.full_name || identity.email.split("@")[0];
+  const currentModuleCurriculum = MODULES_CURRICULUM[nextModule <= 10 ? nextModule : 10];
+  const displayName = profile.full_name;
   const course = COURSE_PACKAGES[0];
 
   return (
@@ -182,7 +57,7 @@ export default async function StudentPortalPage() {
             <div className="portal-badges">
               <span className="badge-flame">🔥 100-Hour Flagship</span>
               <span className="badge-free">100% Free Scholarship</span>
-              <span className="badge-roll">Roll: {profile?.register_number || "REG-001"}</span>
+              <span className="badge-roll">Roll: {profile.register_number}</span>
             </div>
             <h1>Welcome back, {displayName.split(" ")[0]}! 👋</h1>
             <p>
@@ -192,10 +67,10 @@ export default async function StudentPortalPage() {
           </div>
           <div className="portal-overall-stat">
             <div className="stat-circle">
-              <span className="stat-number">{completed}%</span>
-              <span className="stat-label">Progress</span>
+              <span className="stat-number">{completed * 10}%</span>
+              <span className="stat-label">Stage 01</span>
             </div>
-            <div className="stat-sub">{completed} of 100 Modules Mastered</div>
+            <div className="stat-sub">{completed} of 10 Modules Mastered</div>
           </div>
         </section>
 
@@ -209,9 +84,9 @@ export default async function StudentPortalPage() {
             </p>
             <div className="profile-summary">
               <b>Registered Account</b>
-              <span>{profile?.email || identity.email}</span>
+              <span>{profile.email}</span>
               <span>
-                {profile?.college} · {profile?.register_number}
+                {profile.college} · {profile.register_number}
               </span>
             </div>
           </section>
@@ -222,17 +97,17 @@ export default async function StudentPortalPage() {
               <div className="portal-metric-card">
                 <span className="metric-icon">📚</span>
                 <div>
-                  <div className="metric-val">{completed} / 100</div>
-                  <div className="metric-label">Modules Completed</div>
+                  <div className="metric-val">{completed} / 10</div>
+                  <div className="metric-label">Stage 01 Modules</div>
                 </div>
               </div>
               <div className="portal-metric-card">
                 <span className="metric-icon">🎯</span>
                 <div>
                   <div className="metric-val">
-                    {inProgress > 0 ? "1 Active" : completed > 0 ? "Module 02" : "Module 01"}
+                    {nextModule <= 10 ? `Module ${String(nextModule).padStart(2, "0")}` : "Stage 01 Done"}
                   </div>
-                  <div className="metric-label">Current Focus</div>
+                  <div className="metric-label">Current Milestone</div>
                 </div>
               </div>
               <div className="portal-metric-card">
@@ -241,7 +116,7 @@ export default async function StudentPortalPage() {
                   <div className="metric-val">
                     {totalPossibleMarks > 0 ? `${totalBestScore} / ${totalPossibleMarks}` : "0 / 12"}
                   </div>
-                  <div className="metric-label">Checkpoint Score</div>
+                  <div className="metric-label">Cumulative Score</div>
                 </div>
               </div>
               <div className="portal-metric-card">
@@ -258,105 +133,145 @@ export default async function StudentPortalPage() {
               <div className="action-banner-content">
                 <div className="action-kicker">
                   <span className="cn-pulse-dot-green"></span>
-                  <span>CURRENT ASSIGNMENT · PATH 01 (READ &amp; DEFINE)</span>
+                  <span>
+                    {nextModule <= 10
+                      ? `CURRENT ASSIGNMENT · STAGE 01 · MODULE ${String(nextModule).padStart(2, "0")}`
+                      : "STAGE 01 COMPLETE · FOUNDATIONS MASTERED"}
+                  </span>
                 </div>
                 <h2>
-                  {completed === 0
-                    ? "Module 01: Separate the Story from the Task"
-                    : `Next Up: Module ${String(nextModule).padStart(2, "0")} · Express Task as Input, Rule, Output`}
+                  {nextModule <= 10
+                    ? `Module ${String(nextModule).padStart(2, "0")}: ${currentModuleCurriculum?.title}`
+                    : "🎉 Congratulations! You have mastered all 10 Foundation Modules!"}
                 </h2>
                 <p>
-                  {completed === 0
-                    ? "Master the art of extracting the algorithmic invariant from messy problem stories. Includes 4 principles, 3 real-world case studies, and a 6-question checkpoint."
-                    : "Great work passing Module 01! Continue building your systematic engineering foundation."}
+                  {nextModule <= 10
+                    ? currentModuleCurriculum?.objective
+                    : "You have completed all 10 modules in Stage 01 (Read & Define the Problem) with verified mastery checkpoints."}
                 </p>
-                <div className="action-meta-row">
-                  <span>⏱️ 20 min reading</span>
-                  <span>📝 6 Questions</span>
-                  <span>⭐ 12 Total Marks</span>
-                  <span>🎯 80% to pass</span>
-                </div>
+                {nextModule <= 10 && currentModuleCurriculum && (
+                  <div className="action-meta-row">
+                    <span>⏱️ {currentModuleCurriculum.readTime}</span>
+                    <span>🧩 {currentModuleCurriculum.caseStudies.length} Case Studies</span>
+                    <span>💻 Practice Task</span>
+                    <span>📝 {currentModuleCurriculum.questions.length} Questions</span>
+                    <span>🎯 80% to pass</span>
+                  </div>
+                )}
               </div>
               <div className="action-banner-btn-wrap">
-                <Link
-                  href={nextModule > 0 ? `/learn/${nextModule}` : "/learn/1"}
-                  className="button button-cn-primary action-cta-btn"
-                >
-                  {completed === 0 ? "🚀 Start Module 01 Now →" : "Review Module 01 →"}
-                </Link>
+                {nextModule <= 10 ? (
+                  <Link
+                    href={`/learn/${nextModule}`}
+                    className="button button-cn-primary action-cta-btn"
+                  >
+                    {progressMap.get(nextModule)?.status === "in_progress"
+                      ? `Resume Module ${String(nextModule).padStart(2, "0")} →`
+                      : `Start Module ${String(nextModule).padStart(2, "0")} Now →`}
+                  </Link>
+                ) : (
+                  <Link href="/learn/1" className="button button-outline action-cta-btn">
+                    Review Curriculum Modules →
+                  </Link>
+                )}
               </div>
             </section>
 
-            {/* Module Curriculum Roadmap */}
+            {/* Module Curriculum Roadmap (All 10 Modules) */}
             <section className="portal-curriculum-card">
               <div className="card-header-clean">
                 <div>
-                  <h3>Module 01 Checkpoint &amp; Curriculum Track</h3>
-                  <p>Sequential mastery gating: score ≥ 80% to unlock subsequent engineering modules.</p>
+                  <h3>Stage 01: Read &amp; Define the Problem (10 Modules)</h3>
+                  <p>Master foundational problem solving. Pass each module with ≥ 80% to unlock the next.</p>
                 </div>
-                <span className="catalog-count-pill">{publishedModules.length} Published Module</span>
+                <span className="catalog-count-pill">10 Published Modules</span>
               </div>
 
-              <div className="module-item-clean">
-                <div className="module-item-left">
-                  <div className={`module-num-badge ${completed > 0 ? "badge-completed" : "badge-ready"}`}>
-                    {completed > 0 ? "✓" : "01"}
-                  </div>
-                  <div className="module-item-info">
-                    <h4>Module 01: Separate the Story from the Task</h4>
-                    <p>Identify the exact outcome requested without confusing background narrative with the algorithmic invariant.</p>
-                    <div className="module-item-tags">
-                      <span className="tag-pill">Foundation</span>
-                      <span className="tag-pill">20 Mins</span>
-                      <span className="tag-pill">12 Marks</span>
+              <div className="curriculum-modules-stack">
+                {stage01Modules.map((mNum) => {
+                  const mData = MODULES_CURRICULUM[mNum];
+                  const isCompleted = completedSet.has(mNum);
+                  const isUnlocked = mNum === 1 || completedSet.has(mNum - 1);
+                  const prog = progressMap.get(mNum);
+
+                  return (
+                    <div
+                      key={mNum}
+                      className={`module-item-clean ${!isUnlocked ? "module-item-locked" : ""}`}
+                    >
+                      <div className="module-item-left">
+                        <div
+                          className={`module-num-badge ${
+                            isCompleted
+                              ? "badge-completed"
+                              : isUnlocked
+                                ? "badge-ready"
+                                : "badge-locked"
+                          }`}
+                        >
+                          {isCompleted ? "✓" : String(mNum).padStart(2, "0")}
+                        </div>
+                        <div className="module-item-info">
+                          <h4>
+                            Module {String(mNum).padStart(2, "0")}: {mData?.title || `Module ${mNum}`}
+                          </h4>
+                          <p>{mData?.objective}</p>
+                          <div className="module-item-tags">
+                            <span className="tag-pill">{mData?.readTime || "20 Mins"}</span>
+                            <span className="tag-pill">{mData?.caseStudies.length || 2} Case Studies</span>
+                            <span className="tag-pill">Hands-on Task</span>
+                            <span className="tag-pill">{mData?.questions.length || 6} Questions</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="module-item-right">
+                        <div className="module-score-status">
+                          {isCompleted ? (
+                            <span className="status-badge-completed">
+                              Passed ✓ ({prog?.best_score}/{prog?.total_marks})
+                            </span>
+                          ) : isUnlocked ? (
+                            <span className="status-badge-ready">
+                              {prog?.status === "in_progress" ? "In Progress" : "Ready to Start"}
+                            </span>
+                          ) : (
+                            <span className="status-badge-locked">
+                              🔒 Complete Mod {String(mNum - 1).padStart(2, "0")}
+                            </span>
+                          )}
+                        </div>
+                        {isUnlocked ? (
+                          <Link
+                            href={`/learn/${mNum}`}
+                            className={`button button-small ${isCompleted ? "button-outline" : "button-cn-primary"}`}
+                          >
+                            {isCompleted ? "Review Material" : "Start Lesson →"}
+                          </Link>
+                        ) : (
+                          <button
+                            type="button"
+                            className="button button-small button-disabled"
+                            disabled
+                          >
+                            Locked
+                          </button>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </div>
-                <div className="module-item-right">
-                  <div className="module-score-status">
-                    {progressMap.get(1)?.status === "completed" ? (
-                      <span className="status-badge-completed">
-                        Passed ({progressMap.get(1)?.best_score}/12)
-                      </span>
-                    ) : (
-                      <span className="status-badge-ready">Ready to Start</span>
-                    )}
-                  </div>
-                  <Link href="/learn/1" className="button button-small button-outline">
-                    {completed > 0 ? "Review Material" : "Start Lesson →"}
-                  </Link>
-                </div>
-              </div>
-
-              {/* Planned Modules Preview */}
-              <div className="planned-modules-list">
-                <div className="planned-module-item">
-                  <div className="planned-num">🔒 02</div>
-                  <div className="planned-info">
-                    <b>Express a task as input, rule and output</b>
-                    <small>Construct formal transformation contracts and deterministic state mappings.</small>
-                  </div>
-                  <span className="planned-badge">Unlocks after Module 01</span>
-                </div>
-                <div className="planned-module-item">
-                  <div className="planned-num">🔒 03</div>
-                  <div className="planned-info">
-                    <b>Extract constraints, limits, and resource bounds</b>
-                    <small>Size limits, uniqueness rules, ordering, and capacity bounds.</small>
-                  </div>
-                  <span className="planned-badge">Planned</span>
-                </div>
+                  );
+                })}
               </div>
             </section>
 
-            {/* Recent Checkpoint Attempts */}
+            {/* Assessment History */}
             {attemptsList.length > 0 && (
               <section className="portal-curriculum-card">
                 <div className="card-header-clean">
                   <div>
-                    <h3>Assessment History</h3>
-                    <p>Verified scores recorded for your account.</p>
+                    <h3>Mastery Checkpoint Assessment History</h3>
+                    <p>Verified scores recorded in the persistent SQLite database.</p>
                   </div>
+                  <span className="count-chip">{attemptsList.length} Attempts</span>
                 </div>
                 <div className="attempts-table-wrap">
                   <table className="clean-table">
@@ -365,22 +280,35 @@ export default async function StudentPortalPage() {
                         <th>Module</th>
                         <th>Outcome</th>
                         <th>Score</th>
-                        <th>Completed On</th>
+                        <th>Percentage</th>
+                        <th>Submitted At</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {attemptsList.map((att) => (
-                        <tr key={att.id}>
-                          <td><b>Module {String(att.module_number).padStart(2, "0")}</b></td>
-                          <td>
-                            <span className={att.status === "passed" ? "table-passed" : "table-active"}>
-                              {att.status === "passed" ? "Passed ✓" : "Active"}
-                            </span>
-                          </td>
-                          <td><b>{att.score} / {att.total_marks}</b></td>
-                          <td>{new Date(att.submitted_at || "").toLocaleDateString("en-IN")}</td>
-                        </tr>
-                      ))}
+                      {attemptsList.map((att) => {
+                        const pct = att.total_marks > 0 ? Math.round((att.score / att.total_marks) * 100) : 0;
+                        return (
+                          <tr key={att.id}>
+                            <td>
+                              <b>Module {String(att.module_number).padStart(2, "0")}</b>
+                            </td>
+                            <td>
+                              <span
+                                className={att.passed ? "table-passed" : "table-active"}
+                              >
+                                {att.passed ? "Passed ✓" : "Review Needed"}
+                              </span>
+                            </td>
+                            <td>
+                              <b>
+                                {att.score} / {att.total_marks}
+                              </b>
+                            </td>
+                            <td>{pct}%</td>
+                            <td>{new Date(att.submitted_at || "").toLocaleString("en-IN")}</td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -392,42 +320,42 @@ export default async function StudentPortalPage() {
               <div className="card-header-clean">
                 <div>
                   <h3>Verified Student Registration</h3>
-                  <p>Institutional record linked to this learning portal.</p>
+                  <p>Permanent institutional record linked to this learning portal.</p>
                 </div>
                 <span className="status-badge-completed">Verified Student</span>
               </div>
               <div className="profile-details-grid">
                 <div className="profile-detail-cell">
                   <span>Full Name</span>
-                  <b>{profile?.full_name}</b>
+                  <b>{profile.full_name}</b>
                 </div>
                 <div className="profile-detail-cell">
                   <span>Registered Email</span>
-                  <b>{profile?.email}</b>
+                  <b>{profile.email}</b>
                 </div>
                 <div className="profile-detail-cell">
                   <span>Phone Number</span>
-                  <b>{profile?.phone}</b>
+                  <b>{profile.phone}</b>
                 </div>
                 <div className="profile-detail-cell">
                   <span>Institution / College</span>
-                  <b>{profile?.college}</b>
+                  <b>{profile.college}</b>
                 </div>
                 <div className="profile-detail-cell">
                   <span>Roll / Register Number</span>
-                  <b>{profile?.register_number}</b>
+                  <b>{profile.register_number}</b>
                 </div>
                 <div className="profile-detail-cell">
                   <span>Department</span>
-                  <b>{profile?.department}</b>
+                  <b>{profile.department}</b>
                 </div>
                 <div className="profile-detail-cell">
                   <span>Degree &amp; Programme</span>
-                  <b>{profile?.degree}</b>
+                  <b>{profile.degree}</b>
                 </div>
                 <div className="profile-detail-cell">
                   <span>Expected Graduation</span>
-                  <b>{profile?.graduation_year}</b>
+                  <b>{profile.graduation_year}</b>
                 </div>
               </div>
             </section>

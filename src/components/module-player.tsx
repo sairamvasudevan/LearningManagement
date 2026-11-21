@@ -1,19 +1,8 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
-import { isSupabaseConfigured } from "@/lib/supabase/config";
-
-type Question = {
-  question_id: string;
-  sort_order: number;
-  title: string;
-  prompt: string;
-  options: string[];
-  hints: string[];
-  marks: number;
-};
+import type { ModuleCurriculum } from "@/lib/curriculum-data";
 
 type Review = {
   is_correct: boolean;
@@ -23,27 +12,26 @@ type Review = {
   max_marks: number;
   explanation: string;
   option_explanations: string[];
-  already_submitted?: boolean;
-};
-
-type SavedResponse = {
-  question_id: string;
-  selected_index: number;
-  is_correct: boolean;
-  marks_awarded: number;
 };
 
 export function ModulePlayer({
-  moduleNumber,
-  title,
-  objective,
-  questions,
+  curriculum,
 }: {
-  moduleNumber: number;
-  title: string;
-  objective: string;
-  questions: Question[];
+  curriculum: ModuleCurriculum;
 }) {
+  const {
+    moduleNumber,
+    stageTitle,
+    title,
+    objective,
+    readTime,
+    sections,
+    caseStudies,
+    checklist,
+    practiceTask,
+    questions,
+  } = curriculum;
+
   const [mode, setMode] = useState<"content" | "assessment" | "result">("content");
   const [attemptId, setAttemptId] = useState<string | null>(null);
   const [index, setIndex] = useState(0);
@@ -53,6 +41,13 @@ export function ModulePlayer({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [activeChecklist, setActiveChecklist] = useState<Record<number, boolean>>({});
+
+  // Hands-on practice task state
+  const [taskInput, setTaskInput] = useState(practiceTask.starterTemplate);
+  const [taskSubmitting, setTaskSubmitting] = useState(false);
+  const [taskSubmitted, setTaskSubmitted] = useState(false);
+  const [taskSavedMsg, setTaskSavedMsg] = useState("");
+
   const [result, setResult] = useState<{
     score: number;
     total_marks: number;
@@ -60,120 +55,41 @@ export function ModulePlayer({
     passed: boolean;
   } | null>(null);
 
-  const hasSupabase = isSupabaseConfigured();
-  const supabase = useMemo(() => (hasSupabase ? createClient() : null), [hasSupabase]);
-
   const question = questions[index];
   const currentReview = question ? reviews[question.question_id] : undefined;
   const score = Object.values(reviews).reduce((n, r) => n + r.marks_awarded, 0);
   const total = questions.reduce((n, q) => n + q.marks, 0);
 
-  const beginAssessment = useCallback(async () => {
+  const beginAssessment = useCallback(() => {
     if (!questions.length) {
       setError("The assessment questions have not been published yet.");
       return;
     }
-    setBusy(true);
+    setAttemptId(`att-mod-${moduleNumber}-${Date.now()}`);
+    setMode("assessment");
+    setIndex(0);
     setError("");
+  }, [moduleNumber, questions]);
 
-    if (!supabase) {
-      setAttemptId("demo-attempt-001");
-      setMode("assessment");
-      setBusy(false);
-      return;
-    }
-
-    try {
-      const { data, error: rpcError } = await supabase.rpc("start_module_assessment", {
-        p_module_number: moduleNumber,
-      });
-      if (rpcError) throw rpcError;
-      const id = String(data);
-      setAttemptId(id);
-      const { data: saved, error: savedError } = await supabase
-        .from("assessment_responses")
-        .select("question_id,selected_index,is_correct,marks_awarded")
-        .eq("attempt_id", id);
-      if (savedError) throw savedError;
-      const restored: Record<string, Review> = {};
-      const choices: Record<string, number> = {};
-      for (const row of (saved || []) as SavedResponse[]) {
-        choices[row.question_id] = row.selected_index;
-        const { data: review, error: reviewError } = await supabase.rpc(
-          "submit_assessment_answer",
-          {
-            p_attempt_id: id,
-            p_question_id: row.question_id,
-            p_selected_index: row.selected_index,
-          },
-        );
-        if (reviewError) throw reviewError;
-        restored[row.question_id] = review as Review;
-      }
-      setSelected(choices);
-      setReviews(restored);
-      const firstUnanswered = questions.findIndex((q) => choices[q.question_id] === undefined);
-      setIndex(firstUnanswered < 0 ? questions.length - 1 : firstUnanswered);
-      setMode("assessment");
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not begin the assessment.");
-    } finally {
-      setBusy(false);
-    }
-  }, [moduleNumber, questions, supabase]);
-
-  async function submitCurrentAnswer() {
+  function submitCurrentAnswer() {
     if (!question || selected[question.question_id] === undefined || !attemptId || currentReview)
       return;
-    setBusy(true);
-    setError("");
 
-    if (!supabase) {
-      const chosenIdx = selected[question.question_id];
-      const correctAnswers: Record<string, number> = {
-        m1q01: 2,
-        m1q02: 2,
-        m1q03: 3,
-        m1q04: 1,
-        m1q05: 2,
-        m1q06: 2,
-      };
-      const targetCorrect = correctAnswers[question.question_id] ?? 0;
-      const isCorrect = chosenIdx === targetCorrect;
-      const review: Review = {
-        is_correct: isCorrect,
-        selected_index: chosenIdx,
-        correct_index: targetCorrect,
-        marks_awarded: isCorrect ? question.marks : 0,
-        max_marks: question.marks,
-        explanation: isCorrect
-          ? "Spot on! You accurately separated the underlying invariant from narrative distractors."
-          : `The correct answer is Option ${String.fromCharCode(65 + targetCorrect)}. Notice the distinction between event rows and distinct underlying entity identities.`,
-        option_explanations: question.options.map((_, i) =>
-          i === targetCorrect
-            ? "Correct: Directly targets the requested invariant without scope creep or entity confusion."
-            : "Incorrect: Either confuses individual events with distinct entity identities or adds unrequested scope.",
-        ),
-      };
-      setReviews((current) => ({ ...current, [question.question_id]: review }));
-      setBusy(false);
-      return;
-    }
+    const chosenIdx = selected[question.question_id];
+    const targetCorrect = question.correct_index;
+    const isCorrect = chosenIdx === targetCorrect;
 
-    try {
-      const { data, error: rpcError } = await supabase.rpc("submit_assessment_answer", {
-        p_attempt_id: attemptId,
-        p_question_id: question.question_id,
-        p_selected_index: selected[question.question_id],
-      });
-      if (rpcError) throw rpcError;
-      const review = data as Review;
-      setReviews((current) => ({ ...current, [question.question_id]: review }));
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "The answer could not be submitted.");
-    } finally {
-      setBusy(false);
-    }
+    const review: Review = {
+      is_correct: isCorrect,
+      selected_index: chosenIdx,
+      correct_index: targetCorrect,
+      marks_awarded: isCorrect ? question.marks : 0,
+      max_marks: question.marks,
+      explanation: question.explanation,
+      option_explanations: question.option_explanations,
+    };
+
+    setReviews((current) => ({ ...current, [question.question_id]: review }));
   }
 
   async function finishAssessment() {
@@ -181,19 +97,20 @@ export function ModulePlayer({
     setBusy(true);
     setError("");
 
-    if (!supabase) {
-      const finalScore = Object.values(reviews).reduce((sum, r) => sum + r.marks_awarded, 0);
-      const passThreshold = 80;
-      const passed = (finalScore / total) * 100 >= passThreshold;
-      setResult({
-        score: finalScore,
-        total_marks: total,
-        pass_percent: passThreshold,
-        passed,
-      });
+    const finalScore = Object.values(reviews).reduce((sum, r) => sum + r.marks_awarded, 0);
+    const passThreshold = 80;
+    const passed = (finalScore / total) * 100 >= passThreshold;
 
-      // Persist progress to cookie session for instant portal sync
-      void fetch("/api/auth/session", {
+    setResult({
+      score: finalScore,
+      total_marks: total,
+      pass_percent: passThreshold,
+      passed,
+    });
+
+    try {
+      // Persist progress to SQLite database via /api/auth/session
+      await fetch("/api/auth/session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -202,27 +119,43 @@ export function ModulePlayer({
           score: finalScore,
           totalMarks: total,
           passed,
+          answers: selected,
         }),
       });
-
-      setMode("result");
-      setBusy(false);
-      return;
-    }
-
-    try {
-      const { data, error: rpcError } = await supabase.rpc("finalize_module_assessment", {
-        p_attempt_id: attemptId,
-      });
-      if (rpcError) throw rpcError;
-      setResult(
-        data as { score: number; total_marks: number; pass_percent: number; passed: boolean },
-      );
-      setMode("result");
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not finalize the assessment.");
+    } catch {
+      // non-fatal network error
     } finally {
+      setMode("result");
       setBusy(false);
+    }
+  }
+
+  async function submitPractice() {
+    if (!taskInput.trim()) return;
+    setTaskSubmitting(true);
+    setTaskSavedMsg("");
+    try {
+      const res = await fetch("/api/auth/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "submit_practice_task",
+          moduleNumber,
+          taskId: practiceTask.id,
+          taskPrompt: practiceTask.prompt,
+          submission: taskInput.trim(),
+        }),
+      });
+      if (res.ok) {
+        setTaskSubmitted(true);
+        setTaskSavedMsg("✓ Solution successfully recorded in your academic profile.");
+      } else {
+        setTaskSavedMsg("Could not record solution. Please try again.");
+      }
+    } catch {
+      setTaskSavedMsg("Submission network error.");
+    } finally {
+      setTaskSubmitting(false);
     }
   }
 
@@ -240,8 +173,7 @@ export function ModulePlayer({
   }
 
   /* -------------------------------------------------------------
-     MODE 1: NATIVE RICH READING CONTENT
-     (No empty video player, authoritative engineering pedagogy)
+     MODE 1: NATIVE RICH READING CONTENT & HANDS-ON WORKSPACE
   ------------------------------------------------------------- */
   if (mode === "content") {
     return (
@@ -253,247 +185,221 @@ export function ModulePlayer({
               ← Return to Dashboard
             </Link>
             <div className="reader-badge-wrap">
-              <span className="badge-flame">Path 01</span>
-              <span className="badge-category">Module 01 of 100</span>
+              <span className="badge-flame">Stage 01</span>
+              <span className="badge-category">Module {String(moduleNumber).padStart(2, "0")} of 100</span>
             </div>
           </div>
           <button
             type="button"
             className="button button-cn-primary"
-            onClick={() => void beginAssessment()}
+            onClick={beginAssessment}
             disabled={busy}
           >
-            {busy ? "Loading Checkpoint…" : "🎯 Jump to Mastery Checkpoint (6 Qs) →"}
+            🎯 Jump to Checkpoint ({questions.length} Qs) →
           </button>
         </header>
 
         {/* Hero Article Header */}
         <div className="reader-hero">
-          <span className="reader-eyebrow">STAGE 01 · READ &amp; DEFINE THE PROBLEM</span>
-          <h1>Separate the Story from the Task</h1>
-          <p className="reader-lead">
-            {objective ||
-              "Extract the unambiguous mathematical invariant from real-world narrative camouflage before touching code or choosing data structures."}
-          </p>
+          <span className="reader-eyebrow">{stageTitle}</span>
+          <h1>{title}</h1>
+          <p className="reader-lead">{objective}</p>
           <div className="reader-meta-pills">
-            <span>⏱️ 20 min deep read</span>
-            <span>🧩 3 Real-World Case Studies</span>
-            <span>💡 4 Core Invariant Principles</span>
-            <span>🎓 6 Mastery Checkpoint Questions</span>
+            <span>⏱️ {readTime}</span>
+            <span>🧩 {caseStudies.length} Real-World Case Studies</span>
+            <span>💻 Hands-on Practice Task</span>
+            <span>🎓 {questions.length} Mastery Checkpoint Questions</span>
           </div>
         </div>
 
         {/* Main Article Body */}
         <article className="reader-article">
-          {/* Section 1 */}
-          <section className="reader-section">
-            <div className="section-kicker">SECTION 01 · THE PROBLEM-SOLVER&apos;S TRAP</div>
-            <h2>Why 80% of Engineers Fail Before Writing Code</h2>
-            <p>
-              In software engineering interviews and real-world system architecture, problems rarely arrive as
-              clean mathematical definitions like <i>&quot;Find the cardinality of the union of sets.&quot;</i>
-            </p>
-            <p>
-              Instead, they are delivered as dense stories wrapped in business narratives: e-commerce inventory
-              rules, ride-hailing peak pricing dispatch logs, museum visitor turnstile events, or warehouse supply chain
-              orders.
-            </p>
-            <div className="callout-box warning-callout">
-              <b>⚠️ The Junior Developer Mistake</b>
-              <p>
-                Junior engineers begin writing classes for &quot;Visitor&quot;, &quot;Camera&quot;, or &quot;Turnstile&quot;,
-                accidentally modelling the story rather than determining the mathematical invariant requested.
-              </p>
+          {/* Dynamic Curriculum Sections */}
+          {sections.map((section, sIdx) => (
+            <section key={sIdx} className="reader-section">
+              <div className="section-kicker">{section.kicker}</div>
+              <h2>{section.title}</h2>
+              {section.content.map((para, pIdx) => (
+                <p key={pIdx}>{para}</p>
+              ))}
+
+              {section.callout && (
+                <div
+                  className={`callout-box ${
+                    section.callout.type === "warning"
+                      ? "warning-callout"
+                      : section.callout.type === "tip"
+                        ? "tip-callout"
+                        : "rule-callout"
+                  }`}
+                >
+                  <b>
+                    {section.callout.type === "warning"
+                      ? "⚠️"
+                      : section.callout.type === "tip"
+                        ? "💡"
+                        : "📌"}{" "}
+                    {section.callout.title}
+                  </b>
+                  <p>{section.callout.text}</p>
+                </div>
+              )}
+            </section>
+          ))}
+
+          {/* Worked Case Studies */}
+          {caseStudies.length > 0 && (
+            <section className="reader-section">
+              <div className="section-kicker">SECTION 03 · WORKED CASE STUDIES</div>
+              <h2>De-Noising Real-World Technical Specifications</h2>
+
+              {caseStudies.map((cs, cIdx) => (
+                <div key={cIdx} className="case-study-card">
+                  <div className="case-study-header">
+                    <span className="case-tag">{cs.tag}</span>
+                    <h4>{cs.title}</h4>
+                  </div>
+                  <div className="case-problem-text">&ldquo;{cs.problem}&rdquo;</div>
+
+                  <div className="comparison-columns">
+                    <div className="comparison-bad">
+                      <b>❌ Common Flawed Approach:</b>
+                      <p>{cs.flawedApproach}</p>
+                    </div>
+                    <div className="comparison-good">
+                      <b>✅ The Algorithmic Invariant:</b>
+                      <p>{cs.correctInvariant}</p>
+                      {cs.codeOrContract && (
+                        <div className="code-snippet-box">
+                          <code>{cs.codeOrContract}</code>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </section>
+          )}
+
+          {/* Interactive Senior Engineer Checklist */}
+          {checklist.length > 0 && (
+            <section className="reader-section">
+              <div className="section-kicker">SECTION 04 · SENIOR ENGINEER VERIFICATION CHECKLIST</div>
+              <h2>Self-Review Checklist Before Writing Code</h2>
+              <p>Before jumping into data structures or loops, check off these foundational verifications:</p>
+
+              <div className="checklist-container">
+                {checklist.map((item, chIdx) => (
+                  <label
+                    key={chIdx}
+                    className={`checklist-item ${activeChecklist[chIdx] ? "checked" : ""}`}
+                    onClick={() =>
+                      setActiveChecklist((prev) => ({ ...prev, [chIdx]: !prev[chIdx] }))
+                    }
+                  >
+                    <input
+                      type="checkbox"
+                      checked={Boolean(activeChecklist[chIdx])}
+                      onChange={() => {}}
+                    />
+                    <div>
+                      <b>{item}</b>
+                      <small>Verification principle {chIdx + 1}</small>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* SECTION 05: HANDS-ON PRACTICE TASK */}
+          <section className="reader-section practice-task-section">
+            <div className="section-kicker">SECTION 05 · HANDS-ON PRACTICE TASK</div>
+            <h2>{practiceTask.title}</h2>
+
+            <div className="practice-scenario-box">
+              <div className="practice-badge">Engineering Scenario Specification</div>
+              <p>{practiceTask.scenario}</p>
+              <div className="practice-prompt">
+                <b>Your Task:</b> {practiceTask.prompt}
+              </div>
             </div>
-            <p>
-              To solve complex technical challenges with high velocity, you must develop an instinct to strip away
-              the narrative distractors and formulate a <b>formal Input-Rule-Output contract</b>.
-            </p>
-          </section>
 
-          {/* Section 2 */}
-          <section className="reader-section">
-            <div className="section-kicker">SECTION 02 · CORE PEDAGOGY</div>
-            <h2>The 3 Invariant Extraction Principles</h2>
-
-            <div className="principles-grid">
-              <div className="principle-card">
-                <div className="principle-num">01</div>
-                <h3>Entity vs. Event</h3>
-                <p>
-                  <b>An Event</b> is a single log row (e.g. RFID badge scan, clickstream ping).
-                  <br />
-                  <b>An Entity</b> is the unique real-world actor being measured (e.g. the distinct human visitor).
-                </p>
-                <div className="principle-rule">
-                  Rule: Multiple events can belong to one entity. Counting records is NOT counting entities!
-                </div>
+            <div className="practice-workspace">
+              <div className="workspace-header">
+                <span>💻 Student Solution Workspace</span>
+                <span className="char-count">{taskInput.length} characters</span>
               </div>
-
-              <div className="principle-card">
-                <div className="principle-num">02</div>
-                <h3>Preconditions vs. Assumptions</h3>
-                <p>
-                  Separate what the problem statement <i>explicitly guarantees</i> from what you are tempted to
-                  assume.
-                </p>
-                <div className="principle-rule">
-                  Rule: Never assume inputs are sorted, unique, or non-empty unless guaranteed by the specification.
-                </div>
-              </div>
-
-              <div className="principle-card">
-                <div className="principle-num">03</div>
-                <h3>Observable Output Contract</h3>
-                <p>
-                  Define the exact return type required (e.g., scalar integer count, boolean flag, sorted list of
-                  identifiers) without prematurely specifying the algorithm or data structure.
-                </p>
-                <div className="principle-rule">
-                  Rule: Focus on WHAT must be returned, not the specific hash map or loop used to compute it.
-                </div>
+              <textarea
+                className="practice-textarea"
+                rows={9}
+                value={taskInput}
+                onChange={(e) => setTaskInput(e.target.value)}
+                placeholder="Write your contract, invariant formulation, or edge case analysis here..."
+              />
+              <div className="workspace-footer">
+                <button
+                  type="button"
+                  className="button button-cn-primary"
+                  onClick={() => void submitPractice()}
+                  disabled={taskSubmitting || !taskInput.trim()}
+                >
+                  {taskSubmitting
+                    ? "Recording..."
+                    : taskSubmitted
+                      ? "✓ Update Solution & Re-Check"
+                      : "Submit Solution & Reveal Model Benchmark →"}
+                </button>
+                {taskSavedMsg && <span className="task-success-pill">{taskSavedMsg}</span>}
               </div>
             </div>
-          </section>
 
-          {/* Section 3: Worked Examples */}
-          <section className="reader-section">
-            <div className="section-kicker">SECTION 03 · WORKED CASE STUDIES</div>
-            <h2>De-Noising Real-World Technical Specifications</h2>
-
-            <div className="case-study-card">
-              <div className="case-study-header">
-                <span className="case-tag">CASE STUDY A · E-COMMERCE MIDNIGHT FLASH SALE</span>
-                <h4>The Order Log Aggregator</h4>
-              </div>
-              <div className="case-problem-text">
-                &ldquo;An online retail platform logs checkout orders. Each entry contains customer ID, order ID,
-                timestamp, and product SKU list. During the midnight sale, a single customer may place multiple orders,
-                and each order can contain multiple items. The VP of Growth asks: <b>&lsquo;How many different customers made
-                at least one purchase on June 12?&rsquo;</b>&rdquo;
-              </div>
-
-              <div className="comparison-columns">
-                <div className="comparison-bad">
-                  <b>❌ Common Flawed Interpretations:</b>
+            {taskSubmitted && (
+              <div className="model-solution-reveal">
+                <div className="solution-header">
+                  <span className="badge-flame">SENIOR ARCHITECT BENCHMARK</span>
+                  <h3>Official Model Solution &amp; Evaluation Rubric</h3>
+                </div>
+                <div className="model-code-box">
+                  <pre>
+                    <code>{practiceTask.modelSolution}</code>
+                  </pre>
+                </div>
+                <div className="rubric-checklist">
+                  <b>Self-Grading Rubric:</b>
                   <ul>
-                    <li>Counting total product line items sold on June 12 (confuses SKU lines with customers).</li>
-                    <li>Counting distinct order IDs placed on June 12 (one customer may place 4 orders!).</li>
-                    <li>Sending follow-up emails to customers who didn&apos;t purchase (scope creep).</li>
+                    {practiceTask.rubric.map((r, rIdx) => (
+                      <li key={rIdx}>✓ {r}</li>
+                    ))}
                   </ul>
                 </div>
-                <div className="comparison-good">
-                  <b>✅ The Algorithmic Invariant:</b>
-                  <div className="code-snippet-box">
-                    <code>
-                      Result = Count( Unique( Customer_IDs where Date(timestamp) == &quot;2026-06-12&quot; ) )
-                    </code>
-                  </div>
-                  <p>
-                    <b>Entity:</b> Customer Identity · <b>Predicate:</b> Date == June 12 · <b>Aggregation:</b> Distinct Count.
-                  </p>
-                </div>
               </div>
-            </div>
-
-            <div className="case-study-card">
-              <div className="case-study-header">
-                <span className="case-tag">CASE STUDY B · HARDWARE SENSOR DEBOUNCING</span>
-                <h4>The Metro Gate Debounce Anomaly</h4>
-              </div>
-              <div className="case-problem-text">
-                &ldquo;A rapid transit station uses optical sensor turnstiles. When a commuter passes through, the gate
-                sensor occasionally fires 2 or 3 times in rapid succession (&lt; 200ms) due to mechanical vibrations.
-                The operations manager asks: <b>&lsquo;How many distinct passengers entered between 08:00 and 09:00?&rsquo;</b>&rdquo;
-              </div>
-              <div className="comparison-columns">
-                <div className="comparison-bad">
-                  <b>❌ Flawed Approach:</b>
-                  <p>Counting the total sensor beam pulses. This over-counts commuters by 150–200%!</p>
-                </div>
-                <div className="comparison-good">
-                  <b>✅ Algorithmic Invariant:</b>
-                  <p>
-                    Filter scan events by time window, group by <code>commuter_card_id</code>, and count distinct identities.
-                  </p>
-                </div>
-              </div>
-            </div>
+            )}
           </section>
 
-          {/* Section 4: Interactive Senior Engineer Checklist */}
-          <section className="reader-section">
-            <div className="section-kicker">SECTION 04 · SELF-ASSESSMENT CHECKLIST</div>
-            <h2>Senior Engineer&apos;s 4-Question Invariant Checklist</h2>
-            <p>Before writing code in an interview or project, verify these four questions:</p>
-
-            <div className="checklist-container">
-              {[
-                {
-                  id: 1,
-                  title: "What is the single physical entity being counted or transformed?",
-                  desc: "Is it the order, the product, the customer, or the sensor scan event?",
-                },
-                {
-                  id: 2,
-                  title: "What are the explicit bounds and guarantees?",
-                  desc: "Are inputs guaranteed to be non-empty? Can duplicate IDs exist?",
-                },
-                {
-                  id: 3,
-                  title: "What represents unrequested scope creep?",
-                  desc: "Are you adding sorting, logging, or messaging workflows not requested by the user?",
-                },
-                {
-                  id: 4,
-                  title: "Can you state the task in exactly one unambiguous sentence?",
-                  desc: "e.g. 'Return the number of unique customer IDs with orders on June 12.'",
-                },
-              ].map((item) => (
-                <label
-                  key={item.id}
-                  className={`checklist-item ${activeChecklist[item.id] ? "checked" : ""}`}
-                  onClick={() =>
-                    setActiveChecklist((prev) => ({ ...prev, [item.id]: !prev[item.id] }))
-                  }
-                >
-                  <input
-                    type="checkbox"
-                    checked={Boolean(activeChecklist[item.id])}
-                    onChange={() => {}}
-                  />
-                  <div>
-                    <b>{item.title}</b>
-                    <small>{item.desc}</small>
-                  </div>
-                </label>
-              ))}
-            </div>
-          </section>
-
-          {/* Section 5: Transition to Checkpoint */}
+          {/* Section 6: Transition to Mastery Checkpoint */}
           <div className="checkpoint-cta-box">
             <div className="cta-box-content">
               <span className="badge-flame">VERIFY YOUR MASTERY</span>
-              <h2>Ready for the Module 01 Mastery Checkpoint?</h2>
+              <h2>Ready for the Module {String(moduleNumber).padStart(2, "0")} Mastery Checkpoint?</h2>
               <p>
-                Test your invariant identification skills against 6 realistic engineering scenarios.
-                80% score required to earn the Module 01 mastery badge.
+                Test your invariant identification and formulation skills against {questions.length} realistic
+                engineering scenarios. 80% score required to earn the mastery badge.
               </p>
               <div className="checkpoint-metrics-row">
-                <span>📝 6 Questions</span>
-                <span>⭐ 12 Total Marks</span>
+                <span>📝 {questions.length} Questions</span>
+                <span>⭐ {total} Total Marks</span>
                 <span>💡 Clickable Socratic Hints</span>
-                <span>🎯 Instant Grading &amp; Review</span>
+                <span>🎯 Instant Senior Explanations</span>
               </div>
             </div>
             <button
               type="button"
               className="button button-cn-primary button-large"
-              onClick={() => void beginAssessment()}
+              onClick={beginAssessment}
               disabled={busy}
             >
-              {busy ? "Loading Checkpoint…" : "🚀 Start Mastery Checkpoint →"}
+              🚀 Start Mastery Checkpoint →
             </button>
           </div>
         </article>
@@ -505,6 +411,7 @@ export function ModulePlayer({
      MODE 2: MASTERY CHECKPOINT RESULT
   ------------------------------------------------------------- */
   if (mode === "result" && result) {
+    const nextMod = moduleNumber + 1;
     return (
       <div className="result-screen">
         <span className="eyebrow">MODULE {String(moduleNumber).padStart(2, "0")} · RESULT</span>
@@ -519,7 +426,12 @@ export function ModulePlayer({
           {result.pass_percent}%.
         </p>
         <div className="result-actions">
-          <Link className="button button-cn-primary" href="/portal">
+          {result.passed && nextMod <= 10 && (
+            <Link className="button button-cn-primary" href={`/learn/${nextMod}`}>
+              Proceed to Module {String(nextMod).padStart(2, "0")} →
+            </Link>
+          )}
+          <Link className="button button-outline" href="/portal">
             ← Return to Student Dashboard
           </Link>
           <button
@@ -533,7 +445,7 @@ export function ModulePlayer({
               setAttemptId(null);
             }}
           >
-            Review Lesson Material
+            Review Lesson Material &amp; Retry
           </button>
         </div>
       </div>
@@ -561,7 +473,7 @@ export function ModulePlayer({
       <div className="assessment-top">
         <div>
           <span className="eyebrow">
-            PATH 01 · MODULE {String(moduleNumber).padStart(2, "0")} MASTERY CHECKPOINT
+            STAGE 01 · MODULE {String(moduleNumber).padStart(2, "0")} CHECKPOINT
           </span>
           <b>{title}</b>
         </div>
@@ -600,7 +512,9 @@ export function ModulePlayer({
               <button
                 key={i}
                 type="button"
-                className={`option-button ${chosen ? "selected" : ""} ${correct ? "option-correct" : ""} ${wrong ? "option-wrong" : ""}`}
+                className={`option-button ${chosen ? "selected" : ""} ${
+                  correct ? "option-correct" : ""
+                } ${wrong ? "option-wrong" : ""}`}
                 disabled={Boolean(currentReview)}
                 onClick={() =>
                   setSelected((current) => ({ ...current, [question.question_id]: i }))
@@ -652,7 +566,9 @@ export function ModulePlayer({
         {/* Instant Review & Explanation */}
         {currentReview && (
           <div
-            className={`answer-explanation ${currentReview.is_correct ? "answer-good" : "answer-review"}`}
+            className={`answer-explanation ${
+              currentReview.is_correct ? "answer-good" : "answer-review"
+            }`}
           >
             <div className="answer-heading">
               <b>{currentReview.is_correct ? "✓ Correct Answer" : "⚠️ Review Expected Invariant"}</b>
@@ -685,9 +601,9 @@ export function ModulePlayer({
               type="button"
               className="button button-cn-primary"
               disabled={selected[question.question_id] === undefined || busy}
-              onClick={() => void submitCurrentAnswer()}
+              onClick={submitCurrentAnswer}
             >
-              {busy ? "Evaluating…" : `Submit Answer · ${question.marks} Marks`}
+              Submit Answer · {question.marks} Marks
             </button>
           ) : (
             <div className="quiz-nav-group">

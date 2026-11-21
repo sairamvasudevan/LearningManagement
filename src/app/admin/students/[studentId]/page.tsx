@@ -5,6 +5,12 @@ import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { ApproveEnrollmentButton } from "@/components/auth-forms";
 import catalog from "@/lib/course-catalog.json";
+import {
+  getUserById,
+  getUserProgress,
+  getUserAttempts,
+  getPracticeSubmissions,
+} from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
@@ -43,59 +49,64 @@ export default async function AdminStudentDetailPage({ params }: PageProps) {
   const { studentId } = await params;
   if (!/^[0-9a-f-]{36}$/i.test(studentId)) notFound();
 
+  // Load from persistent SQLite
+  const dbUser = getUserById(studentId);
+  if (!dbUser && !isSupabaseConfigured()) notFound();
+
   let profile = {
     id: studentId,
-    full_name: "Aditya Sharma",
-    email: "aditya.sharma@nitt.edu",
-    phone: "+91 98401 11223",
-    college: "National Institute of Technology, Trichy",
-    register_number: "NITT-2024-CS-0842",
-    department: "Computer Science and Engineering",
-    degree: "B.Tech Computer Science",
-    graduation_year: 2026,
-    created_at: "2026-11-18T09:30:00Z",
+    full_name: dbUser?.full_name || "Aditya Sharma",
+    email: dbUser?.email || "student@learninghub.edu",
+    phone: dbUser?.phone || "+91 98401 11223",
+    college: dbUser?.college || "National Institute of Technology, Trichy",
+    register_number: dbUser?.register_number || "NITT-2024-CS-0842",
+    department: dbUser?.department || "Computer Science and Engineering",
+    degree: dbUser?.degree || "B.Tech Computer Science",
+    graduation_year: dbUser?.graduation_year || 2026,
+    created_at: dbUser?.created_at || "2026-11-18T09:30:00Z",
   };
-  let enrollment = {
-    status: "approved",
-    access_source: "self_registration",
-    enrolled_at: "2026-11-18T10:00:00Z",
-    approved_at: "2026-11-18T10:05:00Z",
-  };
-  let progressList: ProgressRow[] = [
-    {
-      module_number: 1,
-      status: "completed",
-      best_score: 12,
-      total_marks: 12,
-      attempts: 1,
-      first_started_at: "2026-11-18T10:15:00Z",
-      completed_at: "2026-11-18T10:55:00Z",
-      updated_at: "2026-11-18T10:55:00Z",
-    },
-  ];
-  let attemptsList: AttemptRow[] = [
-    {
-      id: "att-001",
-      module_number: 1,
-      status: "completed",
-      score: 12,
-      total_marks: 12,
-      pass_percent: 80,
-      started_at: "2026-11-18T10:15:00Z",
-      submitted_at: "2026-11-18T10:55:00Z",
-    },
-  ];
-  let activitiesList: ActivityRow[] = [
-    {
-      id: "act-001",
-      module_number: 1,
-      activity_id: "m01-act-01",
-      response:
-        "The real task is to count distinct active riders on Route B on Tuesday, ignoring duplicate tap events within the same trip window.",
-      updated_at: "2026-11-18T10:35:00Z",
-    },
-  ];
 
+  let enrollment = {
+    status: dbUser?.enrollment_status || "approved",
+    access_source: "self_registration",
+    enrolled_at: dbUser?.created_at || "2026-11-18T10:00:00Z",
+    approved_at: dbUser?.created_at || "2026-11-18T10:05:00Z",
+  };
+
+  const sqliteProgress = getUserProgress(studentId);
+  let progressList: ProgressRow[] = sqliteProgress.map((p) => ({
+    module_number: p.module_number,
+    status: p.status,
+    best_score: p.best_score,
+    total_marks: p.total_marks,
+    attempts: p.attempts,
+    first_started_at: p.first_started_at,
+    completed_at: p.completed_at,
+    updated_at: p.completed_at || p.first_started_at || new Date().toISOString(),
+  }));
+
+  const sqliteAttempts = getUserAttempts(studentId);
+  let attemptsList: AttemptRow[] = sqliteAttempts.map((a) => ({
+    id: a.id,
+    module_number: a.module_number,
+    status: a.passed ? "passed" : "failed",
+    score: a.score,
+    total_marks: a.total_marks,
+    pass_percent: 80,
+    started_at: a.started_at,
+    submitted_at: a.submitted_at,
+  }));
+
+  const sqlitePractice = getPracticeSubmissions(studentId);
+  let activitiesList: ActivityRow[] = sqlitePractice.map((pr) => ({
+    id: pr.id,
+    module_number: pr.module_number,
+    activity_id: pr.task_id,
+    response: pr.submission,
+    updated_at: pr.submitted_at,
+  }));
+
+  // If live Supabase is configured and not dev session, query it as well
   if (isSupabaseConfigured()) {
     try {
       const supabase = await createClient();
@@ -143,12 +154,15 @@ export default async function AdminStudentDetailPage({ params }: PageProps) {
       if (liveProfile) {
         profile = liveProfile;
         if (liveEnrollment) enrollment = liveEnrollment;
-        if (liveProgressRows) progressList = liveProgressRows as ProgressRow[];
-        if (liveAttemptRows) attemptsList = liveAttemptRows as AttemptRow[];
-        if (liveActivityRows) activitiesList = liveActivityRows as ActivityRow[];
+        if (liveProgressRows && liveProgressRows.length > 0)
+          progressList = liveProgressRows as ProgressRow[];
+        if (liveAttemptRows && liveAttemptRows.length > 0)
+          attemptsList = liveAttemptRows as AttemptRow[];
+        if (liveActivityRows && liveActivityRows.length > 0)
+          activitiesList = liveActivityRows as ActivityRow[];
       }
     } catch {
-      // Dev mock retained
+      // Kept SQLite
     }
   }
 
@@ -176,7 +190,7 @@ export default async function AdminStudentDetailPage({ params }: PageProps) {
         </div>
         <div className="course-status-group">
           <span className={`table-status ${status}`}>
-            {status === "none" ? "Not enrolled" : status}
+            {(status as string) === "none" ? "Not enrolled" : status}
           </span>
           {status === "pending" && <ApproveEnrollmentButton studentId={profile.id} />}
         </div>
@@ -186,9 +200,9 @@ export default async function AdminStudentDetailPage({ params }: PageProps) {
         <div>
           <b>
             {completedCount}
-            <small>/100</small>
+            <small>/10</small>
           </b>
-          <span>Lessons completed ({completedCount}%)</span>
+          <span>Stage 01 Completed ({completedCount * 10}%)</span>
         </div>
         <div>
           <b>{inProgressCount}</b>
@@ -200,7 +214,7 @@ export default async function AdminStudentDetailPage({ params }: PageProps) {
         </div>
         <div>
           <b>{totalPossibleMarks > 0 ? `${totalBestScore}/${totalPossibleMarks}` : "—"}</b>
-          <span>Best checkpoint marks</span>
+          <span>Cumulative marks</span>
         </div>
       </section>
 
@@ -210,20 +224,17 @@ export default async function AdminStudentDetailPage({ params }: PageProps) {
             <span className="eyebrow">PACKAGE PROGRESS</span>
             <h2>Problem Solving Lab (Free Package)</h2>
             <p>
-              Enrollment source: {enrollment?.access_source || "Not enrolled yet"}
-              {enrollment?.approved_at
-                ? ` · Approved ${new Date(enrollment.approved_at).toLocaleDateString("en-IN")}`
-                : ""}
+              Enrollment status: <b>{enrollment.status}</b> · Source: {enrollment.access_source}
             </p>
           </div>
-          <span className="course-status">{completedCount}% COMPLETE</span>
+          <span className="course-status">{completedCount * 10}% OF STAGE 01</span>
         </div>
         <div className="course-progress-line">
-          <span style={{ width: `${completedCount}%` }} />
+          <span style={{ width: `${completedCount * 10}%` }} />
         </div>
         <div className="course-progress-label">
-          <b>{completedCount} of 100 lessons completed</b>
-          <span>{activitiesList.length} written activity responses saved</span>
+          <b>{completedCount} of 10 Stage 01 lessons completed</b>
+          <span>{activitiesList.length} written practice submissions saved</span>
         </div>
       </section>
 
@@ -390,15 +401,15 @@ export default async function AdminStudentDetailPage({ params }: PageProps) {
       <section className="surface-card table-card">
         <div className="table-heading">
           <div>
-            <h2>Saved written activity responses</h2>
-            <p>Guided and independent practice responses saved by this student.</p>
+            <h2>Saved practice task submissions</h2>
+            <p>Hands-on engineering problem solving submissions saved by this student.</p>
           </div>
         </div>
         <div className="table-scroll">
           <table>
             <thead>
               <tr>
-                <th>Module / Activity</th>
+                <th>Module / Task ID</th>
                 <th>Student response</th>
                 <th>Last saved</th>
               </tr>
@@ -410,18 +421,19 @@ export default async function AdminStudentDetailPage({ params }: PageProps) {
                     <b>Module {String(act.module_number).padStart(2, "0")}</b>
                     <small>{act.activity_id}</small>
                   </td>
-                  <td style={{ whiteSpace: "pre-wrap", maxWidth: 620 }}>{act.response}</td>
+                  <td style={{ whiteSpace: "pre-wrap", maxWidth: 620, fontFamily: "monospace", fontSize: 12 }}>
+                    {act.response}
+                  </td>
                   <td>{new Date(act.updated_at).toLocaleString("en-IN")}</td>
                 </tr>
               ))}
             </tbody>
           </table>
           {activitiesList.length === 0 && (
-            <div className="empty-state">No written activity responses saved yet.</div>
+            <div className="empty-state">No written practice submissions recorded yet.</div>
           )}
         </div>
       </section>
     </>
   );
 }
-

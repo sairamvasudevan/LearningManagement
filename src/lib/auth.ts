@@ -2,12 +2,14 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { getUserBySessionToken, getUserById } from "@/lib/db";
 
 export type SessionIdentity = {
   id: string;
   email: string;
   role: "admin" | "student";
   fullName?: string;
+  phone?: string;
   college?: string;
   registerNumber?: string;
   department?: string;
@@ -21,12 +23,13 @@ export const DEV_DEFAULT_STUDENT: SessionIdentity = {
   email: "student@learninghub.edu",
   role: "student",
   fullName: "Aditya Sharma",
+  phone: "+91 98401 11223",
   college: "National Institute of Technology, Trichy",
   registerNumber: "NITT-2024-CS-0842",
   department: "Computer Science and Engineering",
   degree: "B.Tech Computer Science",
   graduationYear: 2026,
-  isDevSession: true,
+  isDevSession: false,
 };
 
 export const DEV_DEFAULT_ADMIN: SessionIdentity = {
@@ -34,12 +37,13 @@ export const DEV_DEFAULT_ADMIN: SessionIdentity = {
   email: "admin@learninghub.edu",
   role: "admin",
   fullName: "Prof. Sairam Vasudevan",
+  phone: "+91 98401 00099",
   college: "Learning Management System Admin",
   registerNumber: "ADMIN-FACULTY-01",
   department: "Academic & Placement Affairs",
   degree: "Head of Technical Learning",
   graduationYear: 2020,
-  isDevSession: true,
+  isDevSession: false,
 };
 
 export async function getCurrentIdentity(): Promise<SessionIdentity | null> {
@@ -60,8 +64,33 @@ export async function getCurrentIdentity(): Promise<SessionIdentity | null> {
     }
   }
 
-  // Fallback dev session via HTTP cookie
+  // Real persistent backend session via SQLite
   const cookieStore = await cookies();
+  const sessionToken = cookieStore.get("psl_session")?.value;
+  if (sessionToken) {
+    try {
+      const user = getUserBySessionToken(sessionToken);
+      if (user) {
+        return {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+          fullName: user.full_name,
+          phone: user.phone,
+          college: user.college,
+          registerNumber: user.register_number,
+          department: user.department,
+          degree: user.degree,
+          graduationYear: user.graduation_year,
+          isDevSession: false,
+        };
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  // Fallback dev session via HTTP cookie
   const sessionCookie = cookieStore.get("psl_dev_session");
   if (sessionCookie?.value) {
     try {
@@ -91,6 +120,13 @@ export async function getRole(userId: string): Promise<"admin" | "student"> {
     } catch {
       return "student";
     }
+  }
+
+  try {
+    const user = getUserById(userId);
+    if (user) return user.role;
+  } catch {
+    // ignore
   }
 
   const cookieStore = await cookies();

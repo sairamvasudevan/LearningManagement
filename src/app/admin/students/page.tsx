@@ -6,6 +6,7 @@ import {
   type AdminStudentSummary,
 } from "@/components/admin-students-table";
 import catalog from "@/lib/course-catalog.json";
+import { getAllStudentsWithProgress } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
@@ -32,164 +33,12 @@ type ProgressRow = {
   updated_at: string;
 };
 
-const DEV_MOCK_STUDENTS: AdminStudentSummary[] = [
-  {
-    id: "00000000-0000-4000-a000-000000000001",
-    fullName: "Aditya Sharma",
-    email: "aditya.sharma@nitt.edu",
-    phone: "+91 98401 11223",
-    college: "National Institute of Technology, Trichy",
-    registerNumber: "NITT-2024-CS-0842",
-    department: "Computer Science and Engineering",
-    degree: "B.Tech Computer Science",
-    graduationYear: 2026,
-    enrollmentStatus: "approved",
-    completedCount: 1,
-    inProgressCount: 0,
-    totalAttempts: 1,
-    bestScoreSum: 12,
-    totalMarksSum: 12,
-    nextModuleLabel: "Module 02 · Planned",
-    lastActivityAt: "2026-11-18T10:55:00Z",
-  },
-  {
-    id: "00000000-0000-4000-a000-000000000002",
-    fullName: "Sneha Ramanathan",
-    email: "sneha.raman@psgtech.ac.in",
-    phone: "+91 98402 33445",
-    college: "PSG College of Technology, Coimbatore",
-    registerNumber: "22BCS108",
-    department: "Computer Science and Engineering",
-    degree: "B.E. Computer Science",
-    graduationYear: 2026,
-    enrollmentStatus: "approved",
-    completedCount: 1,
-    inProgressCount: 0,
-    totalAttempts: 2,
-    bestScoreSum: 12,
-    totalMarksSum: 12,
-    nextModuleLabel: "Module 02 · Planned",
-    lastActivityAt: "2026-11-18T11:20:00Z",
-  },
-  {
-    id: "00000000-0000-4000-a000-000000000003",
-    fullName: "Vikram Patel",
-    email: "vikram.patel@iitb.ac.in",
-    phone: "+91 98403 55667",
-    college: "Indian Institute of Technology, Bombay",
-    registerNumber: "IITB-23-ME-0419",
-    department: "Mechanical & Systems Engineering",
-    degree: "B.Tech Mechanical",
-    graduationYear: 2027,
-    enrollmentStatus: "approved",
-    completedCount: 0,
-    inProgressCount: 1,
-    totalAttempts: 1,
-    bestScoreSum: 8,
-    totalMarksSum: 12,
-    nextModuleLabel: "Module 01 · Checkpoint Retry",
-    lastActivityAt: "2026-11-18T12:05:00Z",
-  },
-  {
-    id: "00000000-0000-4000-a000-000000000004",
-    fullName: "Ananya Iyer",
-    email: "ananya.iyer@pilani.bits-pilani.ac.in",
-    phone: "+91 98404 77889",
-    college: "BITS Pilani, Pilani Campus",
-    registerNumber: "BITS-2023-CS-114",
-    department: "Computer Science",
-    degree: "B.E. Computer Science",
-    graduationYear: 2027,
-    enrollmentStatus: "approved",
-    completedCount: 1,
-    inProgressCount: 0,
-    totalAttempts: 1,
-    bestScoreSum: 12,
-    totalMarksSum: 12,
-    nextModuleLabel: "Module 02 · Planned",
-    lastActivityAt: "2026-11-18T12:45:00Z",
-  },
-  {
-    id: "00000000-0000-4000-a000-000000000005",
-    fullName: "Rahul Verma",
-    email: "rahul.verma@dtu.ac.in",
-    phone: "+91 98405 99001",
-    college: "Delhi Technological University",
-    registerNumber: "DTU-22-IT-092",
-    department: "Information Technology",
-    degree: "B.Tech IT",
-    graduationYear: 2026,
-    enrollmentStatus: "pending",
-    completedCount: 0,
-    inProgressCount: 0,
-    totalAttempts: 0,
-    bestScoreSum: 0,
-    totalMarksSum: 0,
-    nextModuleLabel: "Awaiting Admin Approval",
-    lastActivityAt: "2026-11-18T13:10:00Z",
-  },
-  {
-    id: "00000000-0000-4000-a000-000000000006",
-    fullName: "Priya Nair",
-    email: "priya.nair@ceg.annauniv.edu",
-    phone: "+91 98406 12345",
-    college: "College of Engineering, Guindy (Anna University)",
-    registerNumber: "CEG-23-CS-077",
-    department: "Computer Science and Engineering",
-    degree: "B.E. Computer Science",
-    graduationYear: 2027,
-    enrollmentStatus: "approved",
-    completedCount: 1,
-    inProgressCount: 0,
-    totalAttempts: 1,
-    bestScoreSum: 12,
-    totalMarksSum: 12,
-    nextModuleLabel: "Module 02 · Planned",
-    lastActivityAt: "2026-11-18T13:30:00Z",
-  },
-  {
-    id: "00000000-0000-4000-a000-000000000007",
-    fullName: "Karthik Sundaram",
-    email: "karthik.s@students.iiit.ac.in",
-    phone: "+91 98407 67890",
-    college: "International Institute of Information Technology, Hyderabad",
-    registerNumber: "IIITH-24-CS-302",
-    department: "Computer Science",
-    degree: "B.Tech CSE",
-    graduationYear: 2028,
-    enrollmentStatus: "pending",
-    completedCount: 0,
-    inProgressCount: 0,
-    totalAttempts: 0,
-    bestScoreSum: 0,
-    totalMarksSum: 0,
-    nextModuleLabel: "Awaiting Admin Approval",
-    lastActivityAt: "2026-11-18T14:00:00Z",
-  },
-  {
-    id: "00000000-0000-4000-a000-000000000008",
-    fullName: "Meera Joshi",
-    email: "meera.joshi@rvce.edu.in",
-    phone: "+91 98408 54321",
-    college: "RV College of Engineering, Bengaluru",
-    registerNumber: "RVCE-22-IS-145",
-    department: "Information Science and Engineering",
-    degree: "B.E. Information Science",
-    graduationYear: 2026,
-    enrollmentStatus: "approved",
-    completedCount: 1,
-    inProgressCount: 0,
-    totalAttempts: 1,
-    bestScoreSum: 12,
-    totalMarksSum: 12,
-    nextModuleLabel: "Module 02 · Planned",
-    lastActivityAt: "2026-11-18T14:25:00Z",
-  },
-];
-
 export default async function AdminStudentsPage() {
   const identity = await requireAdmin();
-  let summaries: AdminStudentSummary[] = DEV_MOCK_STUDENTS;
+
+  // Load real students from SQLite backend
+  const sqliteStudents = getAllStudentsWithProgress();
+  let summaries: AdminStudentSummary[] = sqliteStudents;
   let error: string | undefined = undefined;
 
   if (isSupabaseConfigured() && !identity.isDevSession) {
@@ -290,20 +139,18 @@ export default async function AdminStudentsPage() {
           </p>
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          {!isSupabaseConfigured() && (
-            <span
-              style={{
-                fontSize: 10,
-                fontWeight: 800,
-                color: "#926315",
-                background: "#fef3c7",
-                padding: "6px 10px",
-                borderRadius: 99,
-              }}
-            >
-              ⚡ Local Dev Sandbox
-            </span>
-          )}
+          <span
+            style={{
+              fontSize: 10,
+              fontWeight: 800,
+              color: "#065f46",
+              background: "#d1fae5",
+              padding: "6px 10px",
+              borderRadius: 99,
+            }}
+          >
+            ⚡ Persistent SQLite Engine
+          </span>
           <span className="count-chip">{summaries.length} Students</span>
         </div>
       </div>

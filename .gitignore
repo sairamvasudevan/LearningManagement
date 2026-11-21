@@ -8,5 +8,6 @@ build
 *.log
 *.tsbuildinfo
 .DS_Store
+data/*.db*
 supabase/.temp/
 supabase/.branches/
