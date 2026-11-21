@@ -52,6 +52,71 @@ export async function POST(request: NextRequest) {
         sameSite: "lax",
         maxAge: 60 * 60 * 24 * 7,
       });
+      // New student starts with zero progress (not completed!)
+      response.cookies.set("psl_progress", encodeURIComponent(JSON.stringify([])), {
+        path: "/",
+        httpOnly: true,
+        sameSite: "lax",
+        maxAge: 60 * 60 * 24 * 7,
+      });
+      return response;
+    }
+
+    if (action === "update_progress") {
+      const existingCookie = request.cookies.get("psl_progress");
+      let currentProgress: Array<{
+        module_number: number;
+        status: string;
+        best_score: number;
+        total_marks: number;
+        attempts: number;
+        first_started_at: string;
+        completed_at?: string;
+      }> = [];
+
+      if (existingCookie?.value) {
+        try {
+          currentProgress = JSON.parse(decodeURIComponent(existingCookie.value)) || [];
+        } catch {
+          currentProgress = [];
+        }
+      }
+
+      const modNum = Number(body.moduleNumber || 1);
+      const score = Number(body.score || 0);
+      const totalMarks = Number(body.totalMarks || 12);
+      const passed = Boolean(body.passed);
+      const now = new Date().toISOString();
+
+      const existingIdx = currentProgress.findIndex((p) => p.module_number === modNum);
+      if (existingIdx >= 0) {
+        const item = currentProgress[existingIdx];
+        currentProgress[existingIdx] = {
+          ...item,
+          status: passed ? "completed" : "in_progress",
+          best_score: Math.max(item.best_score, score),
+          total_marks: totalMarks,
+          attempts: item.attempts + 1,
+          completed_at: passed ? (item.completed_at || now) : item.completed_at,
+        };
+      } else {
+        currentProgress.push({
+          module_number: modNum,
+          status: passed ? "completed" : "in_progress",
+          best_score: score,
+          total_marks: totalMarks,
+          attempts: 1,
+          first_started_at: now,
+          completed_at: passed ? now : undefined,
+        });
+      }
+
+      response.cookies.set("psl_progress", encodeURIComponent(JSON.stringify(currentProgress)), {
+        path: "/",
+        httpOnly: true,
+        sameSite: "lax",
+        maxAge: 60 * 60 * 24 * 7,
+      });
       return response;
     }
 

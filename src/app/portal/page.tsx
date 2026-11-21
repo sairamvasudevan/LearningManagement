@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { SiteHeader } from "@/components/site-header";
 import { requireIdentity, getRole } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -39,21 +40,26 @@ export default async function StudentPortalPage() {
   const identity = await requireIdentity();
   if ((await getRole(identity.id)) === "admin") redirect("/admin");
 
+  const cookieStore = await cookies();
+  const progressCookie = cookieStore.get("psl_progress");
+
   let profile = {
     full_name: identity.fullName || identity.email.split("@")[0] || "Enrolled Student",
     email: identity.email,
     phone: "+91 98401 23456",
-    college: identity.college || "National Institute of Technology, Trichy",
-    register_number: identity.registerNumber || "NITT-2024-CS-0842",
+    college: identity.college || "Engineering College",
+    register_number: identity.registerNumber || "REG-2026-001",
     department: identity.department || "Computer Science and Engineering",
     degree: identity.degree || "B.Tech Computer Science",
     graduation_year: identity.graduationYear ?? 2026,
   };
+
   let enrollment = {
     status: "approved",
     access_source: "self_registration",
     enrolled_at: "2026-11-18T10:00:00Z",
   };
+
   let moduleRows: CourseModule[] = catalog.modules.map((m) => ({
     module_number: m.id,
     stage_number: m.stage,
@@ -61,29 +67,30 @@ export default async function StudentPortalPage() {
     objective: m.objective,
     content_status: m.published ? "published" : "planned",
   }));
-  let progressList: Progress[] = [
-    {
-      module_number: 1,
-      status: "completed",
-      best_score: 12,
-      total_marks: 12,
-      attempts: 1,
-      first_started_at: "2026-11-18T10:15:00Z",
-      completed_at: "2026-11-18T10:55:00Z",
-    },
-  ];
-  let attemptsList: AttemptRow[] = [
-    {
-      id: "att-demo-001",
-      module_number: 1,
-      status: "completed",
-      score: 12,
-      total_marks: 12,
-      started_at: "2026-11-18T10:15:00Z",
-      submitted_at: "2026-11-18T10:55:00Z",
-    },
-  ];
 
+  // Dynamic progress from cookie in local session mode
+  let progressList: Progress[] = [];
+  let attemptsList: AttemptRow[] = [];
+
+  if (progressCookie?.value) {
+    try {
+      progressList = JSON.parse(decodeURIComponent(progressCookie.value)) || [];
+      attemptsList = progressList.map((p, idx) => ({
+        id: `att-local-${idx + 1}`,
+        module_number: p.module_number,
+        status: p.status === "completed" ? "passed" : "active",
+        score: p.best_score,
+        total_marks: p.total_marks,
+        started_at: p.first_started_at || new Date().toISOString(),
+        submitted_at: p.completed_at || new Date().toISOString(),
+      }));
+    } catch {
+      progressList = [];
+      attemptsList = [];
+    }
+  }
+
+  // Live Supabase Mode if keys present
   if (isSupabaseConfigured() && !identity.isDevSession) {
     try {
       const supabase = await createClient();
@@ -149,8 +156,6 @@ export default async function StudentPortalPage() {
   }
 
   const approved = enrollment?.status === "approved";
-
-  const moduleMap = new Map(moduleRows.map((m) => [m.module_number, m]));
   const progressMap = new Map(progressList.map((p) => [p.module_number, p]));
 
   const completed = progressList.filter((p) => p.status === "completed").length;
@@ -158,301 +163,222 @@ export default async function StudentPortalPage() {
   const publishedModules = moduleRows.filter((m) => m.content_status === "published");
   const totalBestScore = progressList.reduce((sum, p) => sum + p.best_score, 0);
   const totalPossibleMarks = progressList.reduce((sum, p) => sum + p.total_marks, 0);
+
   const nextModule =
     Array.from({ length: 100 }, (_, i) => i + 1).find(
       (n) => !progressMap.get(n) || progressMap.get(n)?.status !== "completed",
     ) || 0;
+
   const displayName = profile?.full_name || identity.email.split("@")[0];
   const course = COURSE_PACKAGES[0];
-
-  const isModuleUnlocked = (moduleNumber: number) =>
-    moduleNumber === 1 || progressMap.get(moduleNumber - 1)?.status === "completed";
 
   return (
     <>
       <SiteHeader signedIn />
-      <main className="dashboard-main">
-        <div className="dashboard-heading">
-          <div>
-            <span className="eyebrow">STUDENT PROGRESS PORTAL</span>
-            <h1>Welcome, {displayName.split(" ")[0]}.</h1>
+      <main className="portal-container">
+        {/* Welcome Header */}
+        <section className="portal-welcome-card">
+          <div className="portal-welcome-main">
+            <div className="portal-badges">
+              <span className="badge-flame">🔥 100-Hour Flagship</span>
+              <span className="badge-free">100% Free Scholarship</span>
+              <span className="badge-roll">Roll: {profile?.register_number || "REG-001"}</span>
+            </div>
+            <h1>Welcome back, {displayName.split(" ")[0]}! 👋</h1>
             <p>
-              Track your enrolled course package, lesson completions, checkpoint scores, and next
-              unlocked module in one place.
+              Your verified enrollment in <b>{course.title}</b> is active. Master foundational problem
+              solving, algorithmic invariants, and structured engineering thinking.
             </p>
           </div>
-          <span className="student-id-chip">STUDENT ACCOUNT</span>
-        </div>
+          <div className="portal-overall-stat">
+            <div className="stat-circle">
+              <span className="stat-number">{completed}%</span>
+              <span className="stat-label">Progress</span>
+            </div>
+            <div className="stat-sub">{completed} of 100 Modules Mastered</div>
+          </div>
+        </section>
 
         {!approved ? (
           <section className="access-state">
-            <div className="access-symbol">{enrollment?.status === "pending" ? "◷" : "!"}</div>
-            <span className="eyebrow">COURSE ACCESS · {course.title.toUpperCase()}</span>
-            <h2>
-              {enrollment?.status === "pending"
-                ? "Your registration is awaiting administrator approval"
-                : "You are not enrolled in this package yet"}
-            </h2>
+            <div className="access-symbol">⏳</div>
+            <span className="eyebrow">COURSE ACCESS PENDING</span>
+            <h2>Your registration is awaiting administrator approval</h2>
             <p>
-              {enrollment?.status === "pending"
-                ? `Your student account for ${course.title} (${course.priceLabel}) has been created. An administrator must approve your registration before the lessons unlock.`
-                : "This course package is currently invitation-only or your account has not been assigned yet. Share your registered email address with the course administrator."}
+              Your student account has been registered. An administrator will review your enrollment shortly.
             </p>
             <div className="profile-summary">
-              <b>Registered account</b>
+              <b>Registered Account</b>
               <span>{profile?.email || identity.email}</span>
               <span>
-                {profile?.college || "College details pending"} ·{" "}
-                {profile?.register_number || "Register number pending"}
+                {profile?.college} · {profile?.register_number}
               </span>
             </div>
           </section>
         ) : (
           <>
-            <section className="dashboard-metrics">
-              <div>
-                <b>
-                  {completed}
-                  <small>/100</small>
-                </b>
-                <span>Lessons completed</span>
+            {/* Quick Metrics Bar */}
+            <div className="portal-metrics-grid">
+              <div className="portal-metric-card">
+                <span className="metric-icon">📚</span>
+                <div>
+                  <div className="metric-val">{completed} / 100</div>
+                  <div className="metric-label">Modules Completed</div>
+                </div>
               </div>
-              <div>
-                <b>{completed}%</b>
-                <span>Overall course progress</span>
+              <div className="portal-metric-card">
+                <span className="metric-icon">🎯</span>
+                <div>
+                  <div className="metric-val">
+                    {inProgress > 0 ? "1 Active" : completed > 0 ? "Module 02" : "Module 01"}
+                  </div>
+                  <div className="metric-label">Current Focus</div>
+                </div>
               </div>
-              <div>
-                <b>{inProgress}</b>
-                <span>Lessons in progress</span>
+              <div className="portal-metric-card">
+                <span className="metric-icon">🏆</span>
+                <div>
+                  <div className="metric-val">
+                    {totalPossibleMarks > 0 ? `${totalBestScore} / ${totalPossibleMarks}` : "0 / 12"}
+                  </div>
+                  <div className="metric-label">Checkpoint Score</div>
+                </div>
               </div>
-              <div>
-                <b>
-                  {totalPossibleMarks > 0
-                    ? `${totalBestScore}/${totalPossibleMarks}`
-                    : "—"}
-                </b>
-                <span>Best checkpoint marks</span>
+              <div className="portal-metric-card">
+                <span className="metric-icon">⚡</span>
+                <div>
+                  <div className="metric-val">Active</div>
+                  <div className="metric-label">Scholarship Status</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Current Focus Action Banner */}
+            <section className="portal-action-banner">
+              <div className="action-banner-content">
+                <div className="action-kicker">
+                  <span className="cn-pulse-dot-green"></span>
+                  <span>CURRENT ASSIGNMENT · PATH 01 (READ &amp; DEFINE)</span>
+                </div>
+                <h2>
+                  {completed === 0
+                    ? "Module 01: Separate the Story from the Task"
+                    : `Next Up: Module ${String(nextModule).padStart(2, "0")} · Express Task as Input, Rule, Output`}
+                </h2>
+                <p>
+                  {completed === 0
+                    ? "Master the art of extracting the algorithmic invariant from messy problem stories. Includes 4 principles, 3 real-world case studies, and a 6-question checkpoint."
+                    : "Great work passing Module 01! Continue building your systematic engineering foundation."}
+                </p>
+                <div className="action-meta-row">
+                  <span>⏱️ 20 min reading</span>
+                  <span>📝 6 Questions</span>
+                  <span>⭐ 12 Total Marks</span>
+                  <span>🎯 80% to pass</span>
+                </div>
+              </div>
+              <div className="action-banner-btn-wrap">
+                <Link
+                  href={nextModule > 0 ? `/learn/${nextModule}` : "/learn/1"}
+                  className="button button-cn-primary action-cta-btn"
+                >
+                  {completed === 0 ? "🚀 Start Module 01 Now →" : "Review Module 01 →"}
+                </Link>
               </div>
             </section>
 
-            <section className="student-course-card">
-              <div className="course-card-top">
+            {/* Module Curriculum Roadmap */}
+            <section className="portal-curriculum-card">
+              <div className="card-header-clean">
                 <div>
-                  <span className="eyebrow">ENROLLED COURSE PACKAGE · {course.priceLabel.toUpperCase()}</span>
-                  <h2>{course.title}</h2>
-                  <p>
-                    100 hours · Language-independent reasoning · {publishedModules.length} lesson
-                    currently published
-                  </p>
+                  <h3>Module 01 Checkpoint &amp; Curriculum Track</h3>
+                  <p>Sequential mastery gating: score ≥ 80% to unlock subsequent engineering modules.</p>
                 </div>
-                <div className="course-status-group">
-                  <span className="badge badge-category">{course.priceLabel}</span>
-                  <span className="course-status">ENROLLED</span>
-                </div>
+                <span className="catalog-count-pill">{publishedModules.length} Published Module</span>
               </div>
 
-              <div className="course-progress-line">
-                <span style={{ width: `${completed}%` }} />
-              </div>
-              <div className="course-progress-label">
-                <b>{completed}% complete</b>
-                <span>{completed} of 100 lessons mastered</span>
-              </div>
-
-              <div className="next-lesson-callout">
-                <div>
-                  <span className="eyebrow">YOUR NEXT STEP</span>
-                  <h3>
-                    {nextModule
-                      ? `Module ${String(nextModule).padStart(2, "0")}: ${
-                          catalog.modules.find((m) => m.id === nextModule)?.title || "Lesson"
-                        }`
-                      : "Course completed"}
-                  </h3>
-                  <p>
-                    {nextModule
-                      ? moduleMap.get(nextModule)?.content_status === "published"
-                        ? catalog.modules.find((m) => m.id === nextModule)?.objective
-                        : "You have completed all currently published lessons. The next module will unlock here once published."
-                      : "All 100 lessons completed."}
-                  </p>
-                </div>
-                {nextModule > 0 && moduleMap.get(nextModule)?.content_status === "published" && (
-                  <Link className="button button-primary" href={`/learn/${nextModule}`}>
-                    {progressMap.get(nextModule)?.status === "in_progress"
-                      ? "Resume lesson →"
-                      : "Start lesson →"}
-                  </Link>
-                )}
-              </div>
-
-              <div className="sub-section-head">
-                <h3>Published lessons &amp; checkpoint progress</h3>
-                <span>Sequential mastery gate: 80% required to unlock the next lesson</span>
-              </div>
-              <div className="table-scroll">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Lesson</th>
-                      <th>Status</th>
-                      <th>Best score</th>
-                      <th>Attempts</th>
-                      <th>Completed</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {publishedModules.map((mod) => {
-                      const prog = progressMap.get(mod.module_number);
-                      const unlocked = isModuleUnlocked(mod.module_number);
-                      const statusLabel =
-                        prog?.status === "completed"
-                          ? "Completed"
-                          : prog?.status === "in_progress"
-                            ? "In progress"
-                            : unlocked
-                              ? "Available"
-                              : "Locked";
-                      const statusClass =
-                        prog?.status === "completed"
-                          ? "approved"
-                          : prog?.status === "in_progress"
-                            ? "pending"
-                            : unlocked
-                              ? "approved"
-                              : "none";
-
-                      return (
-                        <tr key={mod.module_number}>
-                          <td>
-                            <b>
-                              Module {String(mod.module_number).padStart(2, "0")} · {mod.title}
-                            </b>
-                            <small>{mod.objective}</small>
-                          </td>
-                          <td>
-                            <span className={`table-status ${statusClass}`}>{statusLabel}</span>
-                          </td>
-                          <td>
-                            {prog && prog.total_marks > 0
-                              ? `${prog.best_score}/${prog.total_marks}`
-                              : "—"}
-                          </td>
-                          <td>{prog?.attempts ?? 0}</td>
-                          <td>
-                            {prog?.completed_at
-                              ? new Date(prog.completed_at).toLocaleDateString("en-IN")
-                              : "—"}
-                          </td>
-                          <td>
-                            {unlocked ? (
-                              <Link
-                                className="button button-small"
-                                href={`/learn/${mod.module_number}`}
-                              >
-                                {prog?.status === "completed"
-                                  ? "Review"
-                                  : prog?.status === "in_progress"
-                                    ? "Continue"
-                                    : "Open"}
-                              </Link>
-                            ) : (
-                              <span className="field-note">Locked</span>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="sub-section-head">
-                <h3>10-path curriculum progress</h3>
-                <span>Each path unlocks after completing the previous path</span>
-              </div>
-              <div className="portal-path-list">
-                {catalog.stages.map((stage) => {
-                  const stageModules = catalog.modules.filter((m) => m.stage === stage.id);
-                  const stageCompleted = stageModules.filter(
-                    (m) => progressMap.get(m.id)?.status === "completed",
-                  ).length;
-                  const stageOpen =
-                    stage.id === 1 || progressMap.get((stage.id - 1) * 10)?.status === "completed";
-                  return (
-                    <div
-                      className={`portal-path ${stageOpen ? "path-open" : "path-locked"}`}
-                      key={stage.id}
-                    >
-                      <div className="portal-path-num">{String(stage.id).padStart(2, "0")}</div>
-                      <div className="portal-path-copy">
-                        <b>{stage.title}</b>
-                        <span>{stage.description}</span>
-                      </div>
-                      <div className="portal-path-status">
-                        {stageCompleted}/10 · {stageCompleted === 10 ? "Completed" : stageOpen ? "Open" : "Locked"}
-                      </div>
+              <div className="module-item-clean">
+                <div className="module-item-left">
+                  <div className={`module-num-badge ${completed > 0 ? "badge-completed" : "badge-ready"}`}>
+                    {completed > 0 ? "✓" : "01"}
+                  </div>
+                  <div className="module-item-info">
+                    <h4>Module 01: Separate the Story from the Task</h4>
+                    <p>Identify the exact outcome requested without confusing background narrative with the algorithmic invariant.</p>
+                    <div className="module-item-tags">
+                      <span className="tag-pill">Foundation</span>
+                      <span className="tag-pill">20 Mins</span>
+                      <span className="tag-pill">12 Marks</span>
                     </div>
-                  );
-                })}
-              </div>
-            </section>
-
-            {attemptsList.length > 0 && (
-              <section className="surface-card table-card">
-                <div className="table-heading">
-                  <div>
-                    <span className="eyebrow">ASSESSMENT HISTORY</span>
-                    <h2>Recent checkpoint attempts</h2>
-                    <p>Every submitted checkpoint attempt recorded for your account.</p>
                   </div>
                 </div>
-                <div className="table-scroll">
-                  <table>
+                <div className="module-item-right">
+                  <div className="module-score-status">
+                    {progressMap.get(1)?.status === "completed" ? (
+                      <span className="status-badge-completed">
+                        Passed ({progressMap.get(1)?.best_score}/12)
+                      </span>
+                    ) : (
+                      <span className="status-badge-ready">Ready to Start</span>
+                    )}
+                  </div>
+                  <Link href="/learn/1" className="button button-small button-outline">
+                    {completed > 0 ? "Review Material" : "Start Lesson →"}
+                  </Link>
+                </div>
+              </div>
+
+              {/* Planned Modules Preview */}
+              <div className="planned-modules-list">
+                <div className="planned-module-item">
+                  <div className="planned-num">🔒 02</div>
+                  <div className="planned-info">
+                    <b>Express a task as input, rule and output</b>
+                    <small>Construct formal transformation contracts and deterministic state mappings.</small>
+                  </div>
+                  <span className="planned-badge">Unlocks after Module 01</span>
+                </div>
+                <div className="planned-module-item">
+                  <div className="planned-num">🔒 03</div>
+                  <div className="planned-info">
+                    <b>Extract constraints, limits, and resource bounds</b>
+                    <small>Size limits, uniqueness rules, ordering, and capacity bounds.</small>
+                  </div>
+                  <span className="planned-badge">Planned</span>
+                </div>
+              </div>
+            </section>
+
+            {/* Recent Checkpoint Attempts */}
+            {attemptsList.length > 0 && (
+              <section className="portal-curriculum-card">
+                <div className="card-header-clean">
+                  <div>
+                    <h3>Assessment History</h3>
+                    <p>Verified scores recorded for your account.</p>
+                  </div>
+                </div>
+                <div className="attempts-table-wrap">
+                  <table className="clean-table">
                     <thead>
                       <tr>
                         <th>Module</th>
-                        <th>Result</th>
+                        <th>Outcome</th>
                         <th>Score</th>
-                        <th>Started</th>
-                        <th>Submitted</th>
+                        <th>Completed On</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {attemptsList.map((attempt) => (
-                        <tr key={attempt.id}>
+                      {attemptsList.map((att) => (
+                        <tr key={att.id}>
+                          <td><b>Module {String(att.module_number).padStart(2, "0")}</b></td>
                           <td>
-                            <b>Module {String(attempt.module_number).padStart(2, "0")}</b>
-                            <small>
-                              {catalog.modules.find((m) => m.id === attempt.module_number)?.title ||
-                                ""}
-                            </small>
-                          </td>
-                          <td>
-                            <span
-                              className={`table-status ${
-                                attempt.status === "passed"
-                                  ? "approved"
-                                  : attempt.status === "failed"
-                                    ? "rejected"
-                                    : "pending"
-                              }`}
-                            >
-                              {attempt.status}
+                            <span className={att.status === "passed" ? "table-passed" : "table-active"}>
+                              {att.status === "passed" ? "Passed ✓" : "Active"}
                             </span>
                           </td>
-                          <td>
-                            {attempt.total_marks > 0
-                              ? `${attempt.score}/${attempt.total_marks}`
-                              : "In progress"}
-                          </td>
-                          <td>{new Date(attempt.started_at).toLocaleString("en-IN")}</td>
-                          <td>
-                            {attempt.submitted_at
-                              ? new Date(attempt.submitted_at).toLocaleString("en-IN")
-                              : "—"}
-                          </td>
+                          <td><b>{att.score} / {att.total_marks}</b></td>
+                          <td>{new Date(att.submitted_at || "").toLocaleDateString("en-IN")}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -461,43 +387,47 @@ export default async function StudentPortalPage() {
               </section>
             )}
 
-            <section className="profile-panel">
-              <div>
-                <span className="eyebrow">STUDENT PROFILE</span>
-                <h2>Your registered details</h2>
-              </div>
-              <div className="profile-grid">
+            {/* Student Verified Profile Card */}
+            <section className="portal-profile-clean">
+              <div className="card-header-clean">
                 <div>
-                  <span>Full name</span>
+                  <h3>Verified Student Registration</h3>
+                  <p>Institutional record linked to this learning portal.</p>
+                </div>
+                <span className="status-badge-completed">Verified Student</span>
+              </div>
+              <div className="profile-details-grid">
+                <div className="profile-detail-cell">
+                  <span>Full Name</span>
                   <b>{profile?.full_name}</b>
                 </div>
-                <div>
-                  <span>Email</span>
+                <div className="profile-detail-cell">
+                  <span>Registered Email</span>
                   <b>{profile?.email}</b>
                 </div>
-                <div>
-                  <span>Phone</span>
+                <div className="profile-detail-cell">
+                  <span>Phone Number</span>
                   <b>{profile?.phone}</b>
                 </div>
-                <div>
-                  <span>College</span>
+                <div className="profile-detail-cell">
+                  <span>Institution / College</span>
                   <b>{profile?.college}</b>
                 </div>
-                <div>
-                  <span>Register number</span>
+                <div className="profile-detail-cell">
+                  <span>Roll / Register Number</span>
                   <b>{profile?.register_number}</b>
                 </div>
-                <div>
+                <div className="profile-detail-cell">
                   <span>Department</span>
                   <b>{profile?.department}</b>
                 </div>
-                <div>
-                  <span>Degree</span>
+                <div className="profile-detail-cell">
+                  <span>Degree &amp; Programme</span>
                   <b>{profile?.degree}</b>
                 </div>
-                <div>
-                  <span>Graduation year</span>
-                  <b>{profile?.graduation_year || "Not provided"}</b>
+                <div className="profile-detail-cell">
+                  <span>Expected Graduation</span>
+                  <b>{profile?.graduation_year}</b>
                 </div>
               </div>
             </section>

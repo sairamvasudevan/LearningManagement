@@ -150,17 +150,98 @@ export function RegisterForm() {
     confirm_password: "",
     privacy_consent: false,
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
+  const [formError, setFormError] = useState("");
   const [success, setSuccess] = useState("");
   const hasSupabase = isSupabaseConfigured();
 
+  function validateField(field: string, val: unknown): string {
+    const s = String(val ?? "").trim();
+    switch (field) {
+      case "full_name":
+        if (!s) return "Full name is required.";
+        if (s.length < 3) return "Name must be at least 3 characters.";
+        if (!/^[a-zA-Z\s.'-]+$/.test(s)) return "Please enter a valid student name.";
+        return "";
+      case "email":
+        if (!s) return "Email address is required.";
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s)) return "Enter a valid email (e.g. name@college.edu).";
+        return "";
+      case "phone":
+        if (!s) return "Mobile phone number is required.";
+        const cleanPhone = s.replace(/[\s\-()]/g, "");
+        if (!/^\+?[0-9]{10,15}$/.test(cleanPhone)) return "Enter a valid 10-digit mobile number.";
+        return "";
+      case "college":
+        if (!s) return "College or institution name is required.";
+        if (s.length < 3) return "College name must be at least 3 characters.";
+        return "";
+      case "register_number":
+        if (!s) return "Roll / Register number is required.";
+        if (s.length < 2) return "Enter a valid roll or register number.";
+        return "";
+      case "department":
+        if (!s) return "Department is required.";
+        return "";
+      case "degree":
+        if (!s) return "Degree / Programme is required.";
+        return "";
+      case "graduation_year":
+        if (!s) return "Select your graduation year.";
+        const yr = Number(s);
+        if (isNaN(yr) || yr < 2020 || yr > 2035) return "Select a valid graduation year.";
+        return "";
+      case "password":
+        if (!s) return "Password is required.";
+        if (s.length < 8) return "Password must be at least 8 characters.";
+        return "";
+      case "confirm_password":
+        if (!s) return "Please confirm your password.";
+        if (s !== values.password) return "Passwords do not match.";
+        return "";
+      case "privacy_consent":
+        if (!val) return "You must accept the student data notice to enroll.";
+        return "";
+      default:
+        return "";
+    }
+  }
+
+  function validateAll() {
+    const newErrors: Record<string, string> = {};
+    for (const [k, v] of Object.entries(values)) {
+      const err = validateField(k, v);
+      if (err) newErrors[k] = err;
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }
+
   function update<K extends keyof typeof values>(field: K, value: (typeof values)[K]) {
-    setValues((current) => ({ ...current, [field]: value }));
+    setValues((current) => {
+      const next = { ...current, [field]: value };
+      if (touched[field]) {
+        const err = validateField(field, value);
+        setErrors((prev) => ({ ...prev, [field]: err }));
+        if (field === "password" && touched.confirm_password) {
+          const confirmErr = next.confirm_password !== value ? "Passwords do not match." : "";
+          setErrors((prev) => ({ ...prev, confirm_password: confirmErr }));
+        }
+      }
+      return next;
+    });
+  }
+
+  function handleBlur(field: string) {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+    const err = validateField(field, values[field as keyof typeof values]);
+    setErrors((prev) => ({ ...prev, [field]: err }));
   }
 
   function fillSample() {
-    setValues({
+    const sample = {
       full_name: "Sneha Ramanathan",
       email: "sneha.raman@psgtech.ac.in",
       phone: "+91 98401 23456",
@@ -169,15 +250,30 @@ export function RegisterForm() {
       department: "Computer Science and Engineering",
       degree: "B.E. Computer Science",
       graduation_year: "2026",
-      password: "Password12345!",
-      confirm_password: "Password12345!",
+      password: "Password123!",
+      confirm_password: "Password123!",
+      privacy_consent: true,
+    };
+    setValues(sample);
+    setErrors({});
+    setTouched({
+      full_name: true,
+      email: true,
+      phone: true,
+      college: true,
+      register_number: true,
+      department: true,
+      degree: true,
+      graduation_year: true,
+      password: true,
+      confirm_password: true,
       privacy_consent: true,
     });
   }
 
   async function handleDemoFastEnroll() {
     setBusy(true);
-    setError("");
+    setFormError("");
     try {
       const res = await fetch("/api/auth/session", {
         method: "POST",
@@ -188,26 +284,23 @@ export function RegisterForm() {
       router.replace("/portal");
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to launch demo.");
+      setFormError(err instanceof Error ? err.message : "Failed to launch demo.");
       setBusy(false);
     }
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setError("");
+    setFormError("");
     setSuccess("");
 
-    if (values.password.length < 12) {
-      setError("Use a password with at least 12 characters.");
-      return;
-    }
-    if (values.password !== values.confirm_password) {
-      setError("The passwords do not match.");
-      return;
-    }
-    if (!values.privacy_consent) {
-      setError("Please read and accept the student data notice before registering.");
+    // Mark all as touched
+    const allTouched: Record<string, boolean> = {};
+    for (const k of Object.keys(values)) allTouched[k] = true;
+    setTouched(allTouched);
+
+    if (!validateAll()) {
+      setFormError("Please correct the highlighted fields before submitting.");
       return;
     }
 
@@ -258,7 +351,7 @@ export function RegisterForm() {
         router.refresh();
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Registration failed. Please review your details.");
+      setFormError(err instanceof Error ? err.message : "Registration failed. Please review your details.");
     } finally {
       setBusy(false);
     }
@@ -273,8 +366,8 @@ export function RegisterForm() {
             <span>Testing Mode</span>
           </div>
           <p>
-            Supabase keys are not set in <code>.env.local</code> yet. You can register with any details
-            below, click <b>Auto-fill Sample Profile</b>, or jump straight in as a demo learner.
+            Supabase keys are not set in <code>.env.local</code> yet. You can register with your own details
+            below, click <b>Auto-fill Sample Student</b>, or jump straight in as a demo learner.
           </p>
           <div className="demo-actions-grid">
             <button
@@ -297,95 +390,136 @@ export function RegisterForm() {
         </div>
       )}
 
-      <form className="form-stack" onSubmit={submit}>
+      <form className="form-stack" onSubmit={submit} noValidate>
         <div className="form-grid">
           <label>
             Full name *
             <input
               required
               maxLength={120}
+              className={errors.full_name && touched.full_name ? "input-invalid" : touched.full_name && !errors.full_name ? "input-valid" : ""}
               value={values.full_name}
               onChange={(e) => update("full_name", e.target.value)}
+              onBlur={() => handleBlur("full_name")}
               placeholder="e.g. Sneha Ramanathan"
               autoComplete="name"
             />
+            {errors.full_name && touched.full_name && (
+              <span className="field-error-text">⚠️ {errors.full_name}</span>
+            )}
           </label>
           <label>
             Email address *
             <input
               type="email"
               required
+              className={errors.email && touched.email ? "input-invalid" : touched.email && !errors.email ? "input-valid" : ""}
               value={values.email}
               onChange={(e) => update("email", e.target.value)}
+              onBlur={() => handleBlur("email")}
               placeholder="e.g. sneha@college.edu"
               autoComplete="email"
             />
+            {errors.email && touched.email && (
+              <span className="field-error-text">⚠️ {errors.email}</span>
+            )}
           </label>
           <label>
-            Phone number *
+            Mobile phone number *
             <input
               type="tel"
               required
               maxLength={24}
+              className={errors.phone && touched.phone ? "input-invalid" : touched.phone && !errors.phone ? "input-valid" : ""}
               value={values.phone}
               onChange={(e) => update("phone", e.target.value)}
-              placeholder="+91 98401 23456"
+              onBlur={() => handleBlur("phone")}
+              placeholder="e.g. 9840123456 or +91 98401 23456"
               autoComplete="tel"
             />
+            {errors.phone && touched.phone && (
+              <span className="field-error-text">⚠️ {errors.phone}</span>
+            )}
           </label>
           <label>
             College / University *
             <input
               required
               maxLength={180}
+              className={errors.college && touched.college ? "input-invalid" : touched.college && !errors.college ? "input-valid" : ""}
               value={values.college}
               onChange={(e) => update("college", e.target.value)}
+              onBlur={() => handleBlur("college")}
               placeholder="e.g. PSG Tech, Anna Univ, NIT Trichy"
             />
+            {errors.college && touched.college && (
+              <span className="field-error-text">⚠️ {errors.college}</span>
+            )}
           </label>
           <label>
             Register / Roll number *
             <input
               required
               maxLength={60}
+              className={errors.register_number && touched.register_number ? "input-invalid" : touched.register_number && !errors.register_number ? "input-valid" : ""}
               value={values.register_number}
               onChange={(e) => update("register_number", e.target.value)}
+              onBlur={() => handleBlur("register_number")}
               placeholder="e.g. 22BCS108"
             />
+            {errors.register_number && touched.register_number && (
+              <span className="field-error-text">⚠️ {errors.register_number}</span>
+            )}
           </label>
           <label>
             Department *
             <input
               required
               maxLength={120}
+              className={errors.department && touched.department ? "input-invalid" : touched.department && !errors.department ? "input-valid" : ""}
               value={values.department}
               onChange={(e) => update("department", e.target.value)}
-              placeholder="Computer Science and Engineering"
+              onBlur={() => handleBlur("department")}
+              placeholder="e.g. Computer Science and Engineering"
             />
+            {errors.department && touched.department && (
+              <span className="field-error-text">⚠️ {errors.department}</span>
+            )}
           </label>
           <label>
             Degree / Programme *
             <input
               required
               maxLength={100}
+              className={errors.degree && touched.degree ? "input-invalid" : touched.degree && !errors.degree ? "input-valid" : ""}
               value={values.degree}
               onChange={(e) => update("degree", e.target.value)}
-              placeholder="B.Tech / B.E. / M.Sc / MCA"
+              onBlur={() => handleBlur("degree")}
+              placeholder="e.g. B.Tech / B.E. / M.Sc / MCA"
             />
+            {errors.degree && touched.degree && (
+              <span className="field-error-text">⚠️ {errors.degree}</span>
+            )}
           </label>
           <label>
-            Graduation year
+            Graduation year *
             <select
+              required
+              className={errors.graduation_year && touched.graduation_year ? "input-invalid" : touched.graduation_year && !errors.graduation_year ? "input-valid" : ""}
               value={values.graduation_year}
               onChange={(e) => update("graduation_year", e.target.value)}
+              onBlur={() => handleBlur("graduation_year")}
             >
-              <option value="">Select year</option>
-              {Array.from({ length: 12 }, (_, i) => new Date().getFullYear() - 3 + i).map((y) => (
+              <option value="">Select graduation year</option>
+              {[2024, 2025, 2026, 2027, 2028, 2029, 2030].map((y) => (
                 <option key={y} value={y}>
                   {y}
                 </option>
               ))}
             </select>
+            {errors.graduation_year && touched.graduation_year && (
+              <span className="field-error-text">⚠️ {errors.graduation_year}</span>
+            )}
           </label>
         </div>
         <div className="form-grid">
@@ -394,45 +528,59 @@ export function RegisterForm() {
             <input
               type="password"
               required
-              minLength={12}
+              minLength={8}
+              className={errors.password && touched.password ? "input-invalid" : touched.password && !errors.password ? "input-valid" : ""}
               value={values.password}
               onChange={(e) => update("password", e.target.value)}
-              placeholder="At least 12 characters"
+              onBlur={() => handleBlur("password")}
+              placeholder="At least 8 characters"
               autoComplete="new-password"
             />
+            {errors.password && touched.password && (
+              <span className="field-error-text">⚠️ {errors.password}</span>
+            )}
           </label>
           <label>
             Confirm password *
             <input
               type="password"
               required
-              minLength={12}
+              minLength={8}
+              className={errors.confirm_password && touched.confirm_password ? "input-invalid" : touched.confirm_password && !errors.confirm_password ? "input-valid" : ""}
               value={values.confirm_password}
               onChange={(e) => update("confirm_password", e.target.value)}
-              placeholder="Repeat password"
+              onBlur={() => handleBlur("confirm_password")}
+              placeholder="Repeat your password"
               autoComplete="new-password"
             />
+            {errors.confirm_password && touched.confirm_password && (
+              <span className="field-error-text">⚠️ {errors.confirm_password}</span>
+            )}
           </label>
         </div>
         <p className="field-note">
-          Passwords must contain at least 12 characters. Your credentials are securely handled and
-          never stored unhashed.
+          🔒 Passwords must be at least 8 characters. Your credentials are securely handled and never stored unhashed.
         </p>
-        <label className="consent-control">
+        <label className={`consent-control ${errors.privacy_consent && touched.privacy_consent ? "consent-invalid" : ""}`}>
           <input
             type="checkbox"
             required
             checked={values.privacy_consent}
             onChange={(e) => update("privacy_consent", e.target.checked)}
+            onBlur={() => handleBlur("privacy_consent")}
           />
           <span>
             I have read and accept the <Link href="/privacy" target="_blank">Student Data &amp; Privacy Notice</Link>.
             I understand my learning records will be tracked for this course.
           </span>
         </label>
-        {error && (
+        {errors.privacy_consent && touched.privacy_consent && (
+          <span className="field-error-text" style={{ marginTop: "-8px" }}>⚠️ {errors.privacy_consent}</span>
+        )}
+
+        {formError && (
           <div className="form-alert" role="alert">
-            {error}
+            {formError}
           </div>
         )}
         {success && (
@@ -440,8 +588,9 @@ export function RegisterForm() {
             {success}
           </div>
         )}
-        <button className="button button-primary button-full" disabled={busy}>
-          {busy ? "Registering account…" : "Create free student account"}
+
+        <button className="button button-cn-primary button-full" disabled={busy}>
+          {busy ? "Creating your student profile…" : "Complete Registration & Enroll (₹0 Free)"}
         </button>
       </form>
     </div>
