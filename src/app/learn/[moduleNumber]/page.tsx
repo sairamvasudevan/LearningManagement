@@ -35,5 +35,5 @@ export default async function LearnModulePage({ params }: PageProps) {
     }
   }
 
-  return <ModulePlayer curriculum={curriculum} />;
+  return <ModulePlayer key={moduleNumber} curriculum={curriculum} />;
 }

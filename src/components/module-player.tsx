@@ -220,7 +220,7 @@ export function ModulePlayer({
               <div className="section-kicker">{section.kicker}</div>
               <h2>{section.title}</h2>
               {section.content.map((para, pIdx) => (
-                <p key={pIdx}>{para}</p>
+                <p key={pIdx} style={{ whiteSpace: "pre-line" }}>{para}</p>
               ))}
 
               {section.callout && (
@@ -271,7 +271,9 @@ export function ModulePlayer({
                       <p>{cs.correctInvariant}</p>
                       {cs.codeOrContract && (
                         <div className="code-snippet-box">
-                          <code>{cs.codeOrContract}</code>
+                          <pre style={{ margin: 0, whiteSpace: "pre-wrap", fontFamily: "inherit" }}>
+                            <code>{cs.codeOrContract}</code>
+                          </pre>
                         </div>
                       )}
                     </div>
