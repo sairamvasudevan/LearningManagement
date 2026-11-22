@@ -481,3 +481,25 @@ export function approveStudentEnrollment(studentId: string) {
   const db = getDatabase();
   db.prepare("UPDATE users SET enrollment_status = 'approved' WHERE id = ?").run(studentId);
 }
+
+export function getDatabaseHealth() {
+  const db = getDatabase();
+  const integrity = db.prepare("PRAGMA integrity_check;").get() as { integrity_check?: string } | undefined;
+  const userCount = (db.prepare("SELECT COUNT(*) as count FROM users").get() as { count: number }).count;
+  const sessionCount = (db.prepare("SELECT COUNT(*) as count FROM sessions").get() as { count: number }).count;
+  const progressCount = (db.prepare("SELECT COUNT(*) as count FROM module_progress").get() as { count: number }).count;
+  const attemptCount = (db.prepare("SELECT COUNT(*) as count FROM assessment_attempts").get() as { count: number }).count;
+  const submissionCount = (db.prepare("SELECT COUNT(*) as count FROM practice_submissions").get() as { count: number }).count;
+
+  return {
+    status: integrity?.integrity_check === "ok" ? "healthy" : "degraded",
+    integrityCheck: integrity?.integrity_check || "unknown",
+    counts: {
+      users: userCount,
+      activeSessions: sessionCount,
+      moduleProgressRecords: progressCount,
+      assessmentAttempts: attemptCount,
+      practiceSubmissions: submissionCount,
+    },
+  };
+}

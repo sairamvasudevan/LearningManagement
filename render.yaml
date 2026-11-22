@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: problem-solving-lab-lms
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+      - key: PORT
+        value: "3000"
+    disk:
+      name: lms-data
+      mountPath: /app/data
+      sizeGB: 1

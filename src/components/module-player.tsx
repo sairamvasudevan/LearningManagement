@@ -225,13 +225,12 @@ export function ModulePlayer({
 
               {section.callout && (
                 <div
-                  className={`callout-box ${
-                    section.callout.type === "warning"
+                  className={`callout-box ${section.callout.type === "warning"
                       ? "warning-callout"
                       : section.callout.type === "tip"
                         ? "tip-callout"
                         : "rule-callout"
-                  }`}
+                    }`}
                 >
                   <b>
                     {section.callout.type === "warning"
@@ -302,7 +301,7 @@ export function ModulePlayer({
                     <input
                       type="checkbox"
                       checked={Boolean(activeChecklist[chIdx])}
-                      onChange={() => {}}
+                      onChange={() => { }}
                     />
                     <div>
                       <b>{item}</b>
@@ -514,9 +513,8 @@ export function ModulePlayer({
               <button
                 key={i}
                 type="button"
-                className={`option-button ${chosen ? "selected" : ""} ${
-                  correct ? "option-correct" : ""
-                } ${wrong ? "option-wrong" : ""}`}
+                className={`option-button ${chosen ? "selected" : ""} ${correct ? "option-correct" : ""
+                  } ${wrong ? "option-wrong" : ""}`}
                 disabled={Boolean(currentReview)}
                 onClick={() =>
                   setSelected((current) => ({ ...current, [question.question_id]: i }))
@@ -568,9 +566,8 @@ export function ModulePlayer({
         {/* Instant Review & Explanation */}
         {currentReview && (
           <div
-            className={`answer-explanation ${
-              currentReview.is_correct ? "answer-good" : "answer-review"
-            }`}
+            className={`answer-explanation ${currentReview.is_correct ? "answer-good" : "answer-review"
+              }`}
           >
             <div className="answer-heading">
               <b>{currentReview.is_correct ? "✓ Correct Answer" : "⚠️ Review Expected Invariant"}</b>
