@@ -539,8 +539,23 @@ export function CourseCatalogSection() {
               }}
             >
               <div className="thumb-badges-top">
-                {course.status === "available" ? (
-                  <span className="badge-flame">🔥 BESTSELLER · 100% SCHOLARSHIP</span>
+                {course.slug === "problem-solving-lab" ? (
+                  <span className="badge-flame">🔥 FLAGSHIP FOUNDATION · 100% SCHOLARSHIP</span>
+                ) : course.status === "available" ? (
+                  <span
+                    style={{
+                      background: "rgba(245, 158, 11, 0.2)",
+                      border: "1px solid #f59e0b",
+                      color: "#fde68a",
+                      fontSize: "10px",
+                      fontWeight: 800,
+                      padding: "2px 8px",
+                      borderRadius: "99px",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    🔒 PREREQUISITE: 100H LAB
+                  </span>
                 ) : (
                   <span className="thumb-badge-hero">{course.badge}</span>
                 )}
@@ -603,12 +618,16 @@ export function CourseCatalogSection() {
                     {course.originalPrice && <del className="price-struck">{course.originalPrice}</del>}
                   </div>
                   <small className="price-subtext">
-                    {course.status === "available" ? "100% Scholarship · Free for Students" : "Cohort Launching Soon"}
+                    {course.slug === "problem-solving-lab"
+                      ? "100% Scholarship · Free for Students"
+                      : course.status === "available"
+                      ? "🔒 Unlocks After 100-Hour Lab"
+                      : "Cohort Launching Soon"}
                   </small>
                 </div>
 
                 <div className="ed-card-actions">
-                  {course.status === "available" ? (
+                  {course.slug === "problem-solving-lab" ? (
                     <>
                       <Link className="button button-quiet" href={`/courses/${course.slug}`}>
                         Syllabus
@@ -618,6 +637,24 @@ export function CourseCatalogSection() {
                         href={`/register?course=${course.slug}`}
                       >
                         Enroll Free →
+                      </Link>
+                    </>
+                  ) : course.status === "available" ? (
+                    <>
+                      <Link className="button button-quiet" href={`/courses/${course.slug}`}>
+                        Syllabus
+                      </Link>
+                      <Link
+                        className="button button-cn-primary"
+                        href={
+                          course.slug === "web-dev-mern-lab"
+                            ? "/web-dev/html-intro"
+                            : course.slug === "dsa-mastery-lab"
+                            ? "/dsa/two-sum"
+                            : `/courses/${course.slug}`
+                        }
+                      >
+                        Preview First Part 👁️
                       </Link>
                     </>
                   ) : (

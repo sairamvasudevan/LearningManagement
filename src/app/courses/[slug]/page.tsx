@@ -96,10 +96,30 @@ export default async function CourseDetailPage({ params }: PageProps) {
               ))}
             </ul>
 
-            {course.status === "available" ? (
+            {!isFlagship && (
+              <div
+                style={{
+                  background: "#1e1b4b",
+                  border: "1px solid #4338ca",
+                  borderRadius: "8px",
+                  padding: "14px",
+                  marginBottom: "16px",
+                  color: "#e0e7ff",
+                  fontSize: "12px",
+                  lineHeight: 1.5,
+                }}
+              >
+                <div style={{ fontWeight: 800, color: "#f59e0b", marginBottom: "4px" }}>
+                  🔒 Prerequisite Enforced
+                </div>
+                Full interactive sandboxes and verified submissions require mastering the 100-Hour Flagship <b>Problem Solving Lab</b>. You can preview Chapter 01 immediately.
+              </div>
+            )}
+
+            {isFlagship ? (
               <>
                 <Link
-                  className="button button-primary button-full"
+                  className="button button-cn-primary button-full"
                   href={`/register?course=${course.slug}`}
                 >
                   Register Free Account (₹0) →
@@ -111,21 +131,31 @@ export default async function CourseDetailPage({ params }: PageProps) {
             ) : (
               <>
                 <Link
-                  className="button button-primary button-full"
-                  href="/register?course=problem-solving-lab"
+                  className="button button-cn-primary button-full"
+                  href={
+                    course.slug === "web-dev-mern-lab"
+                      ? "/web-dev/html-intro"
+                      : course.slug === "dsa-mastery-lab"
+                      ? "/dsa/two-sum"
+                      : `/courses/${course.slug}`
+                  }
                 >
-                  Enroll Free in Flagship Lab →
+                  👁️ Open Chapter 01 Preview →
                 </Link>
-                <button className="button button-full" type="button" disabled style={{ marginTop: 9 }}>
-                  Track Launches Q2/Q3 2026
-                </button>
+                <Link
+                  className="button button-quiet button-full"
+                  href="/register?course=problem-solving-lab"
+                  style={{ marginTop: 9, borderColor: "#4338ca", color: "#c7d2fe" }}
+                >
+                  👉 Enroll in 100-Hour Lab to Unlock
+                </Link>
               </>
             )}
 
             <p className="field-note">
-              {course.status === "available"
+              {isFlagship
                 ? "Module 01 is currently published and live. Modules 02–100 unlock sequentially upon passing each 80% checkpoint."
-                : "Students enrolled in Problem Solving Lab automatically gain priority access to roadmap tracks."}
+                : "Complete all 100 modules of Problem Solving Lab to unlock full interactive submissions and certifications for this track."}
             </p>
           </aside>
         </section>

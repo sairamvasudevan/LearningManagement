@@ -2,11 +2,14 @@ import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { WEB_DEV_LESSONS, WebDevTrack } from "@/lib/web-dev-data";
 import { getCurrentIdentity } from "@/lib/auth";
+import { checkCourseAccess } from "@/lib/course-prerequisites";
+import { PrerequisiteLockBanner } from "@/components/prerequisite-lock";
 
 export const dynamic = "force-dynamic";
 
 export default async function WebDevCoursePage() {
   const identity = await getCurrentIdentity();
+  const access = checkCourseAccess(identity?.id, "web-dev-mern-lab");
 
   const tracks: { name: WebDevTrack; label: string; count: number; color: string; desc: string }[] = [
     {
@@ -141,6 +144,14 @@ export default async function WebDevCoursePage() {
           </div>
         </div>
 
+        {/* Prerequisite Lock Banner */}
+        <PrerequisiteLockBanner
+          access={access}
+          courseTitle="Full-Stack Web Development & MERN Lab"
+          firstPartLabel="Chapter 01 (HTML5 Skeleton)"
+          previewUrl="/web-dev/html-intro"
+        />
+
         {/* Track Roadmap Overview Cards */}
         <div style={{ marginBottom: "36px" }}>
           <h2 style={{ fontSize: "20px", fontWeight: 800, margin: "0 0 16px", color: "#f8fafc" }}>
@@ -224,65 +235,107 @@ export default async function WebDevCoursePage() {
                 </div>
 
                 <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                  {trackLessons.map((lesson) => (
-                    <div
-                      key={lesson.id}
-                      style={{
-                        background: "#0f172a",
-                        border: "1px solid #1e293b",
-                        borderRadius: "10px",
-                        padding: "16px 20px",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        flexWrap: "wrap",
-                        gap: "14px",
-                      }}
-                    >
-                      <div style={{ maxWidth: "800px" }}>
-                        <div style={{ display: "flex", gap: "8px", alignItems: "center", marginBottom: "6px" }}>
-                          <span
-                            style={{
-                              fontSize: "11px",
-                              fontWeight: 700,
-                              padding: "2px 8px",
-                              borderRadius: "4px",
-                              background:
-                                lesson.difficulty === "Beginner"
-                                  ? "#065f46"
-                                  : lesson.difficulty === "Intermediate"
-                                  ? "#854d0e"
-                                  : "#991b1b",
-                              color: "#f8fafc",
-                            }}
-                          >
-                            {lesson.difficulty}
-                          </span>
-                          <span style={{ fontSize: "12px", color: "#94a3b8" }}>
-                            Chapter #{lesson.number} · ⏱ ~{lesson.estimatedMinutes} mins · {lesson.requirements.length} Test Cases
-                          </span>
+                  {trackLessons.map((lesson) => {
+                    const isPreview = lesson.id === "html-intro";
+                    const isLocked = access.isLocked && !isPreview;
+
+                    return (
+                      <div
+                        key={lesson.id}
+                        style={{
+                          background: isLocked ? "#0b1120" : "#0f172a",
+                          border: isLocked ? "1px dashed #334155" : isPreview ? "1px solid #38bdf8" : "1px solid #1e293b",
+                          borderRadius: "10px",
+                          padding: "16px 20px",
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          flexWrap: "wrap",
+                          gap: "14px",
+                          opacity: isLocked ? 0.78 : 1,
+                        }}
+                      >
+                        <div style={{ maxWidth: "800px" }}>
+                          <div style={{ display: "flex", gap: "8px", alignItems: "center", marginBottom: "6px" }}>
+                            {isPreview && (
+                              <span
+                                style={{
+                                  fontSize: "11px",
+                                  fontWeight: 800,
+                                  padding: "2px 8px",
+                                  borderRadius: "4px",
+                                  background: "#0284c7",
+                                  color: "#ffffff",
+                                }}
+                              >
+                                👁️ Open Free Preview
+                              </span>
+                            )}
+                            {isLocked && (
+                              <span
+                                style={{
+                                  fontSize: "11px",
+                                  fontWeight: 800,
+                                  padding: "2px 8px",
+                                  borderRadius: "4px",
+                                  background: "#475569",
+                                  color: "#cbd5e1",
+                                }}
+                              >
+                                🔒 Prerequisite Locked
+                              </span>
+                            )}
+                            <span
+                              style={{
+                                fontSize: "11px",
+                                fontWeight: 700,
+                                padding: "2px 8px",
+                                borderRadius: "4px",
+                                background:
+                                  lesson.difficulty === "Beginner"
+                                    ? "#065f46"
+                                    : lesson.difficulty === "Intermediate"
+                                    ? "#854d0e"
+                                    : "#991b1b",
+                                color: "#f8fafc",
+                              }}
+                            >
+                              {lesson.difficulty}
+                            </span>
+                            <span style={{ fontSize: "12px", color: "#94a3b8" }}>
+                              Chapter #{lesson.number} · ⏱ ~{lesson.estimatedMinutes} mins · {lesson.requirements.length} Test Cases
+                            </span>
+                          </div>
+
+                          <h4 style={{ fontSize: "16px", fontWeight: 700, margin: "0 0 4px", color: isLocked ? "#cbd5e1" : "#f8fafc" }}>
+                            {isLocked && <span style={{ marginRight: 6 }}>🔒</span>}
+                            {lesson.title}
+                          </h4>
+
+                          <p style={{ margin: 0, fontSize: "13px", color: "#94a3b8", lineHeight: 1.5 }}>
+                            {lesson.objective}
+                          </p>
                         </div>
 
-                        <h4 style={{ fontSize: "16px", fontWeight: 700, margin: "0 0 4px", color: "#f8fafc" }}>
-                          {lesson.title}
-                        </h4>
-
-                        <p style={{ margin: 0, fontSize: "13px", color: "#94a3b8", lineHeight: 1.5 }}>
-                          {lesson.objective}
-                        </p>
+                        <div>
+                          <Link
+                            href={`/web-dev/${lesson.id}`}
+                            className={isLocked ? "button button-dark" : "button button-cn-primary"}
+                            style={{
+                              padding: "8px 18px",
+                              fontSize: "12px",
+                              fontWeight: 700,
+                              whiteSpace: "nowrap",
+                              borderColor: isLocked ? "#475569" : undefined,
+                              color: isLocked ? "#94a3b8" : undefined,
+                            }}
+                          >
+                            {isPreview ? "Start Preview Sandbox ❯" : isLocked ? "🔒 Locked (Preview Only)" : "Open Sandbox & Kata →"}
+                          </Link>
+                        </div>
                       </div>
-
-                      <div>
-                        <Link
-                          href={`/web-dev/${lesson.id}`}
-                          className="button button-cn-primary"
-                          style={{ padding: "8px 18px", fontSize: "12px", fontWeight: 700, whiteSpace: "nowrap" }}
-                        >
-                          Open Sandbox &amp; Kata →
-                        </Link>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             );

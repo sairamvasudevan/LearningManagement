@@ -7,12 +7,16 @@ import { COURSE_PACKAGES } from "@/lib/courses";
 import { MODULES_CURRICULUM } from "@/lib/curriculum-data";
 import catalog from "@/lib/course-catalog.json";
 import { PortalStageExplorer } from "@/components/portal-stage-explorer";
+import { checkCourseAccess } from "@/lib/course-prerequisites";
 
 export const dynamic = "force-dynamic";
 
 export default async function StudentPortalPage() {
   const identity = await requireIdentity();
   if ((await getRole(identity.id)) === "admin") redirect("/admin");
+
+  const dsaAccess = checkCourseAccess(identity.id, "dsa-mastery-lab");
+  const webDevAccess = checkCourseAccess(identity.id, "web-dev-mern-lab");
 
   const dbUser = getUserById(identity.id);
   const profile = {
@@ -99,6 +103,21 @@ export default async function StudentPortalPage() {
           </section>
         ) : (
           <>
+            {/* Advanced Tracks Header */}
+            <div style={{ margin: "20px 0 12px", display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: "8px" }}>
+              <div>
+                <span style={{ fontSize: "11px", fontWeight: 800, color: "#f59e0b", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                  ADVANCED PRACTICAL TRACKS
+                </span>
+                <h3 style={{ margin: "2px 0 0", fontSize: "20px", color: "#0f172a", fontWeight: 800 }}>
+                  Specialization Laboratories &amp; Coding Arenas
+                </h3>
+              </div>
+              <span style={{ fontSize: "12px", color: "#64748b", fontWeight: 600 }}>
+                Unlocked after mastering 100-Hour Problem Solving Foundation ({completed}/100 Completed)
+              </span>
+            </div>
+
             {/* DSA CodeStudio Flagship Banner */}
             <div
               style={{
@@ -112,24 +131,41 @@ export default async function StudentPortalPage() {
                 alignItems: "center",
                 flexWrap: "wrap",
                 gap: "16px",
-                border: "1px solid #334155",
+                border: dsaAccess.isLocked ? "1px dashed #475569" : "1px solid #334155",
+                opacity: dsaAccess.isLocked ? 0.92 : 1,
               }}
             >
               <div>
                 <div style={{ display: "flex", gap: "8px", alignItems: "center", marginBottom: "6px" }}>
-                  <span
-                    style={{
-                      background: "#ff6a00",
-                      color: "#fff",
-                      fontSize: "10px",
-                      fontWeight: 800,
-                      padding: "2px 8px",
-                      borderRadius: "99px",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    LIVE ARENA
-                  </span>
+                  {dsaAccess.isLocked ? (
+                    <span
+                      style={{
+                        background: "#f59e0b",
+                        color: "#000",
+                        fontSize: "10px",
+                        fontWeight: 900,
+                        padding: "2px 8px",
+                        borderRadius: "99px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      🔒 PREREQUISITE REQUIRED · {completed}/100 MODULES
+                    </span>
+                  ) : (
+                    <span
+                      style={{
+                        background: "#10b981",
+                        color: "#fff",
+                        fontSize: "10px",
+                        fontWeight: 800,
+                        padding: "2px 8px",
+                        borderRadius: "99px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      ✅ UNLOCKED
+                    </span>
+                  )}
                   <span style={{ fontSize: "12px", color: "#94a3b8", fontWeight: 600 }}>
                     Multi-Language Compiler (C · C++17 · Java 17 · Python 3)
                   </span>
@@ -138,18 +174,38 @@ export default async function StudentPortalPage() {
                   DSA CodeStudio: Algorithmic Coding Arena
                 </h3>
                 <p style={{ margin: 0, fontSize: "13px", color: "#cbd5e1", maxWidth: "620px" }}>
-                  Practice data structures &amp; algorithmic patterns in C, C++, Java, and Python. Test code
-                  against hidden test suites on our dedicated execution engine.
+                  {dsaAccess.isLocked
+                    ? "Problem 01 (Two Sum) is open for preview. Complete all 100 modules of Problem Solving Lab to unlock the full competitive problem bank and compiler test runner."
+                    : "Practice data structures & algorithmic patterns in C, C++, Java, and Python. Test code against hidden test suites on our dedicated execution engine."}
                 </p>
               </div>
-              <div>
-                <Link
-                  href="/dsa"
-                  className="button button-cn-primary"
-                  style={{ padding: "10px 20px", fontSize: "13px", fontWeight: 700 }}
-                >
-                  Open DSA Arena →
-                </Link>
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                {dsaAccess.isLocked ? (
+                  <>
+                    <Link
+                      href="/dsa/two-sum"
+                      className="button button-cn-primary"
+                      style={{ padding: "8px 16px", fontSize: "12px", fontWeight: 700 }}
+                    >
+                      👁️ Preview Problem 01 ❯
+                    </Link>
+                    <Link
+                      href="/dsa"
+                      className="button button-quiet"
+                      style={{ padding: "8px 16px", fontSize: "12px", color: "#c7d2fe", borderColor: "#475569" }}
+                    >
+                      📋 View Problems
+                    </Link>
+                  </>
+                ) : (
+                  <Link
+                    href="/dsa"
+                    className="button button-cn-primary"
+                    style={{ padding: "10px 20px", fontSize: "13px", fontWeight: 700 }}
+                  >
+                    Open DSA Arena →
+                  </Link>
+                )}
               </div>
             </div>
 
@@ -166,24 +222,41 @@ export default async function StudentPortalPage() {
                 alignItems: "center",
                 flexWrap: "wrap",
                 gap: "16px",
-                border: "1px solid #1e3a8a",
+                border: webDevAccess.isLocked ? "1px dashed #1e3a8a" : "1px solid #1e3a8a",
+                opacity: webDevAccess.isLocked ? 0.92 : 1,
               }}
             >
               <div>
                 <div style={{ display: "flex", gap: "8px", alignItems: "center", marginBottom: "6px" }}>
-                  <span
-                    style={{
-                      background: "#38bdf8",
-                      color: "#0f172a",
-                      fontSize: "10px",
-                      fontWeight: 800,
-                      padding: "2px 8px",
-                      borderRadius: "99px",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    LIVE LAB
-                  </span>
+                  {webDevAccess.isLocked ? (
+                    <span
+                      style={{
+                        background: "#f59e0b",
+                        color: "#000",
+                        fontSize: "10px",
+                        fontWeight: 900,
+                        padding: "2px 8px",
+                        borderRadius: "99px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      🔒 PREREQUISITE REQUIRED · {completed}/100 MODULES
+                    </span>
+                  ) : (
+                    <span
+                      style={{
+                        background: "#10b981",
+                        color: "#fff",
+                        fontSize: "10px",
+                        fontWeight: 800,
+                        padding: "2px 8px",
+                        borderRadius: "99px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      ✅ UNLOCKED
+                    </span>
+                  )}
                   <span style={{ fontSize: "12px", color: "#93c5fd", fontWeight: 600 }}>
                     HTML5 · CSS3 Flexbox/Grid · Modern JavaScript · Full MERN
                   </span>
@@ -192,18 +265,38 @@ export default async function StudentPortalPage() {
                   Full-Stack Web Development &amp; MERN Lab
                 </h3>
                 <p style={{ margin: 0, fontSize: "13px", color: "#cbd5e1", maxWidth: "620px" }}>
-                  Code with our interactive live editor (HTML/CSS/JS), view real-time sandboxed DOM preview,
-                  inspect console logs, and pass automated requirement test suites.
+                  {webDevAccess.isLocked
+                    ? "Chapter 01 (HTML5 Skeleton) is open for preview. Complete all 100 modules of Problem Solving Lab to unlock the full 26-chapter curriculum and WebKata challenges."
+                    : "Code with our interactive live editor (HTML/CSS/JS), view real-time sandboxed DOM preview, inspect console logs, and pass automated requirement test suites."}
                 </p>
               </div>
-              <div>
-                <Link
-                  href="/web-dev"
-                  className="button button-cn-primary"
-                  style={{ padding: "10px 20px", fontSize: "13px", fontWeight: 700, background: "#0284c7", borderColor: "#0284c7" }}
-                >
-                  Open Web Dev Lab →
-                </Link>
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                {webDevAccess.isLocked ? (
+                  <>
+                    <Link
+                      href="/web-dev/html-intro"
+                      className="button button-cn-primary"
+                      style={{ padding: "8px 16px", fontSize: "12px", fontWeight: 700, background: "#0284c7", borderColor: "#0284c7" }}
+                    >
+                      👁️ Preview Chapter 01 ❯
+                    </Link>
+                    <Link
+                      href="/web-dev"
+                      className="button button-quiet"
+                      style={{ padding: "8px 16px", fontSize: "12px", color: "#93c5fd", borderColor: "#1e3a8a" }}
+                    >
+                      📋 View Chapters
+                    </Link>
+                  </>
+                ) : (
+                  <Link
+                    href="/web-dev"
+                    className="button button-cn-primary"
+                    style={{ padding: "10px 20px", fontSize: "13px", fontWeight: 700, background: "#0284c7", borderColor: "#0284c7" }}
+                  >
+                    Open Web Dev Lab →
+                  </Link>
+                )}
               </div>
             </div>
 
