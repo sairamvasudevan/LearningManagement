@@ -139,6 +139,17 @@ export function SiteHeader({
                     </div>
                     <span className="badge badge-live">Available</span>
                   </Link>
+                  <Link
+                    href="/dsa"
+                    className="explore-menu-item highlight"
+                    onClick={() => setExploreOpen(false)}
+                  >
+                    <div>
+                      <b>DSA CodeStudio: Algorithmic Arena</b>
+                      <small>C, C++, Java &amp; Python Compiler · 80 Hours · Free</small>
+                    </div>
+                    <span className="badge badge-live" style={{ background: "#ff6a00", color: "#fff" }}>Live IDE</span>
+                  </Link>
                 </div>
 
                 <div className="explore-dropdown-section">
@@ -237,6 +248,9 @@ export function SiteHeader({
             <>
               {!admin && (
                 <>
+                  <Link href="/dsa" style={{ color: "#ff6a00", fontWeight: 700 }}>
+                    ⚡ DSA Arena
+                  </Link>
                   <Link href="/#courses">Courses</Link>
                   <Link href="/#curriculum">10-Path Roadmap</Link>
                 </>
@@ -255,6 +269,9 @@ export function SiteHeader({
             </>
           ) : (
             <>
+              <Link href="/dsa" style={{ color: "#ff6a00", fontWeight: 700 }}>
+                ⚡ DSA Arena
+              </Link>
               <Link href="/#courses">Courses</Link>
               <Link href="/#curriculum">Curriculum</Link>
               <Link href="/#pedagogy">Why It Works</Link>

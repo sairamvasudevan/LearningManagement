@@ -52,6 +52,19 @@ export type DbPracticeSubmission = {
   submitted_at: string;
 };
 
+export type DbDsaSubmission = {
+  id: string;
+  user_id: string;
+  problem_id: string;
+  language: string;
+  code: string;
+  status: "ACCEPTED" | "WRONG_ANSWER" | "COMPILE_ERROR" | "TIME_LIMIT_EXCEEDED" | "RUNTIME_ERROR";
+  test_cases_passed: number;
+  total_test_cases: number;
+  execution_time_ms: number;
+  created_at: string;
+};
+
 let dbInstance: DatabaseSync | null = null;
 
 export function getDatabase(): DatabaseSync {
@@ -131,6 +144,21 @@ export function getDatabase(): DatabaseSync {
       submitted_at TEXT NOT NULL,
       FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
     );
+
+    CREATE TABLE IF NOT EXISTS dsa_submissions (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      problem_id TEXT NOT NULL,
+      language TEXT NOT NULL,
+      code TEXT NOT NULL,
+      status TEXT NOT NULL,
+      test_cases_passed INTEGER NOT NULL,
+      total_test_cases INTEGER NOT NULL,
+      execution_time_ms INTEGER NOT NULL,
+      created_at TEXT NOT NULL,
+      FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+    );
+    CREATE INDEX IF NOT EXISTS idx_dsa_sub_user ON dsa_submissions(user_id, problem_id);
   `);
 
   // Pre-seed default Admin if not exists
@@ -482,6 +510,50 @@ export function approveStudentEnrollment(studentId: string) {
   db.prepare("UPDATE users SET enrollment_status = 'approved' WHERE id = ?").run(studentId);
 }
 
+export function recordDsaSubmission(sub: Omit<DbDsaSubmission, "id" | "created_at">): DbDsaSubmission {
+  const db = getDatabase();
+  const id = crypto.randomUUID();
+  const now = new Date().toISOString();
+  db.prepare(`
+    INSERT INTO dsa_submissions (id, user_id, problem_id, language, code, status, test_cases_passed, total_test_cases, execution_time_ms, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    id,
+    sub.user_id,
+    sub.problem_id,
+    sub.language,
+    sub.code,
+    sub.status,
+    sub.test_cases_passed,
+    sub.total_test_cases,
+    sub.execution_time_ms,
+    now,
+  );
+  return { id, created_at: now, ...sub };
+}
+
+export function getUserDsaSubmissions(userId: string, problemId?: string): DbDsaSubmission[] {
+  const db = getDatabase();
+  if (problemId) {
+    return db
+      .prepare(
+        "SELECT * FROM dsa_submissions WHERE user_id = ? AND problem_id = ? ORDER BY created_at DESC LIMIT 20",
+      )
+      .all(userId, problemId) as unknown as DbDsaSubmission[];
+  }
+  return db
+    .prepare("SELECT * FROM dsa_submissions WHERE user_id = ? ORDER BY created_at DESC LIMIT 50")
+    .all(userId) as unknown as DbDsaSubmission[];
+}
+
+export function getUserSolvedDsaProblemIds(userId: string): Set<string> {
+  const db = getDatabase();
+  const rows = db
+    .prepare("SELECT DISTINCT problem_id FROM dsa_submissions WHERE user_id = ? AND status = 'ACCEPTED'")
+    .all(userId) as unknown as { problem_id: string }[];
+  return new Set(rows.map((r) => r.problem_id));
+}
+
 export function getDatabaseHealth() {
   const db = getDatabase();
   const integrity = db.prepare("PRAGMA integrity_check;").get() as { integrity_check?: string } | undefined;
@@ -490,6 +562,7 @@ export function getDatabaseHealth() {
   const progressCount = (db.prepare("SELECT COUNT(*) as count FROM module_progress").get() as { count: number }).count;
   const attemptCount = (db.prepare("SELECT COUNT(*) as count FROM assessment_attempts").get() as { count: number }).count;
   const submissionCount = (db.prepare("SELECT COUNT(*) as count FROM practice_submissions").get() as { count: number }).count;
+  const dsaCount = (db.prepare("SELECT COUNT(*) as count FROM dsa_submissions").get() as { count: number }).count;
 
   return {
     status: integrity?.integrity_check === "ok" ? "healthy" : "degraded",
@@ -500,6 +573,7 @@ export function getDatabaseHealth() {
       moduleProgressRecords: progressCount,
       assessmentAttempts: attemptCount,
       practiceSubmissions: submissionCount,
+      dsaSubmissions: dsaCount,
     },
   };
 }

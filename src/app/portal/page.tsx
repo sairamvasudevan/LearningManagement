@@ -94,6 +94,60 @@ export default async function StudentPortalPage() {
           </section>
         ) : (
           <>
+            {/* DSA CodeStudio Flagship Banner */}
+            <div
+              style={{
+                background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
+                borderRadius: "14px",
+                padding: "20px 24px",
+                color: "#ffffff",
+                marginBottom: "20px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: "16px",
+                border: "1px solid #334155",
+              }}
+            >
+              <div>
+                <div style={{ display: "flex", gap: "8px", alignItems: "center", marginBottom: "6px" }}>
+                  <span
+                    style={{
+                      background: "#ff6a00",
+                      color: "#fff",
+                      fontSize: "10px",
+                      fontWeight: 800,
+                      padding: "2px 8px",
+                      borderRadius: "99px",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    NEW COURSE
+                  </span>
+                  <span style={{ fontSize: "12px", color: "#94a3b8", fontWeight: 600 }}>
+                    Multi-Language Compiler (C · C++17 · Java 17 · Python 3)
+                  </span>
+                </div>
+                <h3 style={{ margin: "0 0 4px", fontSize: "18px", color: "#f8fafc" }}>
+                  DSA CodeStudio: Algorithmic Coding Arena
+                </h3>
+                <p style={{ margin: 0, fontSize: "13px", color: "#cbd5e1", maxWidth: "620px" }}>
+                  Practice data structures &amp; algorithmic patterns in C, C++, Java, and Python. Test code
+                  against hidden test suites on our dedicated execution engine.
+                </p>
+              </div>
+              <div>
+                <Link
+                  href="/dsa"
+                  className="button button-cn-primary"
+                  style={{ padding: "10px 20px", fontSize: "13px", fontWeight: 700 }}
+                >
+                  Open DSA Arena →
+                </Link>
+              </div>
+            </div>
+
             {/* Quick Metrics Bar */}
             <div className="portal-metrics-grid">
               <div className="portal-metric-card">

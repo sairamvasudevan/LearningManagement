@@ -1,0 +1,598 @@
+"use client";
+
+import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
+import { DsaProblem, DSA_PROBLEMS } from "@/lib/dsa-problems";
+import { SupportedLanguage } from "@/lib/compiler";
+
+interface DsaCodeArenaProps {
+  initialProblem: DsaProblem;
+  allProblems: DsaProblem[];
+  solvedProblemIds?: string[];
+}
+
+export function DsaCodeArena({
+  initialProblem,
+  allProblems,
+  solvedProblemIds = [],
+}: DsaCodeArenaProps) {
+  const [problem, setProblem] = useState<DsaProblem>(initialProblem);
+  const [language, setLanguage] = useState<SupportedLanguage>("cpp");
+  const [codePerLang, setCodePerLang] = useState<Record<string, Record<SupportedLanguage, string>>>({});
+  const [code, setCode] = useState<string>("");
+  const [activeLeftTab, setActiveLeftTab] = useState<"description" | "submissions">("description");
+
+  // Console state
+  const [activeConsoleTab, setActiveConsoleTab] = useState<"samples" | "custom" | "output">("samples");
+  const [selectedSampleIndex, setSelectedSampleIndex] = useState<number>(0);
+  const [customStdin, setCustomStdin] = useState<string>("");
+  const [isRunning, setIsRunning] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
+  // Results state
+  const [executionResult, setExecutionResult] = useState<any>(null);
+  const [submissionResult, setSubmissionResult] = useState<any>(null);
+  const [solvedSet, setSolvedSet] = useState<Set<string>>(new Set(solvedProblemIds));
+
+  // Initialize code for current problem & language
+  useEffect(() => {
+    const saved = codePerLang[problem.id]?.[language];
+    if (saved) {
+      setCode(saved);
+    } else {
+      const template = problem.starterTemplates[language] || "";
+      setCode(template);
+      setCodePerLang((prev) => ({
+        ...prev,
+        [problem.id]: {
+          ...(prev[problem.id] || {}),
+          [language]: template,
+        },
+      }));
+    }
+    setCustomStdin(problem.sampleTestCases[0]?.input || "");
+    setExecutionResult(null);
+    setSubmissionResult(null);
+  }, [problem.id, language]);
+
+  const handleCodeChange = (newCode: string) => {
+    setCode(newCode);
+    setCodePerLang((prev) => ({
+      ...prev,
+      [problem.id]: {
+        ...(prev[problem.id] || {}),
+        [language]: newCode,
+      },
+    }));
+  };
+
+  const handleResetCode = () => {
+    if (confirm("Reset code to the original starter template?")) {
+      const template = problem.starterTemplates[language] || "";
+      setCode(template);
+      setCodePerLang((prev) => ({
+        ...prev,
+        [problem.id]: {
+          ...(prev[problem.id] || {}),
+          [language]: template,
+        },
+      }));
+    }
+  };
+
+  // Run against sample or custom input
+  const handleRunCode = async () => {
+    setIsRunning(true);
+    setActiveConsoleTab("output");
+    setExecutionResult(null);
+    setSubmissionResult(null);
+
+    try {
+      const testCases =
+        activeConsoleTab === "samples"
+          ? [
+              {
+                id: `Sample ${selectedSampleIndex + 1}`,
+                input: problem.sampleTestCases[selectedSampleIndex]?.input || "",
+                expectedOutput: problem.sampleTestCases[selectedSampleIndex]?.expectedOutput || "",
+              },
+            ]
+          : undefined;
+
+      const res = await fetch("/api/compiler", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          language,
+          code,
+          stdin: activeConsoleTab === "custom" ? customStdin : undefined,
+          testCases,
+        }),
+      });
+
+      const data = await res.json();
+      setExecutionResult(data);
+    } catch (err: any) {
+      setExecutionResult({
+        status: "RUNTIME_ERROR",
+        stderr: err?.message || "Failed to execute code",
+      });
+    } finally {
+      setIsRunning(false);
+    }
+  };
+
+  // Submit against all test cases
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    setActiveConsoleTab("output");
+    setExecutionResult(null);
+    setSubmissionResult(null);
+
+    try {
+      const res = await fetch("/api/dsa/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          problemId: problem.id,
+          language,
+          code,
+        }),
+      });
+
+      const data = await res.json();
+      setSubmissionResult(data);
+      if (data.status === "ACCEPTED") {
+        setSolvedSet((prev) => new Set([...prev, problem.id]));
+      }
+    } catch (err: any) {
+      setSubmissionResult({
+        status: "RUNTIME_ERROR",
+        compileOutput: err?.message || "Submission failed",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Handle Tab key in editor
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Tab") {
+      e.preventDefault();
+      const textarea = e.currentTarget;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const val = textarea.value;
+      const newVal = val.substring(0, start) + "    " + val.substring(end);
+      handleCodeChange(newVal);
+      setTimeout(() => {
+        textarea.selectionStart = textarea.selectionEnd = start + 4;
+      }, 0);
+    } else if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+      e.preventDefault();
+      handleRunCode();
+    }
+  };
+
+  const lineCount = (code.match(/\n/g) || []).length + 1;
+
+  return (
+    <div className="dsa-arena-layout">
+      {/* Top Bar Navigation */}
+      <header className="dsa-topbar">
+        <div className="dsa-topbar-left">
+          <Link href="/dsa" className="dsa-back-link">
+            ← Problem Bank
+          </Link>
+          <div className="dsa-problem-switcher">
+            <label htmlFor="problem-select" className="sr-only">Switch Problem</label>
+            <select
+              id="problem-select"
+              value={problem.id}
+              onChange={(e) => {
+                const found = allProblems.find((p) => p.id === e.target.value);
+                if (found) setProblem(found);
+              }}
+              className="dsa-select"
+            >
+              {allProblems.map((p, idx) => (
+                <option key={p.id} value={p.id}>
+                  {idx + 1}. {p.title} ({p.difficulty}) {solvedSet.has(p.id) ? "✓" : ""}
+                </option>
+              ))}
+            </select>
+          </div>
+          <span
+            className={`dsa-diff-pill ${
+              problem.difficulty === "Easy"
+                ? "diff-easy"
+                : problem.difficulty === "Medium"
+                  ? "diff-medium"
+                  : "diff-hard"
+            }`}
+          >
+            {problem.difficulty}
+          </span>
+          <span className="dsa-topic-tag">{problem.topic}</span>
+        </div>
+
+        <div className="dsa-topbar-right">
+          <button
+            type="button"
+            className="dsa-btn-run"
+            onClick={handleRunCode}
+            disabled={isRunning || isSubmitting}
+          >
+            {isRunning ? "Running..." : "▶ Run Code"}
+          </button>
+          <button
+            type="button"
+            className="dsa-btn-submit"
+            onClick={handleSubmit}
+            disabled={isRunning || isSubmitting}
+          >
+            {isSubmitting ? "Evaluating..." : "✓ Submit Solution"}
+          </button>
+        </div>
+      </header>
+
+      {/* Main Split Body */}
+      <div className="dsa-main-split">
+        {/* Left Pane: Description & Submissions */}
+        <section className="dsa-left-pane">
+          <div className="dsa-tabs-header">
+            <button
+              type="button"
+              className={`dsa-tab-btn ${activeLeftTab === "description" ? "active" : ""}`}
+              onClick={() => setActiveLeftTab("description")}
+            >
+              📄 Description
+            </button>
+            <button
+              type="button"
+              className={`dsa-tab-btn ${activeLeftTab === "submissions" ? "active" : ""}`}
+              onClick={() => setActiveLeftTab("submissions")}
+            >
+              📊 Submissions {solvedSet.has(problem.id) ? "(Solved ✓)" : ""}
+            </button>
+          </div>
+
+          <div className="dsa-left-content">
+            {activeLeftTab === "description" ? (
+              <div className="dsa-prose">
+                <h2>{problem.title}</h2>
+                <div style={{ whiteSpace: "pre-line", lineHeight: 1.6, margin: "14px 0" }}>
+                  {problem.description}
+                </div>
+
+                <h3>Input Format</h3>
+                <pre className="dsa-code-block">{problem.inputFormat}</pre>
+
+                <h3>Output Format</h3>
+                <pre className="dsa-code-block">{problem.outputFormat}</pre>
+
+                <h3>Constraints</h3>
+                <ul className="dsa-constraints-list">
+                  {problem.constraints.map((c, i) => (
+                    <li key={i}>
+                      <code>{c}</code>
+                    </li>
+                  ))}
+                </ul>
+
+                <h3>Sample Test Cases</h3>
+                {problem.sampleTestCases.map((tc, idx) => (
+                  <div key={idx} className="dsa-sample-box">
+                    <div className="dsa-sample-title">Example {idx + 1}</div>
+                    <div className="dsa-io-row">
+                      <div>
+                        <b>Input:</b>
+                        <pre>{tc.input}</pre>
+                      </div>
+                      <div>
+                        <b>Expected Output:</b>
+                        <pre>{tc.expectedOutput}</pre>
+                      </div>
+                    </div>
+                    {tc.explanation && (
+                      <div className="dsa-explanation">
+                        <b>Explanation:</b> {tc.explanation}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="dsa-submissions-pane">
+                <h3>Submission History</h3>
+                {solvedSet.has(problem.id) ? (
+                  <div className="dsa-accepted-banner">
+                    🎉 <b>Problem Solved!</b> You have successfully submitted an accepted solution.
+                  </div>
+                ) : (
+                  <p style={{ color: "#64748b" }}>
+                    No accepted submission yet. Write your code and click <b>Submit Solution</b> to
+                    test all hidden cases!
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Right Pane: Code Editor & Console */}
+        <section className="dsa-right-pane">
+          {/* Editor Header */}
+          <div className="dsa-editor-header">
+            <div className="dsa-lang-picker">
+              <span style={{ fontSize: "12px", color: "#64748b", fontWeight: 600 }}>Language:</span>
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value as SupportedLanguage)}
+                className="dsa-select dsa-lang-select"
+              >
+                <option value="cpp">C++ (C++17 / Clang)</option>
+                <option value="c">C (C11 / Clang)</option>
+                <option value="java">Java (JDK 17)</option>
+                <option value="python">Python (3.x)</option>
+              </select>
+            </div>
+            <div className="dsa-editor-actions">
+              <span className="dsa-shortcut-hint">Shortcuts: Tab indent · ⌘/Ctrl+Enter run</span>
+              <button
+                type="button"
+                className="dsa-btn-subtle"
+                onClick={handleResetCode}
+                title="Reset to starter template"
+              >
+                ↺ Reset Template
+              </button>
+            </div>
+          </div>
+
+          {/* Code Editor Body */}
+          <div className="dsa-editor-wrap">
+            <div className="dsa-line-gutter" aria-hidden="true">
+              {Array.from({ length: Math.max(lineCount, 15) }, (_, i) => (
+                <div key={i}>{i + 1}</div>
+              ))}
+            </div>
+            <textarea
+              value={code}
+              onChange={(e) => handleCodeChange(e.target.value)}
+              onKeyDown={handleKeyDown}
+              spellCheck={false}
+              autoCapitalize="none"
+              autoComplete="off"
+              className="dsa-code-textarea"
+              placeholder="// Write your solution here..."
+            />
+          </div>
+
+          {/* Console / Results Drawer */}
+          <div className="dsa-console-drawer">
+            <div className="dsa-console-tabs">
+              <button
+                type="button"
+                className={`dsa-console-tab-btn ${activeConsoleTab === "samples" ? "active" : ""}`}
+                onClick={() => setActiveConsoleTab("samples")}
+              >
+                Sample Testcases
+              </button>
+              <button
+                type="button"
+                className={`dsa-console-tab-btn ${activeConsoleTab === "custom" ? "active" : ""}`}
+                onClick={() => setActiveConsoleTab("custom")}
+              >
+                Custom STDIN
+              </button>
+              <button
+                type="button"
+                className={`dsa-console-tab-btn ${activeConsoleTab === "output" ? "active" : ""}`}
+                onClick={() => setActiveConsoleTab("output")}
+              >
+                Execution Result{" "}
+                {(executionResult || submissionResult) && (
+                  <span className="dsa-pulse-indicator">●</span>
+                )}
+              </button>
+            </div>
+
+            <div className="dsa-console-body">
+              {activeConsoleTab === "samples" && (
+                <div className="dsa-sample-selector">
+                  <div className="dsa-sample-nav-pills">
+                    {problem.sampleTestCases.map((_, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        className={`dsa-sample-pill ${selectedSampleIndex === i ? "active" : ""}`}
+                        onClick={() => setSelectedSampleIndex(i)}
+                      >
+                        Case {i + 1}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="dsa-sample-details">
+                    <b>Input:</b>
+                    <pre>{problem.sampleTestCases[selectedSampleIndex]?.input}</pre>
+                    <b>Expected:</b>
+                    <pre>{problem.sampleTestCases[selectedSampleIndex]?.expectedOutput}</pre>
+                  </div>
+                </div>
+              )}
+
+              {activeConsoleTab === "custom" && (
+                <div className="dsa-custom-stdin-wrap">
+                  <label htmlFor="custom-stdin-input" style={{ fontSize: "12px", color: "#64748b", display: "block", marginBottom: "4px" }}>
+                    Standard Input (stdin passed to program):
+                  </label>
+                  <textarea
+                    id="custom-stdin-input"
+                    value={customStdin}
+                    onChange={(e) => setCustomStdin(e.target.value)}
+                    className="dsa-stdin-textarea"
+                    placeholder="Enter test inputs here..."
+                  />
+                </div>
+              )}
+
+              {activeConsoleTab === "output" && (
+                <div className="dsa-output-wrap">
+                  {isRunning || isSubmitting ? (
+                    <div className="dsa-loading-state">
+                      <div className="dsa-spinner"></div>
+                      <span>
+                        {isSubmitting
+                          ? "Compiling and evaluating against all test suites..."
+                          : "Compiling and executing code on sandbox engine..."}
+                      </span>
+                    </div>
+                  ) : submissionResult ? (
+                    /* Submission Evaluation Result */
+                    <div className="dsa-submission-report">
+                      <div
+                        className={`dsa-status-banner ${
+                          submissionResult.status === "ACCEPTED"
+                            ? "banner-accepted"
+                            : "banner-failed"
+                        }`}
+                      >
+                        <span className="banner-icon">
+                          {submissionResult.status === "ACCEPTED" ? "✓" : "✗"}
+                        </span>
+                        <div>
+                          <div className="banner-status-title">{submissionResult.status}</div>
+                          <div className="banner-stats">
+                            Passed {submissionResult.testCasesPassed} of{" "}
+                            {submissionResult.totalTestCases} Test Cases · Total Time:{" "}
+                            {submissionResult.executionTimeMs}ms
+                          </div>
+                        </div>
+                      </div>
+
+                      {submissionResult.compileOutput && (
+                        <div className="dsa-error-box">
+                          <b>Compiler Output:</b>
+                          <pre>{submissionResult.compileOutput}</pre>
+                        </div>
+                      )}
+
+                      {submissionResult.results && submissionResult.results.length > 0 && (
+                        <div className="dsa-tc-results-list">
+                          {submissionResult.results.map((r: any, idx: number) => (
+                            <div
+                              key={idx}
+                              className={`dsa-tc-item ${r.passed ? "tc-passed" : "tc-failed"}`}
+                            >
+                              <div className="dsa-tc-header">
+                                <span>
+                                  Testcase {idx + 1}: {r.passed ? "Passed ✓" : "Failed ✗"}
+                                </span>
+                                <span>{r.timeMs}ms</span>
+                              </div>
+                              {!r.passed && (
+                                <div className="dsa-diff-grid">
+                                  <div>
+                                    <small>Input:</small>
+                                    <pre>{r.input}</pre>
+                                  </div>
+                                  <div>
+                                    <small>Expected Output:</small>
+                                    <pre>{r.expected}</pre>
+                                  </div>
+                                  <div>
+                                    <small>Your Output:</small>
+                                    <pre>{r.actual || r.error || "(Empty)"}</pre>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ) : executionResult ? (
+                    /* Interactive Run Result */
+                    <div className="dsa-run-report">
+                      <div
+                        className={`dsa-status-banner ${
+                          executionResult.status === "SUCCESS" || executionResult.status === "ACCEPTED"
+                            ? "banner-accepted"
+                            : "banner-failed"
+                        }`}
+                      >
+                        <div>
+                          <div className="banner-status-title">
+                            {executionResult.status || "COMPLETED"}
+                          </div>
+                          <div className="banner-stats">
+                            Execution Time: {executionResult.executionTimeMs || 0}ms
+                          </div>
+                        </div>
+                      </div>
+
+                      {executionResult.compileOutput && (
+                        <div className="dsa-error-box">
+                          <b>Compiler Diagnostics:</b>
+                          <pre>{executionResult.compileOutput}</pre>
+                        </div>
+                      )}
+
+                      {executionResult.stderr && (
+                        <div className="dsa-error-box">
+                          <b>Runtime Errors / stderr:</b>
+                          <pre>{executionResult.stderr}</pre>
+                        </div>
+                      )}
+
+                      <div className="dsa-stdout-box">
+                        <b>Standard Output:</b>
+                        <pre>{executionResult.stdout || "(No output produced)"}</pre>
+                      </div>
+
+                      {executionResult.results && (
+                        <div className="dsa-tc-results-list">
+                          {executionResult.results.map((r: any, idx: number) => (
+                            <div
+                              key={idx}
+                              className={`dsa-tc-item ${r.passed ? "tc-passed" : "tc-failed"}`}
+                            >
+                              <div className="dsa-tc-header">
+                                <span>{r.id}: {r.passed ? "Passed ✓" : "Failed ✗"}</span>
+                                <span>{r.timeMs}ms</span>
+                              </div>
+                              <div className="dsa-diff-grid">
+                                <div>
+                                  <small>Input:</small>
+                                  <pre>{r.input}</pre>
+                                </div>
+                                <div>
+                                  <small>Expected:</small>
+                                  <pre>{r.expected}</pre>
+                                </div>
+                                <div>
+                                  <small>Your Output:</small>
+                                  <pre>{r.actual || "(Empty)"}</pre>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="dsa-placeholder-output">
+                      Click <b>Run Code</b> to execute on the sample input, or <b>Submit Solution</b> to
+                      evaluate against all hidden test cases.
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
