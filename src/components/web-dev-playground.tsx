@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { WebDevLesson, WebDevTrack } from "@/lib/web-dev-data";
+import { AudioReader, webDevLessonToAudioChunks } from "@/components/audio-reader";
 
 interface WebDevPlaygroundProps {
   lesson: WebDevLesson;
@@ -40,7 +41,7 @@ export function WebDevPlayground({ lesson, allLessons }: WebDevPlaygroundProps) 
   const [activeRightTab, setActiveRightTab] = useState<"preview" | "console" | "tests">("preview");
 
   // Left pane tab: "tutorial" (W3Schools) | "exercise" (GUVI WebKata) | "solution"
-  const [activeLeftTab, setActiveLeftTab] = useState<"tutorial" | "exercise" | "solution">("exercise");
+  const [activeLeftTab, setActiveLeftTab] = useState<"tutorial" | "exercise" | "solution">("tutorial");
 
   // Auto-run toggle
   const [autoRun, setAutoRun] = useState<boolean>(true);
@@ -56,6 +57,9 @@ export function WebDevPlayground({ lesson, allLessons }: WebDevPlaygroundProps) 
 
   // Completed lessons stored locally
   const [completedLessonIds, setCompletedLessonIds] = useState<Set<string>>(new Set());
+
+  // Spoken audio chunks for tutorial readout
+  const audioChunks = useMemo(() => webDevLessonToAudioChunks(lesson), [lesson]);
 
   // W3Schools style Quiz state
   const [selectedQuizOption, setSelectedQuizOption] = useState<number | null>(null);
@@ -680,6 +684,14 @@ ${htmlCode}
                 </div>
 
                 <h3 style={{ fontSize: "18px", color: "#f8fafc", margin: "0 0 12px" }}>{lesson.title}</h3>
+
+                {/* Read Aloud Audio Player */}
+                <AudioReader
+                  title={`Chapter ${lesson.number}: ${lesson.title}`}
+                  subtitle={`${lesson.track} Track · Concept Tutorial & Code Explanation`}
+                  chunks={audioChunks}
+                  badgeLabel="Tutorial Audio"
+                />
 
                 <div
                   style={{

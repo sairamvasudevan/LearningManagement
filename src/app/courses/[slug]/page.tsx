@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { getCoursePackageBySlug, PLATFORM_NAME } from "@/lib/courses";
 import catalog from "@/lib/course-catalog.json";
+import { CourseDetailAudioReader } from "@/components/audio-reader";
 
 type PageProps = { params: Promise<{ slug: string }> };
 
@@ -71,6 +72,19 @@ export default async function CourseDetailPage({ params }: PageProps) {
                 <b>80%</b>
                 <span>Mastery threshold</span>
               </div>
+            </div>
+
+            {/* Read Aloud Course Syllabus Narration */}
+            <div style={{ marginTop: "20px" }}>
+              <CourseDetailAudioReader
+                title={course.title}
+                category={course.category}
+                description={course.description}
+                highlights={course.highlights}
+                skills={course.skills}
+                totalHours={course.totalHours}
+                totalPaths={course.totalPaths}
+              />
             </div>
           </div>
 

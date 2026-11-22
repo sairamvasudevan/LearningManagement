@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useMemo } from "react";
 import Link from "next/link";
 import type { ModuleCurriculum } from "@/lib/curriculum-data";
+import { AudioReader, moduleCurriculumToAudioChunks } from "@/components/audio-reader";
 
 type Review = {
   is_correct: boolean;
@@ -41,6 +42,9 @@ export function ModulePlayer({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [activeChecklist, setActiveChecklist] = useState<Record<number, boolean>>({});
+
+  // Clean Audio Narration Chunks
+  const audioChunks = useMemo(() => moduleCurriculumToAudioChunks(curriculum), [curriculum]);
 
   // Hands-on practice task state
   const [taskInput, setTaskInput] = useState(practiceTask.starterTemplate);
@@ -210,6 +214,14 @@ export function ModulePlayer({
             <span>💻 Hands-on Practice Task</span>
             <span>🎓 {questions.length} Mastery Checkpoint Questions</span>
           </div>
+
+          {/* Audio Reader with Full Player Controls */}
+          <AudioReader
+            title={`Module ${moduleNumber}: ${title}`}
+            subtitle={`${stageTitle} · Listen to full lesson narration`}
+            chunks={audioChunks}
+            badgeLabel="Audio Narrator"
+          />
         </div>
 
         {/* Main Article Body */}
