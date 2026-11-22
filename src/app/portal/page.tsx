@@ -91,6 +91,11 @@ export default async function StudentPortalPage() {
                 {profile.college} · {profile.register_number}
               </span>
             </div>
+            <div style={{ marginTop: "16px" }}>
+              <a href="/auth/signout" className="button button-quiet button-small" style={{ textDecoration: "none" }}>
+                🚪 Sign out
+              </a>
+            </div>
           </section>
         ) : (
           <>
@@ -409,7 +414,24 @@ export default async function StudentPortalPage() {
                   <h3>Verified Student Registration</h3>
                   <p>Permanent institutional record linked to this learning portal.</p>
                 </div>
-                <span className="status-badge-completed">Verified Student</span>
+                <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                  <span className="status-badge-completed">Verified Student</span>
+                  <a
+                    href="/auth/signout"
+                    className="button button-quiet button-small"
+                    style={{
+                      textDecoration: "none",
+                      color: "#ef4444",
+                      border: "1px solid rgba(239, 68, 68, 0.3)",
+                      padding: "6px 12px",
+                      borderRadius: "6px",
+                      fontSize: "12px",
+                      fontWeight: 600,
+                    }}
+                  >
+                    🚪 Sign out
+                  </a>
+                </div>
               </div>
               <div className="profile-details-grid">
                 <div className="profile-detail-cell">

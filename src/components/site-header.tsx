@@ -16,8 +16,26 @@ export function SiteHeader({
   const [exploreOpen, setExploreOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [topBannerDismissed, setTopBannerDismissed] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
   const exploreRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
+
+  async function handleSignOut(e: React.FormEvent | React.MouseEvent) {
+    e.preventDefault();
+    if (signingOut) return;
+    setSigningOut(true);
+    try {
+      await fetch("/api/auth/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "signout" }),
+      });
+    } catch {}
+    try {
+      await fetch("/auth/signout", { method: "POST" });
+    } catch {}
+    window.location.href = "/login";
+  }
 
   // Close dropdowns on outside click
   useEffect(() => {
@@ -289,9 +307,14 @@ export function SiteHeader({
               </Link>
               {admin && <Link href="/admin/students">Students &amp; Progress</Link>}
               {admin && <Link href="/admin/access">Access Control</Link>}
-              <form action="/auth/signout" method="post">
-                <button className="button button-quiet button-small" type="submit">
-                  Sign out
+              <form action="/auth/signout" method="post" onSubmit={handleSignOut}>
+                <button
+                  className="button button-quiet button-small"
+                  type="submit"
+                  disabled={signingOut}
+                  style={{ cursor: signingOut ? "wait" : "pointer" }}
+                >
+                  {signingOut ? "Signing out…" : "Sign out"}
                 </button>
               </form>
             </>
