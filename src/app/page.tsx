@@ -123,6 +123,9 @@ export default function HomePage() {
               >
                 Enroll Free in Problem Solving Lab (₹0) <span>→</span>
               </Link>
+              <Link className="button button-hero-ghost button-large" href="/ide" style={{ color: "#34d399", borderColor: "#059669" }}>
+                💻 Open Online IDE ↗
+              </Link>
               <Link className="button button-hero-ghost button-large" href="#courses">
                 Explore All Tracks ⚡
               </Link>

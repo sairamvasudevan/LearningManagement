@@ -161,6 +161,17 @@ export function SiteHeader({
                     </div>
                     <span className="badge badge-live" style={{ background: "#38bdf8", color: "#0f172a" }}>Live Editor</span>
                   </Link>
+                  <Link
+                    href="/ide"
+                    className="explore-menu-item highlight"
+                    onClick={() => setExploreOpen(false)}
+                  >
+                    <div>
+                      <b>Standalone Online IDE &amp; Compiler</b>
+                      <small>C, C++, Java, Python &amp; Web Sandbox Scratchpad · Free</small>
+                    </div>
+                    <span className="badge badge-live" style={{ background: "#10b981", color: "#fff" }}>Open IDE</span>
+                  </Link>
                 </div>
 
                 <div className="explore-dropdown-section">
@@ -259,6 +270,9 @@ export function SiteHeader({
             <>
               {!admin && (
                 <>
+                  <Link href="/ide" style={{ color: "#10b981", fontWeight: 700 }}>
+                    💻 Online IDE
+                  </Link>
                   <Link href="/dsa" style={{ color: "#ff6a00", fontWeight: 700 }}>
                     ⚡ DSA Arena
                   </Link>
@@ -283,6 +297,9 @@ export function SiteHeader({
             </>
           ) : (
             <>
+              <Link href="/ide" style={{ color: "#10b981", fontWeight: 700 }}>
+                💻 Online IDE
+              </Link>
               <Link href="/dsa" style={{ color: "#ff6a00", fontWeight: 700 }}>
                 ⚡ DSA Arena
               </Link>

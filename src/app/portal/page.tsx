@@ -202,6 +202,60 @@ export default async function StudentPortalPage() {
               </div>
             </div>
 
+            {/* Standalone Online IDE & Compiler Scratchpad Banner */}
+            <div
+              style={{
+                background: "linear-gradient(135deg, #064e3b 0%, #065f46 100%)",
+                borderRadius: "14px",
+                padding: "20px 24px",
+                color: "#ffffff",
+                marginBottom: "20px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: "16px",
+                border: "1px solid #059669",
+              }}
+            >
+              <div>
+                <div style={{ display: "flex", gap: "8px", alignItems: "center", marginBottom: "6px" }}>
+                  <span
+                    style={{
+                      background: "#34d399",
+                      color: "#064e3b",
+                      fontSize: "10px",
+                      fontWeight: 800,
+                      padding: "2px 8px",
+                      borderRadius: "99px",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    OPEN SCRATCHPAD
+                  </span>
+                  <span style={{ fontSize: "12px", color: "#a7f3d0", fontWeight: 600 }}>
+                    Execute Arbitrary Code · C · C++17 · Java 17 · Python 3 · Web Canvas
+                  </span>
+                </div>
+                <h3 style={{ margin: "0 0 4px", fontSize: "18px", color: "#f8fafc" }}>
+                  Standalone Online IDE &amp; Execution Sandbox
+                </h3>
+                <p style={{ margin: 0, fontSize: "13px", color: "#d1fae5", maxWidth: "620px" }}>
+                  Run, test, and debug any arbitrary code with custom STDIN input outside of problem exercises.
+                  Free-form coding with compiler telemetry, execution runtimes, and file export.
+                </p>
+              </div>
+              <div>
+                <Link
+                  href="/ide"
+                  className="button button-cn-primary"
+                  style={{ padding: "10px 20px", fontSize: "13px", fontWeight: 700, background: "#10b981", borderColor: "#10b981", color: "#064e3b" }}
+                >
+                  Launch Online IDE ↗
+                </Link>
+              </div>
+            </div>
+
             {/* Quick Metrics Bar */}
             <div className="portal-metrics-grid">
               <div className="portal-metric-card">
