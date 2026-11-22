@@ -101,7 +101,7 @@ export default async function StudentPortalPage() {
                 borderRadius: "14px",
                 padding: "20px 24px",
                 color: "#ffffff",
-                marginBottom: "20px",
+                marginBottom: "14px",
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
@@ -123,7 +123,7 @@ export default async function StudentPortalPage() {
                       textTransform: "uppercase",
                     }}
                   >
-                    NEW COURSE
+                    LIVE ARENA
                   </span>
                   <span style={{ fontSize: "12px", color: "#94a3b8", fontWeight: 600 }}>
                     Multi-Language Compiler (C · C++17 · Java 17 · Python 3)
@@ -144,6 +144,60 @@ export default async function StudentPortalPage() {
                   style={{ padding: "10px 20px", fontSize: "13px", fontWeight: 700 }}
                 >
                   Open DSA Arena →
+                </Link>
+              </div>
+            </div>
+
+            {/* Web Dev & Full MERN Sandbox Banner */}
+            <div
+              style={{
+                background: "linear-gradient(135deg, #091224 0%, #172554 100%)",
+                borderRadius: "14px",
+                padding: "20px 24px",
+                color: "#ffffff",
+                marginBottom: "20px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: "16px",
+                border: "1px solid #1e3a8a",
+              }}
+            >
+              <div>
+                <div style={{ display: "flex", gap: "8px", alignItems: "center", marginBottom: "6px" }}>
+                  <span
+                    style={{
+                      background: "#38bdf8",
+                      color: "#0f172a",
+                      fontSize: "10px",
+                      fontWeight: 800,
+                      padding: "2px 8px",
+                      borderRadius: "99px",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    LIVE LAB
+                  </span>
+                  <span style={{ fontSize: "12px", color: "#93c5fd", fontWeight: 600 }}>
+                    HTML5 · CSS3 Flexbox/Grid · Modern JavaScript · Full MERN
+                  </span>
+                </div>
+                <h3 style={{ margin: "0 0 4px", fontSize: "18px", color: "#f8fafc" }}>
+                  Full-Stack Web Development &amp; MERN Lab
+                </h3>
+                <p style={{ margin: 0, fontSize: "13px", color: "#cbd5e1", maxWidth: "620px" }}>
+                  Code with our interactive live editor (HTML/CSS/JS), view real-time sandboxed DOM preview,
+                  inspect console logs, and pass automated requirement test suites.
+                </p>
+              </div>
+              <div>
+                <Link
+                  href="/web-dev"
+                  className="button button-cn-primary"
+                  style={{ padding: "10px 20px", fontSize: "13px", fontWeight: 700, background: "#0284c7", borderColor: "#0284c7" }}
+                >
+                  Open Web Dev Lab →
                 </Link>
               </div>
             </div>

@@ -150,6 +150,17 @@ export function SiteHeader({
                     </div>
                     <span className="badge badge-live" style={{ background: "#ff6a00", color: "#fff" }}>Live IDE</span>
                   </Link>
+                  <Link
+                    href="/web-dev"
+                    className="explore-menu-item highlight"
+                    onClick={() => setExploreOpen(false)}
+                  >
+                    <div>
+                      <b>Web Dev &amp; MERN Stack Sandbox</b>
+                      <small>Live HTML, CSS, JS Editor &amp; DOM Tester · 75 Hours · Free</small>
+                    </div>
+                    <span className="badge badge-live" style={{ background: "#38bdf8", color: "#0f172a" }}>Live Editor</span>
+                  </Link>
                 </div>
 
                 <div className="explore-dropdown-section">
@@ -251,6 +262,9 @@ export function SiteHeader({
                   <Link href="/dsa" style={{ color: "#ff6a00", fontWeight: 700 }}>
                     ⚡ DSA Arena
                   </Link>
+                  <Link href="/web-dev" style={{ color: "#38bdf8", fontWeight: 700 }}>
+                    🌐 Web Dev &amp; MERN
+                  </Link>
                   <Link href="/#courses">Courses</Link>
                   <Link href="/#curriculum">10-Path Roadmap</Link>
                 </>
@@ -271,6 +285,9 @@ export function SiteHeader({
             <>
               <Link href="/dsa" style={{ color: "#ff6a00", fontWeight: 700 }}>
                 ⚡ DSA Arena
+              </Link>
+              <Link href="/web-dev" style={{ color: "#38bdf8", fontWeight: 700 }}>
+                🌐 Web Dev &amp; MERN
               </Link>
               <Link href="/#courses">Courses</Link>
               <Link href="/#curriculum">Curriculum</Link>
