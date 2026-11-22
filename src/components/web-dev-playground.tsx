@@ -641,7 +641,7 @@ ${htmlCode}
                 cursor: "pointer",
               }}
             >
-              🎯 Practice WebKata
+              🎯 Coding Challenge
             </button>
             <button
               type="button"
@@ -860,7 +860,7 @@ ${htmlCode}
                   >
                     {lesson.difficulty}
                   </span>
-                  <span style={{ fontSize: "12px", color: "#94a3b8" }}>GUVI WebKata Practice</span>
+                  <span style={{ fontSize: "12px", color: "#94a3b8" }}>Interactive Coding Challenge</span>
                   {completedLessonIds.has(lesson.id) && (
                     <span style={{ fontSize: "11px", fontWeight: 700, color: "#34d399", background: "rgba(16, 185, 129, 0.2)", padding: "2px 6px", borderRadius: "4px" }}>
                       ✓ Mastered

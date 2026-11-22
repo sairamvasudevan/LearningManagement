@@ -187,7 +187,7 @@ export function PrerequisiteLockScreen({
           }}
         >
           <div style={{ fontSize: "13px", fontWeight: 700, color: "#e2e8f0", marginBottom: "6px" }}>
-            Foundation Invariant Gating
+            Foundation Course Prerequisite
           </div>
           <p style={{ fontSize: "13px", color: "#94a3b8", lineHeight: 1.6, margin: "0 0 16px" }}>
             Under institutional curriculum rules, advanced coding labs unlock only after mastering the 100-Hour Flagship <b>Problem Solving Lab</b>. You can review the course syllabus or study the <b>{firstPartLabel} preview</b>.

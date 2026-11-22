@@ -117,20 +117,19 @@ export function HeroTryChallenge() {
   }
 
   return (
-    <div className="cn-terminal-window" aria-label="CodeStudio interactive playground">
+    <div className="cn-terminal-window" aria-label="Interactive problem solving playground" style={{ textAlign: "left" }}>
       {/* Top Mac-style bar */}
       <div className="cn-terminal-topbar">
         <div className="cn-mac-dots">
           <span className="cn-mac-dot dot-red" />
           <span className="cn-mac-dot dot-yellow" />
           <span className="cn-mac-dot dot-green" />
-          <span className="cn-terminal-title">CodeStudio v2.4 · Module 01 Sandbox</span>
+          <span className="cn-terminal-title">ProblemSolvingLab.cpp — Invariant Verification</span>
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <span className="cn-xp-chip">⚡ +50 XP</span>
           <span className="cn-terminal-mode-badge">
             <span className="cn-pulse-dot" style={{ marginRight: 5 }} />
-            Interactive
+            Interactive Sandbox
           </span>
         </div>
       </div>
@@ -142,14 +141,14 @@ export function HeroTryChallenge() {
           className={`cn-tab-item ${activeMode === "terminal" ? "active" : ""}`}
           onClick={() => setActiveMode("terminal")}
         >
-          💻 CodeStudio Runner
+          💻 Code Sandbox (C++ / Python)
         </button>
         <button
           type="button"
           className={`cn-tab-item ${activeMode === "quiz" ? "active" : ""}`}
           onClick={() => setActiveMode("quiz")}
         >
-          🎯 Checkpoint Challenge
+          🎯 Knowledge Checkpoint
         </button>
       </div>
 
@@ -379,8 +378,8 @@ export function HeroTryChallenge() {
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
             <button
               type="button"
-              className="button-cn-primary"
-              style={{ padding: "7px 14px", borderRadius: 8, fontSize: 11 }}
+              className="apple-btn-primary"
+              style={{ padding: "7px 16px", borderRadius: 980, fontSize: 11 }}
               disabled={selected === null}
               onClick={() => setChecked(true)}
             >
@@ -427,18 +426,18 @@ export function HeroTryChallenge() {
       <div className="hw-footer">
         <div className="hw-meta-stat">
           <b>100 Hours</b>
-          <span>10 Paths</span>
+          <span>10 Stages</span>
         </div>
         <div className="hw-meta-stat">
           <b>80% Score</b>
-          <span>Mastery Gate</span>
+          <span>Passing Requirement</span>
         </div>
         <div className="hw-meta-stat">
           <b>Dual Tracking</b>
           <span>Student &amp; Mentor</span>
         </div>
         <div className="hw-meta-stat">
-          <b style={{ color: "#ff8a00" }}>₹0 / Free</b>
+          <b style={{ color: "#34c759" }}>₹0 / Free</b>
           <span>100% Scholarship</span>
         </div>
       </div>
@@ -483,8 +482,8 @@ export function CourseCatalogSection() {
     <section id="courses" className="ed-section">
       <div className="ed-section-head">
         <div>
-          <span className="eyebrow" style={{ color: "#ff6a00" }}>
-            🔥 INDUSTRY-LEADING LEARNING TRACKS
+          <span className="eyebrow" style={{ color: "#2997ff" }}>
+            SPECIALIZED ENGINEERING TRACKS
           </span>
           <h2>Explore Engineering Programs</h2>
           <p>
@@ -612,12 +611,12 @@ export function CourseCatalogSection() {
               <div className="ed-course-footer">
                 <div className="ed-price-block">
                   <div className="price-tag-row">
-                    <strong style={{ color: course.isFree ? "#ff6a00" : "var(--navy)", fontSize: 22 }}>
+                    <strong style={{ color: course.isFree ? "#34c759" : "#f5f5f7", fontSize: 20 }}>
                       {course.priceLabel}
                     </strong>
                     {course.originalPrice && <del className="price-struck">{course.originalPrice}</del>}
                   </div>
-                  <small className="price-subtext">
+                  <small className="price-subtext" style={{ color: "#86868b" }}>
                     {course.slug === "problem-solving-lab"
                       ? "100% Scholarship · Free for Students"
                       : course.status === "available"
@@ -629,11 +628,12 @@ export function CourseCatalogSection() {
                 <div className="ed-card-actions">
                   {course.slug === "problem-solving-lab" ? (
                     <>
-                      <Link className="button button-quiet" href={`/courses/${course.slug}`}>
+                      <Link className="apple-btn-secondary" style={{ padding: "6px 14px", fontSize: "11.5px" }} href={`/courses/${course.slug}`}>
                         Syllabus
                       </Link>
                       <Link
-                        className="button button-cn-primary"
+                        className="apple-btn-primary"
+                        style={{ padding: "6px 14px", fontSize: "11.5px" }}
                         href={`/register?course=${course.slug}`}
                       >
                         Enroll Free →
@@ -641,11 +641,12 @@ export function CourseCatalogSection() {
                     </>
                   ) : course.status === "available" ? (
                     <>
-                      <Link className="button button-quiet" href={`/courses/${course.slug}`}>
+                      <Link className="apple-btn-secondary" style={{ padding: "6px 14px", fontSize: "11.5px" }} href={`/courses/${course.slug}`}>
                         Syllabus
                       </Link>
                       <Link
-                        className="button button-cn-primary"
+                        className="apple-btn-primary"
+                        style={{ padding: "6px 14px", fontSize: "11.5px" }}
                         href={
                           course.slug === "web-dev-mern-lab"
                             ? "/web-dev/html-intro"
@@ -658,7 +659,7 @@ export function CourseCatalogSection() {
                       </Link>
                     </>
                   ) : (
-                    <Link className="button button-hero-ghost" href={`/courses/${course.slug}`}>
+                    <Link className="apple-btn-secondary" style={{ padding: "6px 14px", fontSize: "11.5px" }} href={`/courses/${course.slug}`}>
                       Preview Track
                     </Link>
                   )}
@@ -701,8 +702,8 @@ export function CurriculumExplorer() {
     <section id="curriculum" className="ed-section">
       <div className="ed-section-head">
         <div>
-          <span className="eyebrow" style={{ color: "#ff6a00" }}>
-            ⚔️ GAMIFIED 10-PATH LEARNING ROADMAP
+          <span className="eyebrow" style={{ color: "#2997ff" }}>
+            SYSTEMATIC 10-STAGE ROADMAP
           </span>
           <h2>The 100-Hour Problem Solving Path</h2>
           <p>
@@ -710,7 +711,7 @@ export function CurriculumExplorer() {
             at 80% unlocks the next lesson. Module 01 is live today; Modules 02–100 unlock sequentially.
           </p>
         </div>
-        <Link className="button button-dark" href="/courses/problem-solving-lab">
+        <Link className="apple-btn-secondary" href="/courses/problem-solving-lab">
           View Complete 100-Module Syllabus →
         </Link>
       </div>
@@ -735,7 +736,7 @@ export function CurriculumExplorer() {
                   <b>{stage.title}</b>
                   <small>
                     {liveCount > 0 ? (
-                      <span style={{ color: "#10b981", fontWeight: 800 }}>
+                      <span style={{ color: "#34c759", fontWeight: 700 }}>
                         ● {liveCount}/10 lessons live
                       </span>
                     ) : (
@@ -752,17 +753,18 @@ export function CurriculumExplorer() {
         <div className="explorer-panel">
           <div className="explorer-panel-head">
             <div>
-              <span className="eyebrow" style={{ color: "#ff6a00" }}>
-                PATH {String(activeStage.id).padStart(2, "0")} OF 10 · 10 INTENSIVE HOURS · +1,000 XP
+              <span className="eyebrow" style={{ color: "#2997ff" }}>
+                STAGE {String(activeStage.id).padStart(2, "0")} OF 10 · 10 INTENSIVE HOURS
               </span>
               <h3>{activeStage.title}</h3>
               <p>{activeStage.description}</p>
             </div>
             <Link
-              className="button button-cn-primary"
+              className="apple-btn-primary"
               href="/register?course=problem-solving-lab"
+              style={{ padding: "8px 18px", fontSize: "12px" }}
             >
-              Start Path 01 Free →
+              Start Stage 01 Free →
             </Link>
           </div>
 
@@ -810,12 +812,12 @@ export function PedagogySection() {
     <section id="pedagogy" className="ed-section">
       <div className="ed-section-head">
         <div>
-          <span className="eyebrow" style={{ color: "#ff6a00" }}>
-            🧠 EVIDENCE-BASED PEDAGOGY
+          <span className="eyebrow" style={{ color: "#2997ff" }}>
+            EVIDENCE-BASED PEDAGOGY
           </span>
-          <h2>Why Active Problem Solving Outperforms Video Bingeing</h2>
+          <h2>Why Active Problem Solving Outperforms Passive Videos</h2>
           <p>
-            Traditional video tutorials give you an illusion of learning that evaporates in technical
+            Traditional video tutorials give you an illusion of learning that collapses in technical
             interviews. Here are the 4 cognitive science pillars backing our lab:
           </p>
         </div>
@@ -834,7 +836,7 @@ export function PedagogySection() {
 
         <div className="pedagogy-card">
           <div className="pedagogy-icon">🛡️</div>
-          <h3>80% Strict Mastery Gating</h3>
+          <h3>80% Strict Passing Threshold</h3>
           <p>
             No skipping ahead. You cannot proceed to Module N+1 without scoring at least 80% on Module
             N&apos;s checkpoint. Compounding knowledge gaps are eliminated at the source.
@@ -875,12 +877,12 @@ export function ComparisonSection() {
     <section className="ed-section">
       <div className="ed-section-head">
         <div>
-          <span className="eyebrow" style={{ color: "#ff6a00" }}>
-            ⚖️ PLATFORM COMPARISON
+          <span className="eyebrow" style={{ color: "#2997ff" }}>
+            DIRECT PLATFORM COMPARISON
           </span>
           <h2>Why Students Excel with Active Retrieval</h2>
           <p>
-            See how passive video tutorial platforms compare to our mastery-gated problem solving engine.
+            See how passive video tutorial platforms compare to our criterion-referenced problem solving engine.
           </p>
         </div>
       </div>
@@ -891,7 +893,7 @@ export function ComparisonSection() {
             <tr>
               <th style={{ width: "32%" }}>Dimension</th>
               <th style={{ width: "34%" }}>Traditional Video Tutorials</th>
-              <th style={{ width: "34%", background: "rgba(99, 102, 241, 0.2)", color: "#818cf8" }}>
+              <th style={{ width: "34%", background: "rgba(0, 113, 227, 0.15)", color: "#2997ff" }}>
                 Problem Solving Lab (Flagship)
               </th>
             </tr>
@@ -902,7 +904,7 @@ export function ComparisonSection() {
                 <b>Learning Mode</b>
               </td>
               <td>Passive video watching (illusion of competence)</td>
-              <td style={{ background: "rgba(99, 102, 241, 0.08)" }}>
+              <td style={{ background: "rgba(0, 113, 227, 0.05)" }}>
                 <b>Active retrieval &amp; hands-on checkpoint evaluation</b>
               </td>
             </tr>
@@ -911,8 +913,8 @@ export function ComparisonSection() {
                 <b>Progression Barrier</b>
               </td>
               <td>Click next anytime; zero mastery required</td>
-              <td style={{ background: "rgba(99, 102, 241, 0.08)" }}>
-                <b>Strict 80% checkpoint score required to unlock next lesson</b>
+              <td style={{ background: "rgba(0, 113, 227, 0.05)" }}>
+                <b>Strict 80% passing score required to unlock next lesson</b>
               </td>
             </tr>
             <tr>
@@ -920,7 +922,7 @@ export function ComparisonSection() {
                 <b>Syntax vs Principles</b>
               </td>
               <td>Heavy syntax memorization in one chosen language</td>
-              <td style={{ background: "rgba(99, 102, 241, 0.08)" }}>
+              <td style={{ background: "rgba(0, 113, 227, 0.05)" }}>
                 <b>Language-independent algorithmic modeling &amp; invariants</b>
               </td>
             </tr>
@@ -929,7 +931,7 @@ export function ComparisonSection() {
                 <b>Mistake Diagnosis</b>
               </td>
               <td>Generic error messages or forum threads</td>
-              <td style={{ background: "rgba(99, 102, 241, 0.08)" }}>
+              <td style={{ background: "rgba(0, 113, 227, 0.05)" }}>
                 <b>Option-by-option explanations of why wrong answers fail</b>
               </td>
             </tr>
@@ -938,7 +940,7 @@ export function ComparisonSection() {
                 <b>Institutional Visibility</b>
               </td>
               <td>None; college faculty cannot verify student effort</td>
-              <td style={{ background: "rgba(99, 102, 241, 0.08)" }}>
+              <td style={{ background: "rgba(0, 113, 227, 0.05)" }}>
                 <b>Full Admin Portal: cohort analytics, attempts, and verification</b>
               </td>
             </tr>
@@ -947,8 +949,8 @@ export function ComparisonSection() {
                 <b>Cost to Students</b>
               </td>
               <td>₹4,000 – ₹25,000 subscription fees</td>
-              <td style={{ background: "rgba(99, 102, 241, 0.08)" }}>
-                <b style={{ color: "#34d399" }}>₹0 / Free Flagship Access</b>
+              <td style={{ background: "rgba(0, 113, 227, 0.05)" }}>
+                <b style={{ color: "#34c759" }}>₹0 / Free Flagship Access</b>
               </td>
             </tr>
           </tbody>
@@ -969,8 +971,8 @@ export function RolePreviewTabs() {
     <section id="platform" className="ed-section">
       <div className="ed-section-head">
         <div>
-          <span className="eyebrow" style={{ color: "#ff6a00" }}>
-            🛡️ DUAL-PORTAL ARCHITECTURE
+          <span className="eyebrow" style={{ color: "#2997ff" }}>
+            DUAL-PORTAL ARCHITECTURE
           </span>
           <h2>Built for Both Ambitious Learners and College Mentors</h2>
           <p>
@@ -1004,13 +1006,13 @@ export function RolePreviewTabs() {
       {role === "student" ? (
         <div className="role-showcase">
           <div className="role-benefits">
-            <span className="eyebrow" style={{ color: "#ff6a00" }}>
+            <span className="eyebrow" style={{ color: "#2997ff" }}>
               STUDENT WORKSPACE
             </span>
-            <h3>Track Your Growth Across 10 Progressive Paths</h3>
+            <h3>Track Your Growth Across 10 Progressive Stages</h3>
             <ul className="role-list">
               <li>
-                <b>Mastery-gated unlocking:</b> Pass each checkpoint at 80% to open the next lesson
+                <b>Criterion-referenced progression:</b> Pass each checkpoint at 80% to open the next lesson
                 automatically.
               </li>
               <li>
@@ -1023,10 +1025,10 @@ export function RolePreviewTabs() {
               </li>
             </ul>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              <Link className="button button-cn-primary" href="/register?course=problem-solving-lab">
+              <Link className="apple-btn-primary" href="/register?course=problem-solving-lab">
                 Create Free Student Account →
               </Link>
-              <Link className="button" href="/login">
+              <Link className="apple-btn-secondary" href="/login">
                 Test Drive Demo Student
               </Link>
             </div>
@@ -1034,15 +1036,15 @@ export function RolePreviewTabs() {
 
           <div className="mock-window" aria-label="Student portal preview">
             <div className="mock-bar">
-              <span />
-              <span />
-              <span />
-              <small>Live Student View · /portal</small>
+              <span className="cn-mac-dot dot-red" />
+              <span className="cn-mac-dot dot-yellow" />
+              <span className="cn-mac-dot dot-green" />
+              <small style={{ marginLeft: "8px" }}>Live Student View · /portal</small>
             </div>
             <div className="mock-body">
               <div className="mock-top-row">
                 <div>
-                  <span className="eyebrow">ENROLLED PACKAGE · ₹0 FREE</span>
+                  <span className="eyebrow" style={{ color: "#2997ff" }}>ENROLLED PACKAGE · ₹0 FREE</span>
                   <h4>Problem Solving Lab</h4>
                 </div>
                 <span className="badge badge-live">Verified Learner</span>
@@ -1050,7 +1052,7 @@ export function RolePreviewTabs() {
               <div className="mock-progress-box">
                 <div className="mock-progress-labels">
                   <b>Module 01 Passed · 12/12 Marks (100%)</b>
-                  <span>Path 01 · 1/10 Completed</span>
+                  <span>Stage 01 · 1/10 Completed</span>
                 </div>
                 <div className="course-progress-line">
                   <span style={{ width: "20%" }} />
@@ -1060,7 +1062,7 @@ export function RolePreviewTabs() {
                 <div className="mock-row">
                   <span>
                     <b>01 · Separate the story from the task</b>
-                    <small>Mastery checkpoint passed · 12/12 marks</small>
+                    <small>Passing benchmark passed · 12/12 marks</small>
                   </span>
                   <span className="table-status approved">Completed</span>
                 </div>
@@ -1085,7 +1087,7 @@ export function RolePreviewTabs() {
       ) : (
         <div className="role-showcase">
           <div className="role-benefits">
-            <span className="eyebrow" style={{ color: "#ff6a00" }}>
+            <span className="eyebrow" style={{ color: "#2997ff" }}>
               COLLEGE PLACEMENT HUB
             </span>
             <h3>Complete Visibility Over Cohort Progress</h3>
@@ -1104,10 +1106,10 @@ export function RolePreviewTabs() {
               </li>
             </ul>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              <Link className="button button-dark" href="/login">
+              <Link className="apple-btn-primary" href="/login">
                 Test Drive Demo Admin →
               </Link>
-              <Link className="button" href="/courses/problem-solving-lab">
+              <Link className="apple-btn-secondary" href="/courses/problem-solving-lab">
                 Inspect Curriculum
               </Link>
             </div>
@@ -1115,15 +1117,15 @@ export function RolePreviewTabs() {
 
           <div className="mock-window" aria-label="Admin portal preview">
             <div className="mock-bar">
-              <span />
-              <span />
-              <span />
-              <small>Live Administrator View · /admin/students</small>
+              <span className="cn-mac-dot dot-red" />
+              <span className="cn-mac-dot dot-yellow" />
+              <span className="cn-mac-dot dot-green" />
+              <small style={{ marginLeft: "8px" }}>Live Administrator View · /admin/students</small>
             </div>
             <div className="mock-body">
               <div className="mock-top-row">
                 <div>
-                  <span className="eyebrow">COHORT TRACKER · 48 REGISTERED</span>
+                  <span className="eyebrow" style={{ color: "#2997ff" }}>COHORT TRACKER · 48 REGISTERED</span>
                   <h4>Registered Students</h4>
                 </div>
                 <span className="badge badge-category">Mode: Approval</span>
@@ -1176,7 +1178,7 @@ const TESTIMONIALS = [
     role: "B.E. Computer Science '26 · PSG Tech",
     avatar: "SR",
     rating: 5,
-    text: "Having the 80% mastery checkpoint gate makes sure you don't fool yourself into thinking you understood a concept when you really didn't. The option explanations are incredibly thorough.",
+    text: "Having the 80% passing checkpoint requirement makes sure you don't fool yourself into thinking you understood a concept when you really didn't. The option explanations are incredibly thorough.",
   },
   {
     name: "Dr. K. Sundaram",
@@ -1192,8 +1194,8 @@ export function TestimonialSection() {
     <section className="ed-section">
       <div className="ed-section-head">
         <div>
-          <span className="eyebrow" style={{ color: "#ff6a00" }}>
-            ⭐️ STUDENT &amp; FACULTY EXPERIENCES
+          <span className="eyebrow" style={{ color: "#2997ff" }}>
+            STUDENT &amp; FACULTY EXPERIENCES
           </span>
           <h2>Validated by Top Campus Engineers</h2>
           <p>Read what students and placement coordinators say about our structured learning engine.</p>
@@ -1230,14 +1232,14 @@ const FAQS = [
   },
   {
     q: "How much of the 100-hour curriculum is published right now?",
-    a: "The full 100-module syllabus architecture and mastery-gated learning engine are deployed. Module 01 (Separate the story from the task) is published with its comprehensive lesson, interactive activities, and database-scored 6-question checkpoint. Modules 02–100 are sequentially authored and published.",
+    a: "The full 100-module syllabus architecture and criterion-referenced learning engine are deployed. Module 01 (Separate the story from the task) is published with its comprehensive lesson, interactive activities, and database-scored 6-question checkpoint. Modules 02–100 are sequentially authored and published.",
   },
   {
     q: "Do I need prior experience with a specific programming language?",
     a: "No. Problem Solving Lab is purposefully language-independent. The focus is on problem extraction, data representation, invariant reasoning, and asymptotic complexity—skills that transfer directly to Python, C++, Java, Go, Rust, or JavaScript.",
   },
   {
-    q: "How do the 80% mastery checkpoint gates work?",
+    q: "How do the 80% passing checkpoint requirements work?",
     a: "At the end of each module, you take an interactive checkpoint. You can open up to 3 progressive hints if you need guidance. Scoring 80% or higher automatically unlocks the next lesson in the sequence.",
   },
   {

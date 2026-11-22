@@ -142,7 +142,7 @@ export const COURSE_PACKAGES: CourseCatalogItem[] = [
     highlights: [
       "100 one-hour structured lessons across 10 sequential paths",
       "Language-independent — builds mental models, not syntactic memory",
-      "80% mastery-gated checkpoints with interactive hints & step-by-step explanations",
+      "80% passing threshold checkpoints with interactive hints & step-by-step explanations",
       "Dual-portal tracking: real-time dashboard for students and college administrators",
       "Aligned with Tier-1 engineering hiring benchmarks (Google, Meta, Microsoft standards)",
     ],

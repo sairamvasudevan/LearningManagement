@@ -110,7 +110,7 @@ export function SiteHeader({
             </div>
             <div className="nexus-brand-text">
               <span className="nexus-brand-name">{PLATFORM_NAME}</span>
-              <span className="nexus-version-pill">SYSTEM v2.6</span>
+              <span className="nexus-version-pill">ENGINEERING ACADEMY</span>
             </div>
           </Link>
 
@@ -193,7 +193,7 @@ export function SiteHeader({
                         <b>Full-Stack &amp; MERN Studio</b>
                         <span className="flyout-badge-green">Interactive</span>
                       </div>
-                      <div className="flyout-desc">Hands-on WebKata HTML/CSS/JS sandbox with real-time DOM tester.</div>
+                      <div className="flyout-desc">Hands-on interactive HTML/CSS/JS sandbox with real-time DOM tester.</div>
                     </div>
                   </Link>
 

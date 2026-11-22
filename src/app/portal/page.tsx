@@ -266,7 +266,7 @@ export default async function StudentPortalPage() {
                 </h3>
                 <p style={{ margin: 0, fontSize: "13px", color: "#cbd5e1", maxWidth: "620px" }}>
                   {webDevAccess.isLocked
-                    ? "Chapter 01 (HTML5 Skeleton) is open for preview. Complete all 100 modules of Problem Solving Lab to unlock the full 26-chapter curriculum and WebKata challenges."
+                    ? "Chapter 01 (HTML5 Skeleton) is open for preview. Complete all 100 modules of Problem Solving Lab to unlock the full 26-chapter curriculum and hands-on coding challenges."
                     : "Code with our interactive live editor (HTML/CSS/JS), view real-time sandboxed DOM preview, inspect console logs, and pass automated requirement test suites."}
                 </p>
               </div>

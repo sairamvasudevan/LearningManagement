@@ -155,8 +155,8 @@ export function webDevLessonToAudioChunks(lesson: WebDevLesson): AudioChunk[] {
 
   if (lesson.requirements && lesson.requirements.length > 0) {
     chunks.push({
-      title: "Hands-on Kata Requirements",
-      text: `Hands-on WebKata challenge requirements: ${lesson.requirements
+      title: "Hands-on Challenge Requirements",
+      text: `Hands-on practice challenge requirements: ${lesson.requirements
         .map((r, i) => `Requirement ${i + 1}: ${r.description}`)
         .join(". ")}.`,
     });

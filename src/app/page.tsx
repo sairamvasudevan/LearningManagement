@@ -29,82 +29,78 @@ export default function HomePage() {
     <>
       <SiteHeader />
 
-      {/* 1. FUTURISTIC HERO SECTION */}
-      <section className="futuristic-hero">
-        <div className="hero-glow-orb-1" />
-        <div className="hero-glow-orb-2" />
-
-        <div className="ed-container" style={{ position: "relative", zIndex: 2, textAlign: "center" }}>
-          {/* Status Badge */}
-          <div className="futuristic-kicker">
-            <span className="kicker-dot" />
-            <span>NEXUS ENGINE v2.6 · AUTONOMOUS TECHNICAL TRAINING SYSTEM · ₹0 SCHOLARSHIP</span>
-          </div>
-
-          {/* Headline */}
-          <h1 className="hero-headline">
-            <span className="hero-headline-gradient">Architect Real Engineering Intuition.</span>
-            <span className="hero-headline-accent">From Algorithmic Invariants to Full-Stack Systems.</span>
-          </h1>
-
-          {/* Subtitle */}
-          <p className="hero-subtitle">
-            A precision-engineered technical training ground for university students and placement candidates.
-            Master 100 hours of language-independent problem solving, execute live code across 150+ algorithms,
-            and build production full-stack systems with real-time test case verification.
-          </p>
-
-          {/* Action Row */}
-          <div className="hero-action-row">
-            <a href="#training-modules" className="btn-cyber-primary">
-              <span>🚀 Launch Training Modules</span>
-              <span>↓</span>
-            </a>
-            <Link href="/ide" className="btn-cyber-secondary">
-              <span>💻 Open Online Cloud IDE</span>
-              <span>↗</span>
-            </Link>
-            <Link href="/courses/problem-solving-lab" className="btn-cyber-secondary" style={{ color: "#38bdf8" }}>
-              <span>🎧 Listen with Audio Narrator</span>
-            </Link>
-          </div>
-
-          {/* System Telemetry Metrics */}
-          <div className="hero-telemetry-strip">
-            <div className="telemetry-item">
-              <span className="telemetry-num">100 Modules</span>
-              <span className="telemetry-label">Curriculum Scope</span>
-              <span className="telemetry-sub">10 progressive stages</span>
+      {/* 1. APPLE-STYLE HERO SECTION */}
+      <section className="apple-hero-section">
+        <div className="ed-container" style={{ position: "relative", zIndex: 2 }}>
+          <div style={{ textAlign: "center", maxWidth: "860px", margin: "0 auto" }}>
+            {/* Status Badge */}
+            <div className="apple-kicker">
+              <span className="apple-kicker-dot" />
+              <span>100-Hour Flagship Curriculum · Full Scholarship (₹0)</span>
             </div>
-            <div className="telemetry-item">
-              <span className="telemetry-num">150+ Katas</span>
-              <span className="telemetry-label">DSA Code Bank</span>
-              <span className="telemetry-sub">C++, Java, Python, C</span>
+
+            {/* Headline */}
+            <h1 className="apple-headline">
+              <span>Architect Real Engineering Intuition.</span>
+              <span className="apple-headline-sub">From Algorithmic Invariants to Full-Stack Systems.</span>
+            </h1>
+
+            {/* Subtitle */}
+            <p className="apple-subtitle">
+              A precision technical training ground engineered for university students and placement candidates.
+              Master 100 hours of language-independent problem solving, execute live code across 150+ challenges,
+              and build production systems with real-time test case verification.
+            </p>
+
+            {/* Action Row */}
+            <div className="apple-action-row">
+              <a href="#training-modules" className="apple-btn-primary">
+                <span>Explore Training Modules</span>
+                <span style={{ fontSize: "12px" }}>↓</span>
+              </a>
+              <Link href="/ide" className="apple-btn-secondary">
+                <span>Open Cloud IDE</span>
+                <span style={{ fontSize: "12px" }}>↗</span>
+              </Link>
             </div>
-            <div className="telemetry-item">
-              <span className="telemetry-num">80% Gate</span>
-              <span className="telemetry-label">Mastery Verification</span>
-              <span className="telemetry-sub">Cognitive progression</span>
-            </div>
-            <div className="telemetry-item">
-              <span className="telemetry-num" style={{ color: "#22d3ee" }}>₹0 Free</span>
-              <span className="telemetry-label">Full Scholarship</span>
-              <span className="telemetry-sub">Zero tuition barrier</span>
+
+            {/* Telemetry Strip */}
+            <div className="apple-telemetry-strip">
+              <div className="apple-telemetry-item">
+                <span className="apple-telemetry-num">100 Modules</span>
+                <span className="apple-telemetry-label">Curriculum Scope</span>
+                <span className="apple-telemetry-sub">10 progressive stages</span>
+              </div>
+              <div className="apple-telemetry-item">
+                <span className="apple-telemetry-num">150+ Challenges</span>
+                <span className="apple-telemetry-label">Coding Practice</span>
+                <span className="apple-telemetry-sub">C++, Java, Python, C</span>
+              </div>
+              <div className="apple-telemetry-item">
+                <span className="apple-telemetry-num">80% Passing Score</span>
+                <span className="apple-telemetry-label">Mastery Requirement</span>
+                <span className="apple-telemetry-sub">Cognitive progression</span>
+              </div>
+              <div className="apple-telemetry-item">
+                <span className="apple-telemetry-num" style={{ color: "#34c759" }}>₹0 Free</span>
+                <span className="apple-telemetry-label">Full Scholarship</span>
+                <span className="apple-telemetry-sub">Zero tuition barrier</span>
+              </div>
             </div>
           </div>
 
-          {/* Interactive Futuristic Sandbox Preview */}
-          <div style={{ marginTop: "48px", maxWidth: "1080px", marginLeft: "auto", marginRight: "auto" }}>
+          {/* Interactive Code Editor Preview - Strictly Left Aligned */}
+          <div style={{ marginTop: "44px", maxWidth: "980px", marginLeft: "auto", marginRight: "auto", textAlign: "left" }}>
             <HeroTryChallenge />
           </div>
         </div>
       </section>
 
-      {/* 2. CORE TRAINING MODULES SYSTEM HUB (THE HEART OF THE PLATFORM) */}
+      {/* 2. CORE TRAINING MODULES SYSTEM HUB */}
       <section id="training-modules" className="training-modules-section">
         <div className="ed-container">
           <div className="system-section-head">
-            <span className="system-eyebrow">Precision Engineering Matrix</span>
+            <span className="system-eyebrow">Engineering Matrix</span>
             <h2 className="system-section-title">Core Training Modules</h2>
             <p className="system-section-desc">
               Four unified training surfaces engineered to transition students from raw algorithmic reasoning
@@ -116,7 +112,7 @@ export default function HomePage() {
             {/* Module 01: Flagship 100-Hour Lab */}
             <article className="training-module-card featured-card">
               <div className="training-card-header">
-                <div className="training-card-icon-box" style={{ background: "rgba(99, 102, 241, 0.2)", color: "#818cf8" }}>
+                <div className="training-card-icon-box" style={{ background: "rgba(0, 113, 227, 0.15)", color: "#2997ff" }}>
                   📐
                 </div>
                 <span className="training-card-pill pill-indigo">MODULE 01 · FLAGSHIP FOUNDATION</span>
@@ -126,7 +122,7 @@ export default function HomePage() {
               <div className="training-card-subtitle">Language-Independent Algorithmic Modeling &amp; Invariant Proofs</div>
               <p className="training-card-desc">
                 Construct rigorous mental models from scratch. Learn requirement extraction, state invariants,
-                asymptotic bounds, worked real-world case studies, and automated audio readout.
+                asymptotic bounds, worked real-world case studies, and verified algorithmic proofs.
               </p>
 
               <div className="training-card-specs-row">
@@ -135,21 +131,21 @@ export default function HomePage() {
                   <span>10 Sequential Stages</span>
                 </div>
                 <div className="spec-chip">
-                  <b>80% Mastery Gate</b>
-                  <span>No Skipping Ahead</span>
+                  <b>80% Passing Score</b>
+                  <span>Required to Advance</span>
                 </div>
                 <div className="spec-chip">
-                  <b>Text-to-Speech</b>
-                  <span>Voice Audio Narrator</span>
+                  <b>Evaluation</b>
+                  <span>Instant Verification</span>
                 </div>
                 <div className="spec-chip">
-                  <b style={{ color: "#34d399" }}>100% Free (₹0)</b>
+                  <b style={{ color: "#34c759" }}>100% Free (₹0)</b>
                   <span>Active Scholarship</span>
                 </div>
               </div>
 
               <div className="training-card-action-row">
-                <Link href="/courses/problem-solving-lab" className="training-card-btn btn-launch-indigo">
+                <Link href="/courses/problem-solving-lab" className="apple-btn-primary" style={{ padding: "9px 20px", fontSize: "13px" }}>
                   <span>Enter 100h Lab</span>
                   <span>→</span>
                 </Link>
@@ -162,7 +158,7 @@ export default function HomePage() {
             {/* Module 02: DSA Arena */}
             <article className="training-module-card">
               <div className="training-card-header">
-                <div className="training-card-icon-box" style={{ background: "rgba(6, 182, 212, 0.2)", color: "#22d3ee" }}>
+                <div className="training-card-icon-box" style={{ background: "rgba(6, 182, 212, 0.15)", color: "#22d3ee" }}>
                   ⚔️
                 </div>
                 <span className="training-card-pill pill-cyan">MODULE 02 · INTERVIEW ARENA</span>
@@ -177,7 +173,7 @@ export default function HomePage() {
 
               <div className="training-card-specs-row">
                 <div className="spec-chip">
-                  <b>150+ Questions</b>
+                  <b>150+ Challenges</b>
                   <span>Easy · Medium · Hard</span>
                 </div>
                 <div className="spec-chip">
@@ -185,7 +181,7 @@ export default function HomePage() {
                   <span>C++, Java 21, Python, C</span>
                 </div>
                 <div className="spec-chip">
-                  <b>Instant Submissions</b>
+                  <b>Instant Execution</b>
                   <span>Sub-millisecond test suites</span>
                 </div>
                 <div className="spec-chip">
@@ -195,7 +191,7 @@ export default function HomePage() {
               </div>
 
               <div className="training-card-action-row">
-                <Link href="/dsa" className="training-card-btn btn-launch-cyan">
+                <Link href="/dsa" className="apple-btn-secondary" style={{ padding: "9px 20px", fontSize: "13px" }}>
                   <span>Enter DSA Arena</span>
                   <span>→</span>
                 </Link>
@@ -208,14 +204,14 @@ export default function HomePage() {
             {/* Module 03: Full-Stack Web Dev Studio */}
             <article className="training-module-card">
               <div className="training-card-header">
-                <div className="training-card-icon-box" style={{ background: "rgba(16, 185, 129, 0.2)", color: "#34d399" }}>
+                <div className="training-card-icon-box" style={{ background: "rgba(52, 199, 89, 0.15)", color: "#34c759" }}>
                   🌐
                 </div>
                 <span className="training-card-pill pill-green">MODULE 03 · PRODUCTION ENGINEERING</span>
               </div>
 
               <h3 className="training-card-title">Full-Stack Web Dev &amp; MERN Studio</h3>
-              <div className="training-card-subtitle">W3Schools &amp; GUVI WebKata Style Interactive Sandbox</div>
+              <div className="training-card-subtitle">Interactive Frontend &amp; Backend Engineering Sandbox</div>
               <p className="training-card-desc">
                 Master modern semantic HTML5, Flexbox/Grid CSS, asynchronous JavaScript DOM scripting,
                 and MERN full-stack architecture with live preview and automated assertions.
@@ -231,17 +227,17 @@ export default function HomePage() {
                   <span>Isolated iframe preview</span>
                 </div>
                 <div className="spec-chip">
-                  <b>Try-It Exercises</b>
-                  <span>Hands-on WebKata katas</span>
+                  <b>Interactive Coding</b>
+                  <span>Hands-on browser challenges</span>
                 </div>
                 <div className="spec-chip">
-                  <b style={{ color: "#34d399" }}>Audio Narrator</b>
-                  <span>Tutorial speech playback</span>
+                  <b style={{ color: "#34c759" }}>Full-Stack</b>
+                  <span>Frontend to Backend</span>
                 </div>
               </div>
 
               <div className="training-card-action-row">
-                <Link href="/web-dev" className="training-card-btn btn-launch-green">
+                <Link href="/web-dev" className="apple-btn-secondary" style={{ padding: "9px 20px", fontSize: "13px" }}>
                   <span>Enter Web Dev Lab</span>
                   <span>→</span>
                 </Link>
@@ -254,7 +250,7 @@ export default function HomePage() {
             {/* Module 04: Online Multi-Language Cloud IDE */}
             <article className="training-module-card">
               <div className="training-card-header">
-                <div className="training-card-icon-box" style={{ background: "rgba(245, 158, 11, 0.2)", color: "#fbbf24" }}>
+                <div className="training-card-icon-box" style={{ background: "rgba(255, 159, 10, 0.15)", color: "#ff9f0a" }}>
                   💻
                 </div>
                 <span className="training-card-pill pill-amber">MODULE 04 · DEVELOPER UTILITY</span>
@@ -281,13 +277,13 @@ export default function HomePage() {
                   <span>Browser-based runtimes</span>
                 </div>
                 <div className="spec-chip">
-                  <b style={{ color: "#fbbf24" }}>Real-time I/O</b>
+                  <b style={{ color: "#ff9f0a" }}>Real-time I/O</b>
                   <span>Instant stdout &amp; stderr</span>
                 </div>
               </div>
 
               <div className="training-card-action-row">
-                <Link href="/ide" className="training-card-btn btn-launch-amber">
+                <Link href="/ide" className="apple-btn-secondary" style={{ padding: "9px 20px", fontSize: "13px" }}>
                   <span>Launch Cloud IDE</span>
                   <span>→</span>
                 </Link>
@@ -301,12 +297,12 @@ export default function HomePage() {
       </section>
 
       {/* 3. PLACEMENT RECOGNITION BENCHMARKS */}
-      <section style={{ padding: "40px 0 60px", borderTop: "1px solid rgba(255, 255, 255, 0.08)", borderBottom: "1px solid rgba(255, 255, 255, 0.08)" }}>
+      <section style={{ padding: "44px 0", borderTop: "1px solid rgba(255, 255, 255, 0.08)", borderBottom: "1px solid rgba(255, 255, 255, 0.08)", background: "#08080a" }}>
         <div className="ed-container" style={{ textAlign: "center" }}>
-          <span style={{ font: "800 11px var(--font-mono)", color: "#818cf8", letterSpacing: "0.1em", textTransform: "uppercase", display: "block", marginBottom: "18px" }}>
-            ENGINEERED TO MATCH TIER-1 PLACEMENT STANDARDS
+          <span style={{ font: "700 11px -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif", color: "#86868b", letterSpacing: "0.12em", textTransform: "uppercase", display: "block", marginBottom: "16px" }}>
+            ENGINEERED TO MATCH TIER-1 INDUSTRY STANDARDS
           </span>
-          <div style={{ display: "flex", justifyContent: "center", gap: "12px", flexWrap: "wrap", alignItems: "center" }}>
+          <div style={{ display: "flex", justifyContent: "center", gap: "10px", flexWrap: "wrap", alignItems: "center" }}>
             {HIRING_BENCHMARKS.map((company) => (
               <div
                 key={company.name}
@@ -314,18 +310,18 @@ export default function HomePage() {
                   display: "inline-flex",
                   alignItems: "center",
                   gap: "8px",
-                  background: "rgba(255, 255, 255, 0.04)",
-                  border: "1px solid rgba(255, 255, 255, 0.08)",
-                  borderRadius: "99px",
-                  padding: "6px 14px",
+                  background: "#161617",
+                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                  borderRadius: "980px",
+                  padding: "7px 16px",
                   fontSize: "12px",
-                  fontWeight: 700,
-                  color: "#cbd5e1",
+                  fontWeight: 600,
+                  color: "#f5f5f7",
                 }}
               >
                 <span>{company.icon}</span>
                 <span>{company.name}</span>
-                <span style={{ fontSize: "9px", color: "#22d3ee", background: "rgba(6, 182, 212, 0.15)", padding: "1px 6px", borderRadius: "99px" }}>
+                <span style={{ fontSize: "10px", color: "#2997ff", background: "rgba(0, 113, 227, 0.15)", padding: "1px 7px", borderRadius: "980px", fontWeight: 700 }}>
                   {company.tag}
                 </span>
               </div>
@@ -353,28 +349,28 @@ export default function HomePage() {
         {/* 9. FINAL CONVERSION BANNER */}
         <section
           style={{
-            margin: "60px 0 20px",
-            background: "linear-gradient(135deg, rgba(30, 27, 75, 0.8) 0%, rgba(15, 23, 42, 0.95) 100%)",
-            border: "1px solid rgba(99, 102, 241, 0.4)",
-            borderRadius: "24px",
-            padding: "40px",
+            margin: "64px 0 24px",
+            background: "#161617",
+            border: "1px solid rgba(255, 255, 255, 0.14)",
+            borderRadius: "20px",
+            padding: "48px 40px",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             flexWrap: "wrap",
             gap: "24px",
-            boxShadow: "0 25px 60px rgba(0, 0, 0, 0.6), 0 0 35px rgba(99, 102, 241, 0.15)",
+            boxShadow: "0 24px 60px rgba(0, 0, 0, 0.6)",
           }}
         >
           <div style={{ maxWidth: "680px" }}>
-            <span style={{ font: "800 10px var(--font-mono)", color: "#22d3ee", letterSpacing: "0.1em", textTransform: "uppercase", display: "inline-block", marginBottom: "8px" }}>
+            <span style={{ font: "700 11px -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif", color: "#34c759", letterSpacing: "0.1em", textTransform: "uppercase", display: "inline-block", marginBottom: "10px" }}>
               ● 100% SCHOLARSHIP ENROLLMENT ACTIVE
             </span>
-            <h2 style={{ font: "800 28px var(--font-display)", color: "#ffffff", margin: "0 0 8px", letterSpacing: "-0.03em" }}>
+            <h2 style={{ font: "700 32px -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif", color: "#f5f5f7", margin: "0 0 10px", letterSpacing: "-0.03em" }}>
               Start Building Real Engineering Intuition Today.
             </h2>
-            <p style={{ fontSize: "14px", color: "#94a3b8", lineHeight: 1.6, margin: 0 }}>
-              Join thousands of students learning to think through algorithms systematically.
+            <p style={{ fontSize: "15px", color: "#86868b", lineHeight: 1.6, margin: 0 }}>
+              Join students learning to think through algorithms systematically.
               Register in 60 seconds with zero credit card required.
             </p>
           </div>
@@ -382,15 +378,13 @@ export default function HomePage() {
           <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
             <Link
               href="/register?course=problem-solving-lab"
-              className="btn-cyber-primary"
-              style={{ padding: "12px 24px" }}
+              className="apple-btn-primary"
             >
               Enroll Free (₹0) →
             </Link>
             <Link
               href="/login"
-              className="btn-cyber-secondary"
-              style={{ padding: "12px 20px" }}
+              className="apple-btn-secondary"
             >
               Sign In to Portal
             </Link>
@@ -398,29 +392,29 @@ export default function HomePage() {
         </section>
       </main>
 
-      {/* 10. FUTURISTIC MULTI-COLUMN FOOTER */}
-      <footer style={{ background: "#050914", borderTop: "1px solid rgba(255, 255, 255, 0.08)", padding: "48px 0 28px" }}>
+      {/* 10. APPLE-STYLE MINIMALIST MULTI-COLUMN FOOTER */}
+      <footer style={{ background: "#0a0a0c", borderTop: "1px solid rgba(255, 255, 255, 0.08)", padding: "48px 0 28px" }}>
         <div className="ed-container">
           <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr 1fr 1fr", gap: "32px", paddingBottom: "32px", borderBottom: "1px solid rgba(255, 255, 255, 0.08)" }}>
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px" }}>
-                <div style={{ width: "32px", height: "32px", borderRadius: "8px", background: "linear-gradient(135deg, #4f46e5, #06b6d4)", display: "grid", placeItems: "center", color: "#fff", fontSize: "15px" }}>
+                <div style={{ width: "32px", height: "32px", borderRadius: "8px", background: "#1c1c1e", border: "1px solid rgba(255, 255, 255, 0.12)", display: "grid", placeItems: "center", color: "#2997ff", fontSize: "15px" }}>
                   ⚡
                 </div>
                 <div>
-                  <b style={{ font: "800 15px var(--font-display)", color: "#ffffff", letterSpacing: "-0.02em" }}>{PLATFORM_NAME}</b>
-                  <small style={{ display: "block", font: "700 8.5px var(--font-mono)", color: "#22d3ee" }}>SYSTEM v2.6</small>
+                  <b style={{ font: "700 15px -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif", color: "#f5f5f7", letterSpacing: "-0.02em" }}>{PLATFORM_NAME}</b>
+                  <small style={{ display: "block", font: "600 9px -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif", color: "#86868b" }}>ENGINEERING ACADEMY</small>
                 </div>
               </div>
-              <p style={{ fontSize: "12.5px", lineHeight: 1.65, color: "#94a3b8", margin: "0 0 16px", maxWidth: "320px" }}>
-                A precision technical learning management platform designed for structured, mastery-gated
+              <p style={{ fontSize: "12.5px", lineHeight: 1.65, color: "#86868b", margin: "0 0 16px", maxWidth: "320px" }}>
+                A precision technical learning management platform designed for structured, mastery-based
                 engineering curricula and college placement transparency.
               </p>
               <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                <span style={{ font: "700 9px var(--font-mono)", background: "rgba(99, 102, 241, 0.2)", color: "#818cf8", padding: "3px 8px", borderRadius: "99px" }}>
+                <span style={{ font: "600 10px -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif", background: "rgba(0, 113, 227, 0.12)", color: "#2997ff", padding: "3px 9px", borderRadius: "980px" }}>
                   100% Free Flagship
                 </span>
-                <span style={{ font: "700 9px var(--font-mono)", background: "rgba(16, 185, 129, 0.2)", color: "#34d399", padding: "3px 8px", borderRadius: "99px" }}>
+                <span style={{ font: "600 10px -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif", background: "rgba(52, 199, 89, 0.12)", color: "#34c759", padding: "3px 9px", borderRadius: "980px" }}>
                   Zero Dependency TTS
                 </span>
               </div>

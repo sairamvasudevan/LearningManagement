@@ -26,7 +26,7 @@ export default function RegisterPage() {
             <h3>{course.title}</h3>
             <p>
               {course.totalHours} hours · {course.totalPaths} learning paths · Sequential
-              mastery-gated progression
+              criterion-referenced progression
             </p>
             <Link href={`/courses/${course.slug}`} className="inline-link">
               View full syllabus →

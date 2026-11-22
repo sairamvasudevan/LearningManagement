@@ -93,7 +93,7 @@ export default async function WebDevCoursePage() {
                   borderRadius: "99px",
                 }}
               >
-                Try-It-Yourself Sandbox &amp; WebKata Lab
+                Try-It-Yourself Sandbox &amp; Interactive Lab
               </span>
               <span
                 style={{
@@ -115,7 +115,7 @@ export default async function WebDevCoursePage() {
             <p style={{ fontSize: "16px", color: "#cbd5e1", lineHeight: 1.6, margin: "0 0 24px" }}>
               Engineered following the world-class learning patterns of <b>W3Schools</b> and <b>GUVI</b>: step-by-step
               conceptual tutorials, instant <b>"Try it Yourself"</b> live sandbox experiments, chapter self-tests, and
-              hands-on <b>WebKata practice challenges</b> with automated DOM test suites.
+              hands-on <b>coding challenges</b> with automated DOM test suites.
             </p>
 
             <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
@@ -230,7 +230,7 @@ export default async function WebDevCoursePage() {
                     </h3>
                   </div>
                   <span style={{ fontSize: "12px", color: "#94a3b8" }}>
-                    Try-It Sandbox · Mini-Quiz · GUVI WebKata Challenge
+                    Try-It Sandbox · Mini-Quiz · Coding Challenge
                   </span>
                 </div>
 
@@ -330,7 +330,7 @@ export default async function WebDevCoursePage() {
                               color: isLocked ? "#94a3b8" : undefined,
                             }}
                           >
-                            {isPreview ? "Start Preview Sandbox ❯" : isLocked ? "🔒 Locked (Preview Only)" : "Open Sandbox & Kata →"}
+                            {isPreview ? "Start Preview Sandbox ❯" : isLocked ? "🔒 Locked (Preview Only)" : "Open Sandbox & Challenge →"}
                           </Link>
                         </div>
                       </div>
