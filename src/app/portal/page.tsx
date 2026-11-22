@@ -5,6 +5,8 @@ import { requireIdentity, getRole } from "@/lib/auth";
 import { getUserProgress, getUserAttempts, getUserById } from "@/lib/db";
 import { COURSE_PACKAGES } from "@/lib/courses";
 import { MODULES_CURRICULUM } from "@/lib/curriculum-data";
+import catalog from "@/lib/course-catalog.json";
+import { PortalStageExplorer } from "@/components/portal-stage-explorer";
 
 export const dynamic = "force-dynamic";
 
@@ -39,11 +41,11 @@ export default async function StudentPortalPage() {
   const totalBestScore = progressList.reduce((sum, p) => sum + p.best_score, 0);
   const totalPossibleMarks = progressList.reduce((sum, p) => sum + p.total_marks, 0);
 
-  // Determine current active module (1 to 10)
-  const stage01Modules = Array.from({ length: 10 }, (_, i) => i + 1);
-  const nextModule = stage01Modules.find((n) => !completedSet.has(n)) || 11;
-
-  const currentModuleCurriculum = MODULES_CURRICULUM[nextModule <= 10 ? nextModule : 10];
+  // Determine current active module across all 100 modules
+  const allModules = catalog.modules;
+  const nextModule = allModules.find((m) => !completedSet.has(m.id))?.id || 101;
+  const currentStageNumber = Math.min(10, Math.max(1, Math.ceil(nextModule / 10)));
+  const currentModuleCurriculum = MODULES_CURRICULUM[nextModule <= 100 ? nextModule : 100];
   const displayName = profile.full_name;
   const course = COURSE_PACKAGES[0];
 
@@ -67,10 +69,10 @@ export default async function StudentPortalPage() {
           </div>
           <div className="portal-overall-stat">
             <div className="stat-circle">
-              <span className="stat-number">{completed * 10}%</span>
-              <span className="stat-label">Stage 01</span>
+              <span className="stat-number">{completed}%</span>
+              <span className="stat-label">Progress</span>
             </div>
-            <div className="stat-sub">{completed} of 10 Modules Mastered</div>
+            <div className="stat-sub">{completed} of 100 Modules Mastered</div>
           </div>
         </section>
 
@@ -97,17 +99,17 @@ export default async function StudentPortalPage() {
               <div className="portal-metric-card">
                 <span className="metric-icon">📚</span>
                 <div>
-                  <div className="metric-val">{completed} / 10</div>
-                  <div className="metric-label">Stage 01 Modules</div>
+                  <div className="metric-val">{completed} / 100</div>
+                  <div className="metric-label">Mastered Modules</div>
                 </div>
               </div>
               <div className="portal-metric-card">
                 <span className="metric-icon">🎯</span>
                 <div>
                   <div className="metric-val">
-                    {nextModule <= 10 ? `Module ${String(nextModule).padStart(2, "0")}` : "Stage 01 Done"}
+                    {nextModule <= 100 ? `Module ${String(nextModule).padStart(2, "0")}` : "All Completed"}
                   </div>
-                  <div className="metric-label">Current Milestone</div>
+                  <div className="metric-label">Stage {String(currentStageNumber).padStart(2, "0")} Milestone</div>
                 </div>
               </div>
               <div className="portal-metric-card">
@@ -134,22 +136,22 @@ export default async function StudentPortalPage() {
                 <div className="action-kicker">
                   <span className="cn-pulse-dot-green"></span>
                   <span>
-                    {nextModule <= 10
-                      ? `CURRENT ASSIGNMENT · STAGE 01 · MODULE ${String(nextModule).padStart(2, "0")}`
-                      : "STAGE 01 COMPLETE · FOUNDATIONS MASTERED"}
+                    {nextModule <= 100
+                      ? `CURRENT ASSIGNMENT · STAGE ${String(currentStageNumber).padStart(2, "0")} · MODULE ${String(nextModule).padStart(2, "0")}`
+                      : "ALL 100 MODULES COMPLETE · FLAGSHIP MASTER"}
                   </span>
                 </div>
                 <h2>
-                  {nextModule <= 10
+                  {nextModule <= 100
                     ? `Module ${String(nextModule).padStart(2, "0")}: ${currentModuleCurriculum?.title}`
-                    : "🎉 Congratulations! You have mastered all 10 Foundation Modules!"}
+                    : "🎉 Congratulations! You have mastered all 100 modules in the Problem Solving Lab!"}
                 </h2>
                 <p>
-                  {nextModule <= 10
+                  {nextModule <= 100
                     ? currentModuleCurriculum?.objective
-                    : "You have completed all 10 modules in Stage 01 (Read & Define the Problem) with verified mastery checkpoints."}
+                    : "You have completed all 100 modules across all 10 stages with verified mastery checkpoints."}
                 </p>
-                {nextModule <= 10 && currentModuleCurriculum && (
+                {nextModule <= 100 && currentModuleCurriculum && (
                   <div className="action-meta-row">
                     <span>⏱️ {currentModuleCurriculum.readTime}</span>
                     <span>🧩 {currentModuleCurriculum.caseStudies.length} Case Studies</span>
@@ -160,7 +162,7 @@ export default async function StudentPortalPage() {
                 )}
               </div>
               <div className="action-banner-btn-wrap">
-                {nextModule <= 10 ? (
+                {nextModule <= 100 ? (
                   <Link
                     href={`/learn/${nextModule}`}
                     className="button button-cn-primary action-cta-btn"
@@ -177,91 +179,14 @@ export default async function StudentPortalPage() {
               </div>
             </section>
 
-            {/* Module Curriculum Roadmap (All 10 Modules) */}
-            <section className="portal-curriculum-card">
-              <div className="card-header-clean">
-                <div>
-                  <h3>Stage 01: Read &amp; Define the Problem (10 Modules)</h3>
-                  <p>Master foundational problem solving. Pass each module with ≥ 80% to unlock the next.</p>
-                </div>
-                <span className="catalog-count-pill">10 Published Modules</span>
-              </div>
-
-              <div className="curriculum-modules-stack">
-                {stage01Modules.map((mNum) => {
-                  const mData = MODULES_CURRICULUM[mNum];
-                  const isCompleted = completedSet.has(mNum);
-                  const isUnlocked = mNum === 1 || completedSet.has(mNum - 1);
-                  const prog = progressMap.get(mNum);
-
-                  return (
-                    <div
-                      key={mNum}
-                      className={`module-item-clean ${!isUnlocked ? "module-item-locked" : ""}`}
-                    >
-                      <div className="module-item-left">
-                        <div
-                          className={`module-num-badge ${
-                            isCompleted
-                              ? "badge-completed"
-                              : isUnlocked
-                                ? "badge-ready"
-                                : "badge-locked"
-                          }`}
-                        >
-                          {isCompleted ? "✓" : String(mNum).padStart(2, "0")}
-                        </div>
-                        <div className="module-item-info">
-                          <h4>
-                            Module {String(mNum).padStart(2, "0")}: {mData?.title || `Module ${mNum}`}
-                          </h4>
-                          <p>{mData?.objective}</p>
-                          <div className="module-item-tags">
-                            <span className="tag-pill">{mData?.readTime || "20 Mins"}</span>
-                            <span className="tag-pill">{mData?.caseStudies.length || 2} Case Studies</span>
-                            <span className="tag-pill">Hands-on Task</span>
-                            <span className="tag-pill">{mData?.questions.length || 6} Questions</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="module-item-right">
-                        <div className="module-score-status">
-                          {isCompleted ? (
-                            <span className="status-badge-completed">
-                              Passed ✓ ({prog?.best_score}/{prog?.total_marks})
-                            </span>
-                          ) : isUnlocked ? (
-                            <span className="status-badge-ready">
-                              {prog?.status === "in_progress" ? "In Progress" : "Ready to Start"}
-                            </span>
-                          ) : (
-                            <span className="status-badge-locked">
-                              🔒 Complete Mod {String(mNum - 1).padStart(2, "0")}
-                            </span>
-                          )}
-                        </div>
-                        {isUnlocked ? (
-                          <Link
-                            href={`/learn/${mNum}`}
-                            className={`button button-small ${isCompleted ? "button-outline" : "button-cn-primary"}`}
-                          >
-                            {isCompleted ? "Review Material" : "Start Lesson →"}
-                          </Link>
-                        ) : (
-                          <button
-                            type="button"
-                            className="button button-small button-disabled"
-                            disabled
-                          >
-                            Locked
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
+            {/* Interactive 10-Stage 100-Module Curriculum Explorer */}
+            <PortalStageExplorer
+              stages={catalog.stages}
+              modules={catalog.modules as any}
+              progressMap={JSON.parse(JSON.stringify(Object.fromEntries(progressMap)))}
+              completedSet={Array.from(completedSet)}
+              nextModule={nextModule}
+            />
 
             {/* Assessment History */}
             {attemptsList.length > 0 && (

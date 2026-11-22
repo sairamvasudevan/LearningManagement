@@ -9,5 +9,7 @@ build
 *.tsbuildinfo
 .DS_Store
 data/*.db*
+data/*.log
+scratch/
 supabase/.temp/
 supabase/.branches/

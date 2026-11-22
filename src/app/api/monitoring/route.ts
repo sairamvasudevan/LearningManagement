@@ -38,7 +38,8 @@ export async function GET() {
         tableCounts: dbHealth.counts,
       },
       curriculum: {
-        stage: "Stage 01: Read & Define the Problem",
+        stage: "Stage 01 to Stage 10 (Full 100-Hour Flagship Curriculum)",
+        publishedStagesCount: 10,
         publishedModulesCount: Object.keys(MODULES_CURRICULUM).length,
         totalQuestionsCount: totalQuestions,
       },

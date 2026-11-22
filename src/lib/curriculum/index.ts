@@ -10,6 +10,16 @@ import { module08 } from "./module-08";
 import { module09 } from "./module-09";
 import { module10 } from "./module-10";
 
+import { stage02Modules } from "./stage-02";
+import { stage03Modules } from "./stage-03";
+import { stage04Modules } from "./stage-04";
+import { stage05Modules } from "./stage-05";
+import { stage06Modules } from "./stage-06";
+import { stage07Modules } from "./stage-07";
+import { stage08Modules } from "./stage-08";
+import { stage09Modules } from "./stage-09";
+import { stage10Modules } from "./stage-10";
+
 export * from "./types";
 
 export const MODULES_CURRICULUM: Record<number, ModuleCurriculum> = {
@@ -23,4 +33,13 @@ export const MODULES_CURRICULUM: Record<number, ModuleCurriculum> = {
   8: module08,
   9: module09,
   10: module10,
+  ...stage02Modules,
+  ...stage03Modules,
+  ...stage04Modules,
+  ...stage05Modules,
+  ...stage06Modules,
+  ...stage07Modules,
+  ...stage08Modules,
+  ...stage09Modules,
+  ...stage10Modules,
 };

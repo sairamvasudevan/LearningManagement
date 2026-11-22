@@ -61,7 +61,7 @@
       "evidence": "A one-sentence task statement that preserves the requested outcome.",
       "tier": "foundation",
       "practiceCount": 4,
-      "activityStyle": "Classify · extract · clarify · restate",
+      "activityStyle": "Classify \u00b7 extract \u00b7 clarify \u00b7 restate",
       "published": true
     },
     {
@@ -70,10 +70,10 @@
       "title": "Express a task as input, rule and output",
       "objective": "Describe a problem as the information received, the transformation required and the result expected.",
       "focus": "Input contract; transformation; output contract",
-      "evidence": "A complete input–rule–output contract.",
+      "evidence": "A complete input\u2013rule\u2013output contract.",
       "tier": "foundation",
       "practiceCount": 3,
-      "activityStyle": "Map · classify · construct",
+      "activityStyle": "Map \u00b7 classify \u00b7 construct",
       "published": true
     },
     {
@@ -85,7 +85,7 @@
       "evidence": "A constraint sheet that distinguishes explicit limits from assumptions.",
       "tier": "foundation",
       "practiceCount": 4,
-      "activityStyle": "Inspect · classify · apply",
+      "activityStyle": "Inspect \u00b7 classify \u00b7 apply",
       "published": true
     },
     {
@@ -97,7 +97,7 @@
       "evidence": "A list of confirmed facts, open questions and safe assumptions.",
       "tier": "foundation",
       "practiceCount": 3,
-      "activityStyle": "Classify · challenge · clarify",
+      "activityStyle": "Classify \u00b7 challenge \u00b7 clarify",
       "published": true
     },
     {
@@ -109,7 +109,7 @@
       "evidence": "A small example set with independently reasoned expected results.",
       "tier": "foundation",
       "practiceCount": 4,
-      "activityStyle": "Predict · compare · explain",
+      "activityStyle": "Predict \u00b7 compare \u00b7 explain",
       "published": true
     },
     {
@@ -121,7 +121,7 @@
       "evidence": "A ranked edge-case list with a reason each case matters.",
       "tier": "foundation",
       "practiceCount": 4,
-      "activityStyle": "Generate · classify · prioritise",
+      "activityStyle": "Generate \u00b7 classify \u00b7 prioritise",
       "published": true
     },
     {
@@ -133,7 +133,7 @@
       "evidence": "Testable acceptance criteria that can be checked without seeing the implementation.",
       "tier": "foundation",
       "practiceCount": 4,
-      "activityStyle": "Rewrite · validate · reject",
+      "activityStyle": "Rewrite \u00b7 validate \u00b7 reject",
       "published": true
     },
     {
@@ -145,7 +145,7 @@
       "evidence": "A dependency-aware breakdown of a larger task.",
       "tier": "building",
       "practiceCount": 4,
-      "activityStyle": "Decompose · sequence · explain",
+      "activityStyle": "Decompose \u00b7 sequence \u00b7 explain",
       "published": true
     },
     {
@@ -157,7 +157,7 @@
       "evidence": "A valid execution order with dependencies explained.",
       "tier": "building",
       "practiceCount": 5,
-      "activityStyle": "Order · diagram · diagnose",
+      "activityStyle": "Order \u00b7 diagram \u00b7 diagnose",
       "published": true
     },
     {
@@ -169,7 +169,7 @@
       "evidence": "A complete problem brief and a justified list of unresolved questions.",
       "tier": "synthesis",
       "practiceCount": 4,
-      "activityStyle": "Case analysis · specification · review",
+      "activityStyle": "Case analysis \u00b7 specification \u00b7 review",
       "published": true
     },
     {
@@ -181,8 +181,8 @@
       "evidence": "An entity model that distinguishes identity from descriptive fields.",
       "tier": "foundation",
       "practiceCount": 3,
-      "activityStyle": "Extract · group · model",
-      "published": false
+      "activityStyle": "Extract \u00b7 group \u00b7 model",
+      "published": true
     },
     {
       "id": 12,
@@ -193,8 +193,8 @@
       "evidence": "A suitable first-pass data representation for several scenarios.",
       "tier": "foundation",
       "practiceCount": 4,
-      "activityStyle": "Classify · match · justify",
-      "published": false
+      "activityStyle": "Classify \u00b7 match \u00b7 justify",
+      "published": true
     },
     {
       "id": 13,
@@ -205,20 +205,20 @@
       "evidence": "A representation choice justified by required operations.",
       "tier": "foundation",
       "practiceCount": 4,
-      "activityStyle": "Compare · select · explain",
-      "published": false
+      "activityStyle": "Compare \u00b7 select \u00b7 explain",
+      "published": true
     },
     {
       "id": 14,
       "stage": 2,
-      "title": "Model direct lookup with key–value records",
+      "title": "Model direct lookup with key\u2013value records",
       "objective": "Represent information that must be found quickly by a stable identifier or key.",
       "focus": "Keys; values; lookup; mapping",
-      "evidence": "A key–value model with a clear uniqueness rule.",
+      "evidence": "A key\u2013value model with a clear uniqueness rule.",
       "tier": "building",
       "practiceCount": 5,
-      "activityStyle": "Map · query · diagnose",
-      "published": false
+      "activityStyle": "Map \u00b7 query \u00b7 diagnose",
+      "published": true
     },
     {
       "id": 15,
@@ -229,8 +229,8 @@
       "evidence": "A correct workflow model and a trace of its state changes.",
       "tier": "building",
       "practiceCount": 4,
-      "activityStyle": "Classify · trace · choose",
-      "published": false
+      "activityStyle": "Classify \u00b7 trace \u00b7 choose",
+      "published": true
     },
     {
       "id": 16,
@@ -241,8 +241,8 @@
       "evidence": "A state-transition model with allowed transitions identified.",
       "tier": "building",
       "practiceCount": 5,
-      "activityStyle": "Model · trace · validate",
-      "published": false
+      "activityStyle": "Model \u00b7 trace \u00b7 validate",
+      "published": true
     },
     {
       "id": 17,
@@ -253,8 +253,8 @@
       "evidence": "A relationship model with correctly identified nodes and edges.",
       "tier": "building",
       "practiceCount": 4,
-      "activityStyle": "Draw · interpret · classify",
-      "published": false
+      "activityStyle": "Draw \u00b7 interpret \u00b7 classify",
+      "published": true
     },
     {
       "id": 18,
@@ -265,8 +265,8 @@
       "evidence": "A complete trace that another person can follow.",
       "tier": "building",
       "practiceCount": 4,
-      "activityStyle": "Trace · complete · explain",
-      "published": false
+      "activityStyle": "Trace \u00b7 complete \u00b7 explain",
+      "published": true
     },
     {
       "id": 19,
@@ -277,8 +277,8 @@
       "evidence": "A reasoned model choice based on the dominant operations.",
       "tier": "applied",
       "practiceCount": 5,
-      "activityStyle": "Compare · select · defend",
-      "published": false
+      "activityStyle": "Compare \u00b7 select \u00b7 defend",
+      "published": true
     },
     {
       "id": 20,
@@ -289,8 +289,8 @@
       "evidence": "A coherent model of a realistic workflow.",
       "tier": "synthesis",
       "practiceCount": 5,
-      "activityStyle": "Scenario model · critique · refine",
-      "published": false
+      "activityStyle": "Scenario model \u00b7 critique \u00b7 refine",
+      "published": true
     },
     {
       "id": 21,
@@ -301,8 +301,8 @@
       "evidence": "An ordered procedure that produces the intended result on a sample.",
       "tier": "foundation",
       "practiceCount": 4,
-      "activityStyle": "Order · repair · explain",
-      "published": false
+      "activityStyle": "Order \u00b7 repair \u00b7 explain",
+      "published": true
     },
     {
       "id": 22,
@@ -313,8 +313,8 @@
       "evidence": "A correct decision rule for each case.",
       "tier": "foundation",
       "practiceCount": 4,
-      "activityStyle": "Classify · choose · trace",
-      "published": false
+      "activityStyle": "Classify \u00b7 choose \u00b7 trace",
+      "published": true
     },
     {
       "id": 23,
@@ -325,8 +325,8 @@
       "evidence": "A complete truth table and correct interpretation of a compound rule.",
       "tier": "building",
       "practiceCount": 5,
-      "activityStyle": "Evaluate · complete · diagnose",
-      "published": false
+      "activityStyle": "Evaluate \u00b7 complete \u00b7 diagnose",
+      "published": true
     },
     {
       "id": 24,
@@ -337,8 +337,8 @@
       "evidence": "A correct state trace for a count or aggregate.",
       "tier": "building",
       "practiceCount": 4,
-      "activityStyle": "Trace · update · explain",
-      "published": false
+      "activityStyle": "Trace \u00b7 update \u00b7 explain",
+      "published": true
     },
     {
       "id": 25,
@@ -349,8 +349,8 @@
       "evidence": "A correct comparison strategy with boundary behaviour stated.",
       "tier": "building",
       "practiceCount": 5,
-      "activityStyle": "Trace · select · test",
-      "published": false
+      "activityStyle": "Trace \u00b7 select \u00b7 test",
+      "published": true
     },
     {
       "id": 26,
@@ -361,8 +361,8 @@
       "evidence": "A complete decision table with no gaps or overlapping rules.",
       "tier": "building",
       "practiceCount": 5,
-      "activityStyle": "Classify · repair · validate",
-      "published": false
+      "activityStyle": "Classify \u00b7 repair \u00b7 validate",
+      "published": true
     },
     {
       "id": 27,
@@ -373,8 +373,8 @@
       "evidence": "A concise correctness contract for a procedure.",
       "tier": "applied",
       "practiceCount": 5,
-      "activityStyle": "State · check · justify",
-      "published": false
+      "activityStyle": "State \u00b7 check \u00b7 justify",
+      "published": true
     },
     {
       "id": 28,
@@ -385,8 +385,8 @@
       "evidence": "A safe operation order with side effects called out.",
       "tier": "applied",
       "practiceCount": 5,
-      "activityStyle": "Reorder · compare · diagnose",
-      "published": false
+      "activityStyle": "Reorder \u00b7 compare \u00b7 diagnose",
+      "published": true
     },
     {
       "id": 29,
@@ -397,8 +397,8 @@
       "evidence": "A reasoned decision about whether a local-choice strategy is safe.",
       "tier": "applied",
       "practiceCount": 4,
-      "activityStyle": "Counterexample · compare · defend",
-      "published": false
+      "activityStyle": "Counterexample \u00b7 compare \u00b7 defend",
+      "published": true
     },
     {
       "id": 30,
@@ -409,8 +409,8 @@
       "evidence": "A traceable procedure with correct results across varied cases.",
       "tier": "synthesis",
       "practiceCount": 6,
-      "activityStyle": "Build · trace · test",
-      "published": false
+      "activityStyle": "Build \u00b7 trace \u00b7 test",
+      "published": true
     },
     {
       "id": 31,
@@ -421,8 +421,8 @@
       "evidence": "A correct step-by-step trace without executing code.",
       "tier": "foundation",
       "practiceCount": 4,
-      "activityStyle": "Trace · complete · predict",
-      "published": false
+      "activityStyle": "Trace \u00b7 complete \u00b7 predict",
+      "published": true
     },
     {
       "id": 32,
@@ -433,8 +433,8 @@
       "evidence": "A valid stop condition and an explanation of why progress reaches it.",
       "tier": "building",
       "practiceCount": 5,
-      "activityStyle": "Diagnose · repair · justify",
-      "published": false
+      "activityStyle": "Diagnose \u00b7 repair \u00b7 justify",
+      "published": true
     },
     {
       "id": 33,
@@ -445,8 +445,8 @@
       "evidence": "Correct start, stop and count decisions on boundary examples.",
       "tier": "building",
       "practiceCount": 5,
-      "activityStyle": "Trace · compare · correct",
-      "published": false
+      "activityStyle": "Trace \u00b7 compare \u00b7 correct",
+      "published": true
     },
     {
       "id": 34,
@@ -457,8 +457,8 @@
       "evidence": "A correct operation count for nested patterns.",
       "tier": "building",
       "practiceCount": 5,
-      "activityStyle": "Count · tabulate · compare",
-      "published": false
+      "activityStyle": "Count \u00b7 tabulate \u00b7 compare",
+      "published": true
     },
     {
       "id": 35,
@@ -469,8 +469,8 @@
       "evidence": "A pointer-movement plan with a clear stopping condition.",
       "tier": "applied",
       "practiceCount": 5,
-      "activityStyle": "Choose · trace · test",
-      "published": false
+      "activityStyle": "Choose \u00b7 trace \u00b7 test",
+      "published": true
     },
     {
       "id": 36,
@@ -481,8 +481,8 @@
       "evidence": "A window-update trace and a justified validity condition.",
       "tier": "applied",
       "practiceCount": 5,
-      "activityStyle": "Trace · update · diagnose",
-      "published": false
+      "activityStyle": "Trace \u00b7 update \u00b7 diagnose",
+      "published": true
     },
     {
       "id": 37,
@@ -493,8 +493,8 @@
       "evidence": "A correct prefix model and range-result derivation.",
       "tier": "applied",
       "practiceCount": 5,
-      "activityStyle": "Construct · query · verify",
-      "published": false
+      "activityStyle": "Construct \u00b7 query \u00b7 verify",
+      "published": true
     },
     {
       "id": 38,
@@ -505,8 +505,8 @@
       "evidence": "A frequency model with correct counts for repeated values.",
       "tier": "applied",
       "practiceCount": 5,
-      "activityStyle": "Count · map · interpret",
-      "published": false
+      "activityStyle": "Count \u00b7 map \u00b7 interpret",
+      "published": true
     },
     {
       "id": 39,
@@ -517,8 +517,8 @@
       "evidence": "A correct interval classification or merge plan.",
       "tier": "applied",
       "practiceCount": 6,
-      "activityStyle": "Draw · compare · merge",
-      "published": false
+      "activityStyle": "Draw \u00b7 compare \u00b7 merge",
+      "published": true
     },
     {
       "id": 40,
@@ -529,8 +529,8 @@
       "evidence": "A pattern choice supported by the input structure and required output.",
       "tier": "synthesis",
       "practiceCount": 6,
-      "activityStyle": "Classify · compare · defend",
-      "published": false
+      "activityStyle": "Classify \u00b7 compare \u00b7 defend",
+      "published": true
     },
     {
       "id": 41,
@@ -541,8 +541,8 @@
       "evidence": "A correct operation plan for an ordered collection.",
       "tier": "foundation",
       "practiceCount": 4,
-      "activityStyle": "Trace · classify · choose",
-      "published": false
+      "activityStyle": "Trace \u00b7 classify \u00b7 choose",
+      "published": true
     },
     {
       "id": 42,
@@ -553,8 +553,8 @@
       "evidence": "A map-based solution outline and its lookup/update behaviour.",
       "tier": "building",
       "practiceCount": 5,
-      "activityStyle": "Model · query · justify",
-      "published": false
+      "activityStyle": "Model \u00b7 query \u00b7 justify",
+      "published": true
     },
     {
       "id": 43,
@@ -565,8 +565,8 @@
       "evidence": "A correct set operation plan with order limitations stated.",
       "tier": "building",
       "practiceCount": 5,
-      "activityStyle": "Select · trace · compare",
-      "published": false
+      "activityStyle": "Select \u00b7 trace \u00b7 compare",
+      "published": true
     },
     {
       "id": 44,
@@ -577,8 +577,8 @@
       "evidence": "A stack trace that preserves the correct processing order.",
       "tier": "building",
       "practiceCount": 5,
-      "activityStyle": "Trace · match · debug",
-      "published": false
+      "activityStyle": "Trace \u00b7 match \u00b7 debug",
+      "published": true
     },
     {
       "id": 45,
@@ -589,8 +589,8 @@
       "evidence": "A queue model and a correct sequence of processed items.",
       "tier": "building",
       "practiceCount": 5,
-      "activityStyle": "Trace · schedule · assess",
-      "published": false
+      "activityStyle": "Trace \u00b7 schedule \u00b7 assess",
+      "published": true
     },
     {
       "id": 46,
@@ -601,8 +601,8 @@
       "evidence": "A correct linked-structure update sequence.",
       "tier": "applied",
       "practiceCount": 6,
-      "activityStyle": "Diagram · update · diagnose",
-      "published": false
+      "activityStyle": "Diagram \u00b7 update \u00b7 diagnose",
+      "published": true
     },
     {
       "id": 47,
@@ -613,8 +613,8 @@
       "evidence": "A priority-processing plan with tie and update behaviour considered.",
       "tier": "applied",
       "practiceCount": 6,
-      "activityStyle": "Choose · simulate · compare",
-      "published": false
+      "activityStyle": "Choose \u00b7 simulate \u00b7 compare",
+      "published": true
     },
     {
       "id": 48,
@@ -625,8 +625,8 @@
       "evidence": "A tree model and a valid traversal plan.",
       "tier": "applied",
       "practiceCount": 5,
-      "activityStyle": "Draw · classify · traverse",
-      "published": false
+      "activityStyle": "Draw \u00b7 classify \u00b7 traverse",
+      "published": true
     },
     {
       "id": 49,
@@ -637,8 +637,8 @@
       "evidence": "A composite model that supports all required operations.",
       "tier": "applied",
       "practiceCount": 6,
-      "activityStyle": "Design · justify · evaluate",
-      "published": false
+      "activityStyle": "Design \u00b7 justify \u00b7 evaluate",
+      "published": true
     },
     {
       "id": 50,
@@ -649,8 +649,8 @@
       "evidence": "A defensible structure choice for an unfamiliar scenario.",
       "tier": "synthesis",
       "practiceCount": 6,
-      "activityStyle": "Scenario choice · counterexample · defence",
-      "published": false
+      "activityStyle": "Scenario choice \u00b7 counterexample \u00b7 defence",
+      "published": true
     },
     {
       "id": 51,
@@ -661,8 +661,8 @@
       "evidence": "A correct search trace and stopping rule.",
       "tier": "foundation",
       "practiceCount": 4,
-      "activityStyle": "Trace · stop · select",
-      "published": false
+      "activityStyle": "Trace \u00b7 stop \u00b7 select",
+      "published": true
     },
     {
       "id": 52,
@@ -673,8 +673,8 @@
       "evidence": "A valid range-narrowing trace with its precondition stated.",
       "tier": "building",
       "practiceCount": 5,
-      "activityStyle": "Check precondition · trace · correct",
-      "published": false
+      "activityStyle": "Check precondition \u00b7 trace \u00b7 correct",
+      "published": true
     },
     {
       "id": 53,
@@ -685,8 +685,8 @@
       "evidence": "A reasoned decision to sort or avoid sorting.",
       "tier": "building",
       "practiceCount": 5,
-      "activityStyle": "Order · compare · justify",
-      "published": false
+      "activityStyle": "Order \u00b7 compare \u00b7 justify",
+      "published": true
     },
     {
       "id": 54,
@@ -697,8 +697,8 @@
       "evidence": "A correct sort-order specification including ties.",
       "tier": "applied",
       "practiceCount": 5,
-      "activityStyle": "Rank · repair · validate",
-      "published": false
+      "activityStyle": "Rank \u00b7 repair \u00b7 validate",
+      "published": true
     },
     {
       "id": 55,
@@ -709,8 +709,8 @@
       "evidence": "A selection strategy justified by k and input size.",
       "tier": "applied",
       "practiceCount": 6,
-      "activityStyle": "Compare · choose · estimate",
-      "published": false
+      "activityStyle": "Compare \u00b7 choose \u00b7 estimate",
+      "published": true
     },
     {
       "id": 56,
@@ -721,8 +721,8 @@
       "evidence": "A correct grouping plan with all records accounted for.",
       "tier": "applied",
       "practiceCount": 5,
-      "activityStyle": "Classify · group · reconcile",
-      "published": false
+      "activityStyle": "Classify \u00b7 group \u00b7 reconcile",
+      "published": true
     },
     {
       "id": 57,
@@ -733,8 +733,8 @@
       "evidence": "A complete merge trace with correct ordering and multiplicity.",
       "tier": "applied",
       "practiceCount": 6,
-      "activityStyle": "Trace · merge · verify",
-      "published": false
+      "activityStyle": "Trace \u00b7 merge \u00b7 verify",
+      "published": true
     },
     {
       "id": 58,
@@ -745,8 +745,8 @@
       "evidence": "A valid interval merge result for touching and overlapping cases.",
       "tier": "applied",
       "practiceCount": 6,
-      "activityStyle": "Draw · sort · merge",
-      "published": false
+      "activityStyle": "Draw \u00b7 sort \u00b7 merge",
+      "published": true
     },
     {
       "id": 59,
@@ -757,8 +757,8 @@
       "evidence": "A combined representation and lookup strategy.",
       "tier": "applied",
       "practiceCount": 6,
-      "activityStyle": "Model · query · compare",
-      "published": false
+      "activityStyle": "Model \u00b7 query \u00b7 compare",
+      "published": true
     },
     {
       "id": 60,
@@ -769,8 +769,8 @@
       "evidence": "A strategy matrix tied to input properties and required operations.",
       "tier": "synthesis",
       "practiceCount": 6,
-      "activityStyle": "Compare · eliminate · defend",
-      "published": false
+      "activityStyle": "Compare \u00b7 eliminate \u00b7 defend",
+      "published": true
     },
     {
       "id": 61,
@@ -781,8 +781,8 @@
       "evidence": "A recursive problem definition with a terminating base case.",
       "tier": "building",
       "practiceCount": 4,
-      "activityStyle": "Recognise · complete · trace",
-      "published": false
+      "activityStyle": "Recognise \u00b7 complete \u00b7 trace",
+      "published": true
     },
     {
       "id": 62,
@@ -793,8 +793,8 @@
       "evidence": "A decomposition and merge plan with all subproblems covered.",
       "tier": "applied",
       "practiceCount": 5,
-      "activityStyle": "Decompose · combine · assess",
-      "published": false
+      "activityStyle": "Decompose \u00b7 combine \u00b7 assess",
+      "published": true
     },
     {
       "id": 63,
@@ -805,8 +805,8 @@
       "evidence": "A search tree with valid pruning and backtracking steps.",
       "tier": "applied",
       "practiceCount": 5,
-      "activityStyle": "Branch · trace · prune",
-      "published": false
+      "activityStyle": "Branch \u00b7 trace \u00b7 prune",
+      "published": true
     },
     {
       "id": 64,
@@ -817,8 +817,8 @@
       "evidence": "A correct traversal sequence and explanation of the chosen order.",
       "tier": "applied",
       "practiceCount": 6,
-      "activityStyle": "Trace · order · explain",
-      "published": false
+      "activityStyle": "Trace \u00b7 order \u00b7 explain",
+      "published": true
     },
     {
       "id": 65,
@@ -829,8 +829,8 @@
       "evidence": "A breadth-first traversal with correct visitation order.",
       "tier": "applied",
       "practiceCount": 6,
-      "activityStyle": "Queue trace · discover · verify",
-      "published": false
+      "activityStyle": "Queue trace \u00b7 discover \u00b7 verify",
+      "published": true
     },
     {
       "id": 66,
@@ -841,8 +841,8 @@
       "evidence": "A graph model that preserves the domain relationships.",
       "tier": "applied",
       "practiceCount": 6,
-      "activityStyle": "Model · classify · interpret",
-      "published": false
+      "activityStyle": "Model \u00b7 classify \u00b7 interpret",
+      "published": true
     },
     {
       "id": 67,
@@ -853,8 +853,8 @@
       "evidence": "A correct reachability/cycle reasoning trace.",
       "tier": "applied",
       "practiceCount": 6,
-      "activityStyle": "Trace · mark · diagnose",
-      "published": false
+      "activityStyle": "Trace \u00b7 mark \u00b7 diagnose",
+      "published": true
     },
     {
       "id": 68,
@@ -865,8 +865,8 @@
       "evidence": "A valid dependency order or a justified cycle diagnosis.",
       "tier": "applied",
       "practiceCount": 6,
-      "activityStyle": "Order · detect · defend",
-      "published": false
+      "activityStyle": "Order \u00b7 detect \u00b7 defend",
+      "published": true
     },
     {
       "id": 69,
@@ -877,8 +877,8 @@
       "evidence": "A suitable shortest-path method choice with assumptions stated.",
       "tier": "advanced",
       "practiceCount": 6,
-      "activityStyle": "Model · choose · compare",
-      "published": false
+      "activityStyle": "Model \u00b7 choose \u00b7 compare",
+      "published": true
     },
     {
       "id": 70,
@@ -889,8 +889,8 @@
       "evidence": "A complete graph problem plan with a testable result.",
       "tier": "synthesis",
       "practiceCount": 7,
-      "activityStyle": "Scenario model · method selection · validation",
-      "published": false
+      "activityStyle": "Scenario model \u00b7 method selection \u00b7 validation",
+      "published": true
     },
     {
       "id": 71,
@@ -901,8 +901,8 @@
       "evidence": "A correct operation-count model for a simple procedure.",
       "tier": "foundation",
       "practiceCount": 4,
-      "activityStyle": "Count · tabulate · compare",
-      "published": false
+      "activityStyle": "Count \u00b7 tabulate \u00b7 compare",
+      "published": true
     },
     {
       "id": 72,
@@ -913,8 +913,8 @@
       "evidence": "A correct growth-rate ranking and explanation.",
       "tier": "building",
       "practiceCount": 5,
-      "activityStyle": "Rank · plot mentally · explain",
-      "published": false
+      "activityStyle": "Rank \u00b7 plot mentally \u00b7 explain",
+      "published": true
     },
     {
       "id": 73,
@@ -925,8 +925,8 @@
       "evidence": "A trade-off recommendation grounded in constraints.",
       "tier": "building",
       "practiceCount": 5,
-      "activityStyle": "Compare · estimate · defend",
-      "published": false
+      "activityStyle": "Compare \u00b7 estimate \u00b7 defend",
+      "published": true
     },
     {
       "id": 74,
@@ -937,8 +937,8 @@
       "evidence": "A correct overall complexity estimate.",
       "tier": "building",
       "practiceCount": 5,
-      "activityStyle": "Count · combine · simplify",
-      "published": false
+      "activityStyle": "Count \u00b7 combine \u00b7 simplify",
+      "published": true
     },
     {
       "id": 75,
@@ -949,8 +949,8 @@
       "evidence": "A method comparison with preconditions and costs stated.",
       "tier": "applied",
       "practiceCount": 6,
-      "activityStyle": "Estimate · compare · choose",
-      "published": false
+      "activityStyle": "Estimate \u00b7 compare \u00b7 choose",
+      "published": true
     },
     {
       "id": 76,
@@ -961,8 +961,8 @@
       "evidence": "A structure choice that remains plausible at the stated scale.",
       "tier": "applied",
       "practiceCount": 6,
-      "activityStyle": "Scale · stress-test · revise",
-      "published": false
+      "activityStyle": "Scale \u00b7 stress-test \u00b7 revise",
+      "published": true
     },
     {
       "id": 77,
@@ -973,8 +973,8 @@
       "evidence": "A correct baseline and a specific, justified improvement.",
       "tier": "applied",
       "practiceCount": 6,
-      "activityStyle": "Baseline · inspect · improve",
-      "published": false
+      "activityStyle": "Baseline \u00b7 inspect \u00b7 improve",
+      "published": true
     },
     {
       "id": 78,
@@ -985,8 +985,8 @@
       "evidence": "A one-pass or bounded-memory strategy with stated limitations.",
       "tier": "advanced",
       "practiceCount": 6,
-      "activityStyle": "Constrain · model · choose",
-      "published": false
+      "activityStyle": "Constrain \u00b7 model \u00b7 choose",
+      "published": true
     },
     {
       "id": 79,
@@ -997,8 +997,8 @@
       "evidence": "A caching decision with correctness and freshness conditions.",
       "tier": "advanced",
       "practiceCount": 6,
-      "activityStyle": "Trade-off · scenario · review",
-      "published": false
+      "activityStyle": "Trade-off \u00b7 scenario \u00b7 review",
+      "published": true
     },
     {
       "id": 80,
@@ -1009,8 +1009,8 @@
       "evidence": "A before/after plan with preserved acceptance criteria.",
       "tier": "synthesis",
       "practiceCount": 7,
-      "activityStyle": "Case analysis · optimisation · proof",
-      "published": false
+      "activityStyle": "Case analysis \u00b7 optimisation \u00b7 proof",
+      "published": true
     },
     {
       "id": 81,
@@ -1021,8 +1021,8 @@
       "evidence": "A small, high-value test set linked to requirements.",
       "tier": "building",
       "practiceCount": 5,
-      "activityStyle": "Derive · classify · verify",
-      "published": false
+      "activityStyle": "Derive \u00b7 classify \u00b7 verify",
+      "published": true
     },
     {
       "id": 82,
@@ -1033,8 +1033,8 @@
       "evidence": "An adversarial test set with the defect each case targets.",
       "tier": "applied",
       "practiceCount": 5,
-      "activityStyle": "Generate · target · explain",
-      "published": false
+      "activityStyle": "Generate \u00b7 target \u00b7 explain",
+      "published": true
     },
     {
       "id": 83,
@@ -1045,8 +1045,8 @@
       "evidence": "A coherent correctness argument for a short procedure.",
       "tier": "applied",
       "practiceCount": 6,
-      "activityStyle": "State · maintain · conclude",
-      "published": false
+      "activityStyle": "State \u00b7 maintain \u00b7 conclude",
+      "published": true
     },
     {
       "id": 84,
@@ -1057,8 +1057,8 @@
       "evidence": "A defect hypothesis supported by a reproducible trace.",
       "tier": "applied",
       "practiceCount": 6,
-      "activityStyle": "Reproduce · isolate · explain",
-      "published": false
+      "activityStyle": "Reproduce \u00b7 isolate \u00b7 explain",
+      "published": true
     },
     {
       "id": 85,
@@ -1069,8 +1069,8 @@
       "evidence": "A counterexample and a corrected high-level approach.",
       "tier": "advanced",
       "practiceCount": 6,
-      "activityStyle": "Challenge · disprove · redesign",
-      "published": false
+      "activityStyle": "Challenge \u00b7 disprove \u00b7 redesign",
+      "published": true
     },
     {
       "id": 86,
@@ -1081,8 +1081,8 @@
       "evidence": "A regression checklist with targeted tests.",
       "tier": "advanced",
       "practiceCount": 6,
-      "activityStyle": "Compare · test · review",
-      "published": false
+      "activityStyle": "Compare \u00b7 test \u00b7 review",
+      "published": true
     },
     {
       "id": 87,
@@ -1093,8 +1093,8 @@
       "evidence": "A defensive data-handling policy with explicit outcomes.",
       "tier": "advanced",
       "practiceCount": 6,
-      "activityStyle": "Classify · decide · justify",
-      "published": false
+      "activityStyle": "Classify \u00b7 decide \u00b7 justify",
+      "published": true
     },
     {
       "id": 88,
@@ -1105,8 +1105,8 @@
       "evidence": "A review containing specific defects, evidence and recommended changes.",
       "tier": "advanced",
       "practiceCount": 6,
-      "activityStyle": "Inspect · annotate · prioritise",
-      "published": false
+      "activityStyle": "Inspect \u00b7 annotate \u00b7 prioritise",
+      "published": true
     },
     {
       "id": 89,
@@ -1117,8 +1117,8 @@
       "evidence": "A keep/change/reject decision backed by tests and reasoning.",
       "tier": "advanced",
       "practiceCount": 6,
-      "activityStyle": "Audit · test · decide",
-      "published": false
+      "activityStyle": "Audit \u00b7 test \u00b7 decide",
+      "published": true
     },
     {
       "id": 90,
@@ -1129,8 +1129,8 @@
       "evidence": "A recommendation with assumptions, trade-offs and a validation plan.",
       "tier": "synthesis",
       "practiceCount": 7,
-      "activityStyle": "Scenario review · prioritise · defend",
-      "published": false
+      "activityStyle": "Scenario review \u00b7 prioritise \u00b7 defend",
+      "published": true
     },
     {
       "id": 91,
@@ -1141,8 +1141,8 @@
       "evidence": "A complete approach and tests for repeated, empty and unique records.",
       "tier": "applied",
       "practiceCount": 6,
-      "activityStyle": "Real-world case · model · validate",
-      "published": false
+      "activityStyle": "Real-world case \u00b7 model \u00b7 validate",
+      "published": true
     },
     {
       "id": 92,
@@ -1153,8 +1153,8 @@
       "evidence": "A schedule-conflict approach with endpoint rules and tests.",
       "tier": "applied",
       "practiceCount": 6,
-      "activityStyle": "Case model · compare · test",
-      "published": false
+      "activityStyle": "Case model \u00b7 compare \u00b7 test",
+      "published": true
     },
     {
       "id": 93,
@@ -1165,8 +1165,8 @@
       "evidence": "A stock-update model and an auditable validation approach.",
       "tier": "applied",
       "practiceCount": 6,
-      "activityStyle": "Model · trace · reconcile",
-      "published": false
+      "activityStyle": "Model \u00b7 trace \u00b7 reconcile",
+      "published": true
     },
     {
       "id": 94,
@@ -1177,8 +1177,8 @@
       "evidence": "A route-planning strategy with assumptions and feasibility checks.",
       "tier": "advanced",
       "practiceCount": 6,
-      "activityStyle": "Model · constrain · choose",
-      "published": false
+      "activityStyle": "Model \u00b7 constrain \u00b7 choose",
+      "published": true
     },
     {
       "id": 95,
@@ -1189,8 +1189,8 @@
       "evidence": "A defensible search-and-ranking pipeline.",
       "tier": "advanced",
       "practiceCount": 7,
-      "activityStyle": "Pipeline · rank · critique",
-      "published": false
+      "activityStyle": "Pipeline \u00b7 rank \u00b7 critique",
+      "published": true
     },
     {
       "id": 96,
@@ -1201,8 +1201,8 @@
       "evidence": "An incident investigation plan with evidence and next tests.",
       "tier": "advanced",
       "practiceCount": 7,
-      "activityStyle": "Triage · trace · communicate",
-      "published": false
+      "activityStyle": "Triage \u00b7 trace \u00b7 communicate",
+      "published": true
     },
     {
       "id": 97,
@@ -1213,8 +1213,8 @@
       "evidence": "A behaviour trace, requirement check and defect hypothesis.",
       "tier": "advanced",
       "practiceCount": 7,
-      "activityStyle": "Read · trace · critique",
-      "published": false
+      "activityStyle": "Read \u00b7 trace \u00b7 critique",
+      "published": true
     },
     {
       "id": 98,
@@ -1225,8 +1225,8 @@
       "evidence": "A revised plan with changed assumptions, tests and review notes.",
       "tier": "synthesis",
       "practiceCount": 7,
-      "activityStyle": "Multi-step case · re-plan · defend",
-      "published": false
+      "activityStyle": "Multi-step case \u00b7 re-plan \u00b7 defend",
+      "published": true
     },
     {
       "id": 99,
@@ -1238,7 +1238,7 @@
       "tier": "capstone",
       "practiceCount": 2,
       "activityStyle": "Two integrated interview cases",
-      "published": false
+      "published": true
     },
     {
       "id": 100,
@@ -1250,7 +1250,7 @@
       "tier": "capstone",
       "practiceCount": 1,
       "activityStyle": "One integrated capstone dossier",
-      "published": false
+      "published": true
     }
   ],
   "timings": {

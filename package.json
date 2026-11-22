@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "share": "bash ./scripts/keep-online-daemon.sh",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test:security": "supabase test db"

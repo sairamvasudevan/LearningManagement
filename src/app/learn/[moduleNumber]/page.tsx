@@ -22,10 +22,10 @@ export default async function LearnModulePage({ params }: PageProps) {
     redirect("/portal");
   }
 
-  // Sequential progression check:
-  // Module 1 is always unlocked.
-  // Module N requires Module N-1 to be marked completed in SQLite.
-  if (moduleNumber > 1) {
+  // Stage start modules (1, 11, 21, 31, 41, 51, 61, 71, 81, 91) are unlocked by default.
+  // Subsequent modules require the immediate preceding module to be completed with >= 80%.
+  const isStageStart = moduleNumber % 10 === 1;
+  if (!isStageStart && moduleNumber > 1) {
     const progressList = getUserProgress(identity.id);
     const completedSet = new Set(
       progressList.filter((p) => p.status === "completed").map((p) => p.module_number),
