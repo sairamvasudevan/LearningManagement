@@ -109,7 +109,7 @@ export default async function StudentPortalPage() {
                 <span style={{ fontSize: "11px", fontWeight: 800, color: "#f59e0b", textTransform: "uppercase", letterSpacing: "0.06em" }}>
                   ADVANCED PRACTICAL TRACKS
                 </span>
-                <h3 style={{ margin: "2px 0 0", fontSize: "20px", color: "#0f172a", fontWeight: 800 }}>
+                <h3 style={{ margin: "2px 0 0", fontSize: "20px", color: "#ffffff", fontWeight: 800 }}>
                   Specialization Laboratories &amp; Coding Arenas
                 </h3>
               </div>

@@ -13,12 +13,13 @@ export function SiteHeader({
   admin?: boolean;
 }) {
   const [searchOpen, setSearchOpen] = useState(false);
-  const [exploreOpen, setExploreOpen] = useState(false);
+  const [modulesDropdownOpen, setModulesDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [topBannerDismissed, setTopBannerDismissed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
-  const exploreRef = useRef<HTMLDivElement>(null);
+
   const searchRef = useRef<HTMLDivElement>(null);
+  const modulesRef = useRef<HTMLDivElement>(null);
 
   async function handleSignOut(e: React.FormEvent | React.MouseEvent) {
     e.preventDefault();
@@ -37,316 +38,415 @@ export function SiteHeader({
     window.location.href = "/login";
   }
 
+  // Keyboard shortcut: Cmd+K / Ctrl+K opens search
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setSearchOpen((prev) => !prev);
+      }
+      if (e.key === "Escape") {
+        setSearchOpen(false);
+        setModulesDropdownOpen(false);
+        setMobileMenuOpen(false);
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   // Close dropdowns on outside click
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (exploreRef.current && !exploreRef.current.contains(event.target as Node)) {
-        setExploreOpen(false);
-      }
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setSearchOpen(false);
+      }
+      if (modulesRef.current && !modulesRef.current.contains(event.target as Node)) {
+        setModulesDropdownOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Filter modules and courses for search
-  const searchResults = searchQuery.trim().length > 1
-    ? [
-        ...COURSE_PACKAGES.filter(
-          (c) =>
-            c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            c.skills.some((s) => s.toLowerCase().includes(searchQuery.toLowerCase())),
-        ).map((c) => ({
-          type: "course" as const,
-          title: c.title,
-          sub: `${c.totalHours} hrs · ${c.category}`,
-          href: `/courses/${c.slug}`,
-          badge: c.priceLabel,
-        })),
-        ...catalog.modules
-          .filter(
-            (m) =>
-              m.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              m.objective.toLowerCase().includes(searchQuery.toLowerCase()),
-          )
-          .slice(0, 5)
-          .map((m) => ({
-            type: "module" as const,
-            title: `Module ${String(m.id).padStart(2, "0")}: ${m.title}`,
-            sub: m.objective,
-            href: m.published ? `/learn/${m.id}` : `/courses/problem-solving-lab`,
-            badge: m.published ? "Live Now" : "Planned",
+  // Search results calculation
+  const searchResults =
+    searchQuery.trim().length > 1
+      ? [
+          ...COURSE_PACKAGES.filter(
+            (c) =>
+              c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              c.skills.some((s) => s.toLowerCase().includes(searchQuery.toLowerCase())),
+          ).map((c) => ({
+            title: c.title,
+            sub: `${c.totalHours} hrs · ${c.category}`,
+            href: `/courses/${c.slug}`,
+            badge: c.priceLabel,
           })),
-      ]
-    : [];
+          ...catalog.modules
+            .filter(
+              (m) =>
+                m.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                m.objective.toLowerCase().includes(searchQuery.toLowerCase()),
+            )
+            .slice(0, 6)
+            .map((m) => ({
+              title: `Module ${String(m.id).padStart(2, "0")}: ${m.title}`,
+              sub: m.objective,
+              href: m.published ? `/learn/${m.id}` : `/courses/problem-solving-lab`,
+              badge: m.published ? "Live Now" : "Planned",
+            })),
+        ]
+      : [];
 
   return (
-    <>
-      {/* Top Coursera/Udemy style announcement ribbon */}
-      {!topBannerDismissed && (
-        <div className="ed-top-banner" style={{ background: "linear-gradient(90deg, #111d2e 0%, #1e1308 50%, #111d2e 100%)" }}>
-          <div className="ed-top-banner-inner">
-            <span className="badge-flame" style={{ padding: "3px 8px", borderRadius: 99, marginRight: 4 }}>
-              🔥 SCHOLARSHIP ENROLLMENT ACTIVE
-            </span>
-            <span className="ed-banner-text">
-              Master 100 hours of systematic problem solving with zero tuition fee. Flagship course is{" "}
-              <strong>100% Free (₹0)</strong> for verified students.
-            </span>
-            <Link href="/register?course=problem-solving-lab" className="ed-banner-cta" style={{ color: "#ff8a00" }}>
-              Enroll Free →
-            </Link>
-            <button
-              type="button"
-              className="ed-banner-close"
-              aria-label="Dismiss banner"
-              onClick={() => setTopBannerDismissed(true)}
-            >
-              ×
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Main sticky header */}
-      <header className="site-header site-header-sticky">
-        <div className="header-left">
-          <Link href="/" className="wordmark" aria-label="Nexus Academy home">
-            <span className="mark" style={{ background: "linear-gradient(135deg, #ff5722, #ff9800)", color: "#fff" }}>
-              ⚡
-            </span>
-            <span>
-              <b>{PLATFORM_NAME}</b>
-              <small>{PLATFORM_SUBTITLE}</small>
-            </span>
+    <header className="futuristic-header">
+      <div className="futuristic-header-inner">
+        {/* Brand / Logo */}
+        <div style={{ display: "flex", alignItems: "center", gap: "18px" }}>
+          <Link href="/" className="nexus-brand" aria-label="Nexus Academy Home">
+            <div className="nexus-logo-orb">
+              <span className="nexus-logo-bolt">⚡</span>
+            </div>
+            <div className="nexus-brand-text">
+              <span className="nexus-brand-name">{PLATFORM_NAME}</span>
+              <span className="nexus-version-pill">SYSTEM v2.6</span>
+            </div>
           </Link>
 
-          {/* Explore Dropdown */}
-          <div className="header-dropdown-wrap" ref={exploreRef}>
+          {/* Training Modules Dropdown */}
+          <div className="modules-dropdown-wrapper" ref={modulesRef}>
             <button
               type="button"
-              className={`header-explore-btn ${exploreOpen ? "open" : ""}`}
-              onClick={() => setExploreOpen(!exploreOpen)}
+              className={`modules-trigger-btn ${modulesDropdownOpen ? "active" : ""}`}
+              onClick={() => setModulesDropdownOpen(!modulesDropdownOpen)}
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <rect x="3" y="3" width="7" height="7" />
-                <rect x="14" y="3" width="7" height="7" />
-                <rect x="14" y="14" width="7" height="7" />
-                <rect x="3" y="14" width="7" height="7" />
-              </svg>
-              <span>Explore</span>
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+              <span>Training Modules</span>
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                style={{
+                  transform: modulesDropdownOpen ? "rotate(180deg)" : "rotate(0deg)",
+                  transition: "transform 0.2s ease",
+                }}
+              >
                 <polyline points="6 9 12 15 18 9" />
               </svg>
             </button>
 
-            {exploreOpen && (
-              <div className="explore-menu-dropdown">
-                <div className="explore-dropdown-section">
-                  <span className="dropdown-label">Flagship Curriculum</span>
-                  <Link
-                    href="/courses/problem-solving-lab"
-                    className="explore-menu-item highlight"
-                    onClick={() => setExploreOpen(false)}
-                  >
-                    <div>
-                      <b>Problem Solving Lab</b>
-                      <small>100 Hours · 10 Progressive Paths · Free</small>
-                    </div>
-                    <span className="badge badge-live">Available</span>
-                  </Link>
-                  <Link
-                    href="/dsa"
-                    className="explore-menu-item highlight"
-                    onClick={() => setExploreOpen(false)}
-                  >
-                    <div>
-                      <b>DSA CodeStudio: Algorithmic Arena</b>
-                      <small>C, C++, Java &amp; Python Compiler · 80 Hours · Free</small>
-                    </div>
-                    <span className="badge badge-live" style={{ background: "#ff6a00", color: "#fff" }}>Live IDE</span>
-                  </Link>
-                  <Link
-                    href="/web-dev"
-                    className="explore-menu-item highlight"
-                    onClick={() => setExploreOpen(false)}
-                  >
-                    <div>
-                      <b>Web Dev &amp; MERN Stack Sandbox</b>
-                      <small>Live HTML, CSS, JS Editor &amp; DOM Tester · 75 Hours · Free</small>
-                    </div>
-                    <span className="badge badge-live" style={{ background: "#38bdf8", color: "#0f172a" }}>Live Editor</span>
-                  </Link>
-                  <Link
-                    href="/ide"
-                    className="explore-menu-item highlight"
-                    onClick={() => setExploreOpen(false)}
-                  >
-                    <div>
-                      <b>Standalone Online IDE &amp; Compiler</b>
-                      <small>C, C++, Java, Python &amp; Web Sandbox Scratchpad · Free</small>
-                    </div>
-                    <span className="badge badge-live" style={{ background: "#10b981", color: "#fff" }}>Open IDE</span>
-                  </Link>
+            {modulesDropdownOpen && (
+              <div className="futuristic-modules-flyout">
+                <div className="flyout-header">
+                  <span className="flyout-kicker">Core System Architecture</span>
+                  <span className="flyout-count">4 Precision Modules</span>
                 </div>
 
-                <div className="explore-dropdown-section">
-                  <span className="dropdown-label">Engineering Tracks (Upcoming)</span>
+                <div className="flyout-grid">
                   <Link
-                    href="/#courses"
-                    className="explore-menu-item"
-                    onClick={() => setExploreOpen(false)}
+                    href="/courses/problem-solving-lab"
+                    className="flyout-item featured"
+                    onClick={() => setModulesDropdownOpen(false)}
                   >
-                    <div>
-                      <b>Distributed Systems &amp; Scalable Architecture</b>
-                      <small>60 Hours · Raft, Caching, Event Microservices</small>
+                    <div className="flyout-icon" style={{ background: "rgba(99, 102, 241, 0.15)", color: "#818cf8" }}>
+                      📐
                     </div>
-                    <span className="badge badge-soon">Roadmap</span>
+                    <div>
+                      <div className="flyout-title">
+                        <b>Problem Solving Lab</b>
+                        <span className="flyout-badge-flagship">Flagship · ₹0</span>
+                      </div>
+                      <div className="flyout-desc">100-Hour systematic algorithmic reasoning &amp; invariant proofs.</div>
+                    </div>
                   </Link>
+
                   <Link
-                    href="/#courses"
-                    className="explore-menu-item"
-                    onClick={() => setExploreOpen(false)}
+                    href="/dsa"
+                    className="flyout-item"
+                    onClick={() => setModulesDropdownOpen(false)}
                   >
-                    <div>
-                      <b>Generative AI Systems &amp; LLM Engineering</b>
-                      <small>45 Hours · Hybrid Vector RAG, Agent Loops</small>
+                    <div className="flyout-icon" style={{ background: "rgba(6, 182, 212, 0.15)", color: "#22d3ee" }}>
+                      ⚔️
                     </div>
-                    <span className="badge badge-soon">Roadmap</span>
+                    <div>
+                      <div className="flyout-title">
+                        <b>Placement DSA Arena</b>
+                        <span className="flyout-badge-cyan">Live Compiler</span>
+                      </div>
+                      <div className="flyout-desc">C++, Java, Python, C multi-language placement practice suite.</div>
+                    </div>
                   </Link>
+
                   <Link
-                    href="/#courses"
-                    className="explore-menu-item"
-                    onClick={() => setExploreOpen(false)}
+                    href="/web-dev"
+                    className="flyout-item"
+                    onClick={() => setModulesDropdownOpen(false)}
                   >
-                    <div>
-                      <b>Competitive Programming &amp; Combinatorics</b>
-                      <small>80 Hours · Trees, Network Flows, ICPC prep</small>
+                    <div className="flyout-icon" style={{ background: "rgba(16, 185, 129, 0.15)", color: "#34d399" }}>
+                      🌐
                     </div>
-                    <span className="badge badge-soon">Roadmap</span>
+                    <div>
+                      <div className="flyout-title">
+                        <b>Full-Stack &amp; MERN Studio</b>
+                        <span className="flyout-badge-green">Interactive</span>
+                      </div>
+                      <div className="flyout-desc">Hands-on WebKata HTML/CSS/JS sandbox with real-time DOM tester.</div>
+                    </div>
+                  </Link>
+
+                  <Link
+                    href="/ide"
+                    className="flyout-item"
+                    onClick={() => setModulesDropdownOpen(false)}
+                  >
+                    <div className="flyout-icon" style={{ background: "rgba(245, 158, 11, 0.15)", color: "#fbbf24" }}>
+                      💻
+                    </div>
+                    <div>
+                      <div className="flyout-title">
+                        <b>Cloud Scratchpad IDE</b>
+                        <span className="flyout-badge-amber">Custom STDIN</span>
+                      </div>
+                      <div className="flyout-desc">Zero-setup multi-language online compiler for quick debugging.</div>
+                    </div>
                   </Link>
                 </div>
               </div>
             )}
           </div>
+        </div>
 
-          {/* Search Bar with instant preview */}
-          <div className="header-search-wrap" ref={searchRef}>
-            <div className="header-search-box">
+        {/* Primary Center Nav Links */}
+        <nav className="futuristic-nav" aria-label="Main system navigation">
+          <Link href="/courses/problem-solving-lab" className="futuristic-nav-link">
+            100h Lab
+          </Link>
+          <Link href="/dsa" className="futuristic-nav-link accent-cyan">
+            DSA Arena
+          </Link>
+          <Link href="/web-dev" className="futuristic-nav-link accent-green">
+            Web Dev &amp; MERN
+          </Link>
+          <Link href="/ide" className="futuristic-nav-link accent-amber">
+            Cloud IDE
+          </Link>
+          <Link href="/#curriculum" className="futuristic-nav-link">
+            10 Stages
+          </Link>
+        </nav>
+
+        {/* Right Side: Quick Search + Authentication */}
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          {/* Quick Search Trigger */}
+          <div className="header-search-container" ref={searchRef}>
+            <button
+              type="button"
+              className="quick-search-trigger"
+              onClick={() => setSearchOpen(!searchOpen)}
+              aria-label="Search curriculum"
+            >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <circle cx="11" cy="11" r="8" />
                 <line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
-              <input
-                type="search"
-                placeholder="What do you want to learn? (e.g. Big-O, pointers, DP)..."
-                value={searchQuery}
-                onFocus={() => setSearchOpen(true)}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setSearchOpen(true);
-                }}
-              />
-              <kbd className="search-kbd">/</kbd>
-            </div>
+              <span className="search-placeholder-text">Quick search...</span>
+              <kbd className="cyber-kbd">⌘K</kbd>
+            </button>
 
-            {searchOpen && searchResults.length > 0 && (
-              <div className="search-results-dropdown">
-                <div className="search-results-head">
-                  <span>Matching Lessons &amp; Packages</span>
-                  <small>{searchResults.length} results</small>
-                </div>
-                {searchResults.map((item, idx) => (
-                  <Link
-                    key={idx}
-                    href={item.href}
-                    className="search-result-item"
+            {searchOpen && (
+              <div className="futuristic-search-palette">
+                <div className="search-palette-input-wrap">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                  </svg>
+                  <input
+                    type="search"
+                    autoFocus
+                    placeholder="Search topics, algorithms, Big-O, modules..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="search-palette-input"
+                  />
+                  <button
+                    type="button"
+                    className="search-palette-close"
                     onClick={() => {
                       setSearchOpen(false);
                       setSearchQuery("");
                     }}
                   >
-                    <div>
-                      <b>{item.title}</b>
-                      <small>{item.sub}</small>
+                    ESC
+                  </button>
+                </div>
+
+                <div className="search-palette-results">
+                  {searchResults.length > 0 ? (
+                    searchResults.map((item, idx) => (
+                      <Link
+                        key={idx}
+                        href={item.href}
+                        className="palette-result-item"
+                        onClick={() => {
+                          setSearchOpen(false);
+                          setSearchQuery("");
+                        }}
+                      >
+                        <div>
+                          <b className="palette-item-title">{item.title}</b>
+                          <small className="palette-item-sub">{item.sub}</small>
+                        </div>
+                        <span className="palette-item-badge">{item.badge}</span>
+                      </Link>
+                    ))
+                  ) : searchQuery.trim().length > 1 ? (
+                    <div className="palette-empty-state">No matching lessons found for &ldquo;{searchQuery}&rdquo;</div>
+                  ) : (
+                    <div className="palette-hints">
+                      <span className="hint-label">Try searching:</span>
+                      <button type="button" onClick={() => setSearchQuery("Big-O")}>Big-O</button>
+                      <button type="button" onClick={() => setSearchQuery("Dynamic Programming")}>Dynamic Programming</button>
+                      <button type="button" onClick={() => setSearchQuery("HTML5")}>HTML5</button>
+                      <button type="button" onClick={() => setSearchQuery("Two Pointers")}>Two Pointers</button>
                     </div>
-                    <span className={`badge ${item.badge.includes("Free") || item.badge.includes("Live") ? "badge-live" : "badge-soon"}`}>
-                      {item.badge}
-                    </span>
-                  </Link>
-                ))}
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* User Auth Action */}
+          {signedIn ? (
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <Link
+                href={admin ? "/admin" : "/portal"}
+                className="portal-status-chip"
+              >
+                <span className="chip-live-dot" />
+                <span>{admin ? "Admin Console" : "Student Hub"}</span>
+              </Link>
+              <form action="/auth/signout" method="post" onSubmit={handleSignOut} style={{ margin: 0 }}>
+                <button
+                  type="submit"
+                  disabled={signingOut}
+                  className="futuristic-signout-btn"
+                  title="Sign out of system"
+                >
+                  {signingOut ? "..." : "Sign Out"}
+                </button>
+              </form>
+            </div>
+          ) : (
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <Link href="/login" className="futuristic-signin-link">
+                Sign In
+              </Link>
+              <Link
+                href="/register?course=problem-solving-lab"
+                className="futuristic-cta-btn"
+              >
+                <span>Start Free</span>
+                <span className="btn-arrow">→</span>
+              </Link>
+            </div>
+          )}
+
+          {/* Mobile Menu Toggle */}
+          <button
+            type="button"
+            className="mobile-hamburger-btn"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle navigation menu"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              {mobileMenuOpen ? (
+                <path d="M18 6L6 18M6 6l12 12" />
+              ) : (
+                <path d="M4 6h16M4 12h16M4 18h16" />
+              )}
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Drawer */}
+      {mobileMenuOpen && (
+        <div className="mobile-nav-drawer">
+          <Link
+            href="/courses/problem-solving-lab"
+            className="mobile-drawer-link"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <span>📐 100-Hour Problem Solving Lab</span>
+            <span className="drawer-badge">₹0 Free</span>
+          </Link>
+          <Link
+            href="/dsa"
+            className="mobile-drawer-link"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <span>⚔️ Placement DSA Arena</span>
+            <span className="drawer-badge">Live IDE</span>
+          </Link>
+          <Link
+            href="/web-dev"
+            className="mobile-drawer-link"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <span>🌐 Web Dev &amp; MERN Studio</span>
+            <span className="drawer-badge">DOM Sandbox</span>
+          </Link>
+          <Link
+            href="/ide"
+            className="mobile-drawer-link"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <span>💻 Standalone Cloud IDE</span>
+            <span className="drawer-badge">Compiler</span>
+          </Link>
+          <Link
+            href="/#curriculum"
+            className="mobile-drawer-link"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <span>🗺️ 10-Stage Roadmap</span>
+          </Link>
+          <div className="mobile-drawer-footer">
+            {signedIn ? (
+              <Link
+                href={admin ? "/admin" : "/portal"}
+                className="futuristic-cta-btn"
+                style={{ width: "100%", justifyContent: "center" }}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Go to Portal →
+              </Link>
+            ) : (
+              <div style={{ display: "flex", gap: "10px", width: "100%" }}>
+                <Link
+                  href="/login"
+                  className="futuristic-signin-link"
+                  style={{ flex: 1, textAlign: "center", padding: "10px" }}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/register?course=problem-solving-lab"
+                  className="futuristic-cta-btn"
+                  style={{ flex: 1, justifyContent: "center" }}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Start Free →
+                </Link>
               </div>
             )}
           </div>
         </div>
-
-        {/* Navigation Right */}
-        <nav className="header-nav" aria-label="Primary navigation">
-          {signedIn ? (
-            <>
-              {!admin && (
-                <>
-                  <Link href="/ide" style={{ color: "#10b981", fontWeight: 700 }}>
-                    💻 Online IDE
-                  </Link>
-                  <Link href="/dsa" style={{ color: "#ff6a00", fontWeight: 700 }}>
-                    ⚡ DSA Arena
-                  </Link>
-                  <Link href="/web-dev" style={{ color: "#38bdf8", fontWeight: 700 }}>
-                    🌐 Web Dev &amp; MERN
-                  </Link>
-                  <Link href="/#courses">Courses</Link>
-                  <Link href="/#curriculum">10-Path Roadmap</Link>
-                </>
-              )}
-              <Link href={admin ? "/admin" : "/portal"} className="header-portal-chip">
-                <span className="portal-chip-dot" />
-                {admin ? "Admin Hub" : "My Learning"}
-              </Link>
-              {admin && <Link href="/admin/students">Students &amp; Progress</Link>}
-              {admin && <Link href="/admin/access">Access Control</Link>}
-              <form action="/auth/signout" method="post" onSubmit={handleSignOut}>
-                <button
-                  className="button button-quiet button-small"
-                  type="submit"
-                  disabled={signingOut}
-                  style={{ cursor: signingOut ? "wait" : "pointer" }}
-                >
-                  {signingOut ? "Signing out…" : "Sign out"}
-                </button>
-              </form>
-            </>
-          ) : (
-            <>
-              <Link href="/ide" style={{ color: "#10b981", fontWeight: 700 }}>
-                💻 Online IDE
-              </Link>
-              <Link href="/dsa" style={{ color: "#ff6a00", fontWeight: 700 }}>
-                ⚡ DSA Arena
-              </Link>
-              <Link href="/web-dev" style={{ color: "#38bdf8", fontWeight: 700 }}>
-                🌐 Web Dev &amp; MERN
-              </Link>
-              <Link href="/#courses">Courses</Link>
-              <Link href="/#curriculum">Curriculum</Link>
-              <Link href="/#pedagogy">Why It Works</Link>
-              <Link href="/#platform">For Colleges</Link>
-              <Link href="/#faq">FAQ</Link>
-              <Link href="/login" className="header-signin-link">
-                Sign In
-              </Link>
-              <Link
-                className="button button-cn-primary header-enroll-btn"
-                href="/register?course=problem-solving-lab"
-              >
-                Join Free (₹0)
-              </Link>
-            </>
-          )}
-        </nav>
-      </header>
-    </>
+      )}
+    </header>
   );
 }

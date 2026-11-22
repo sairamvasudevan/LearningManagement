@@ -891,7 +891,7 @@ export function ComparisonSection() {
             <tr>
               <th style={{ width: "32%" }}>Dimension</th>
               <th style={{ width: "34%" }}>Traditional Video Tutorials</th>
-              <th style={{ width: "34%", background: "#fff5eb", color: "#ff6a00" }}>
+              <th style={{ width: "34%", background: "rgba(99, 102, 241, 0.2)", color: "#818cf8" }}>
                 Problem Solving Lab (Flagship)
               </th>
             </tr>
@@ -902,7 +902,7 @@ export function ComparisonSection() {
                 <b>Learning Mode</b>
               </td>
               <td>Passive video watching (illusion of competence)</td>
-              <td style={{ background: "#fffbf7" }}>
+              <td style={{ background: "rgba(99, 102, 241, 0.08)" }}>
                 <b>Active retrieval &amp; hands-on checkpoint evaluation</b>
               </td>
             </tr>
@@ -911,7 +911,7 @@ export function ComparisonSection() {
                 <b>Progression Barrier</b>
               </td>
               <td>Click next anytime; zero mastery required</td>
-              <td style={{ background: "#fffbf7" }}>
+              <td style={{ background: "rgba(99, 102, 241, 0.08)" }}>
                 <b>Strict 80% checkpoint score required to unlock next lesson</b>
               </td>
             </tr>
@@ -920,7 +920,7 @@ export function ComparisonSection() {
                 <b>Syntax vs Principles</b>
               </td>
               <td>Heavy syntax memorization in one chosen language</td>
-              <td style={{ background: "#fffbf7" }}>
+              <td style={{ background: "rgba(99, 102, 241, 0.08)" }}>
                 <b>Language-independent algorithmic modeling &amp; invariants</b>
               </td>
             </tr>
@@ -929,7 +929,7 @@ export function ComparisonSection() {
                 <b>Mistake Diagnosis</b>
               </td>
               <td>Generic error messages or forum threads</td>
-              <td style={{ background: "#fffbf7" }}>
+              <td style={{ background: "rgba(99, 102, 241, 0.08)" }}>
                 <b>Option-by-option explanations of why wrong answers fail</b>
               </td>
             </tr>
@@ -938,7 +938,7 @@ export function ComparisonSection() {
                 <b>Institutional Visibility</b>
               </td>
               <td>None; college faculty cannot verify student effort</td>
-              <td style={{ background: "#fffbf7" }}>
+              <td style={{ background: "rgba(99, 102, 241, 0.08)" }}>
                 <b>Full Admin Portal: cohort analytics, attempts, and verification</b>
               </td>
             </tr>
@@ -947,8 +947,8 @@ export function ComparisonSection() {
                 <b>Cost to Students</b>
               </td>
               <td>₹4,000 – ₹25,000 subscription fees</td>
-              <td style={{ background: "#fffbf7" }}>
-                <b style={{ color: "#ff6a00" }}>₹0 / Free Flagship Access</b>
+              <td style={{ background: "rgba(99, 102, 241, 0.08)" }}>
+                <b style={{ color: "#34d399" }}>₹0 / Free Flagship Access</b>
               </td>
             </tr>
           </tbody>
