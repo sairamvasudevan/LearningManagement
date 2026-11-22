@@ -15,6 +15,8 @@ export type DbUser = {
   degree: string;
   graduation_year: number | null;
   enrollment_status: "approved" | "pending";
+  password_hash?: string;
+  password_salt?: string;
   created_at: string;
 };
 
@@ -96,6 +98,8 @@ export function getDatabase(): DatabaseSync {
       degree TEXT DEFAULT '',
       graduation_year INTEGER DEFAULT 2026,
       enrollment_status TEXT NOT NULL DEFAULT 'approved',
+      password_hash TEXT DEFAULT '',
+      password_salt TEXT DEFAULT '',
       created_at TEXT NOT NULL
     );
 
@@ -161,12 +165,27 @@ export function getDatabase(): DatabaseSync {
     CREATE INDEX IF NOT EXISTS idx_dsa_sub_user ON dsa_submissions(user_id, problem_id);
   `);
 
-  // Pre-seed default Admin if not exists
-  const existingAdmin = db.prepare("SELECT id FROM users WHERE email = ?").get("admin@learninghub.edu");
+  // Schema migration for password_hash and password_salt
+  try {
+    const cols = db.prepare("PRAGMA table_info(users)").all() as { name: string }[];
+    const colNames = cols.map((c) => c.name);
+    if (!colNames.includes("password_hash")) {
+      db.exec("ALTER TABLE users ADD COLUMN password_hash TEXT DEFAULT '';");
+    }
+    if (!colNames.includes("password_salt")) {
+      db.exec("ALTER TABLE users ADD COLUMN password_salt TEXT DEFAULT '';");
+    }
+  } catch {}
+
+  // Pre-seed default Admin if not exists or update password
+  const adminSalt = "admin_salt_nexus_2026";
+  const adminHash = crypto.pbkdf2Sync("AdminPassword123!", adminSalt, 100000, 64, "sha512").toString("hex");
+
+  const existingAdmin = db.prepare("SELECT id, password_hash FROM users WHERE email = ?").get("admin@learninghub.edu") as { id: string; password_hash?: string } | undefined;
   if (!existingAdmin) {
     db.prepare(`
-      INSERT INTO users (id, email, role, full_name, phone, college, register_number, department, degree, graduation_year, enrollment_status, created_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO users (id, email, role, full_name, phone, college, register_number, department, degree, graduation_year, enrollment_status, password_hash, password_salt, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       "00000000-0000-4000-a000-000000000099",
       "admin@learninghub.edu",
@@ -179,16 +198,23 @@ export function getDatabase(): DatabaseSync {
       "Head of Technical Learning",
       2020,
       "approved",
+      adminHash,
+      adminSalt,
       new Date().toISOString(),
     );
+  } else if (!existingAdmin.password_hash || !existingAdmin.password_hash.trim()) {
+    db.prepare("UPDATE users SET password_hash = ?, password_salt = ? WHERE email = ?").run(adminHash, adminSalt, "admin@learninghub.edu");
   }
 
-  // Pre-seed default Demo Student if not exists
-  const existingStudent = db.prepare("SELECT id FROM users WHERE email = ?").get("student@learninghub.edu");
+  // Pre-seed default Demo Student if not exists or update password
+  const studentSalt = "student_salt_nexus_2026";
+  const studentHash = crypto.pbkdf2Sync("StudentPassword123!", studentSalt, 100000, 64, "sha512").toString("hex");
+
+  const existingStudent = db.prepare("SELECT id, password_hash FROM users WHERE email = ?").get("student@learninghub.edu") as { id: string; password_hash?: string } | undefined;
   if (!existingStudent) {
     db.prepare(`
-      INSERT INTO users (id, email, role, full_name, phone, college, register_number, department, degree, graduation_year, enrollment_status, created_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO users (id, email, role, full_name, phone, college, register_number, department, degree, graduation_year, enrollment_status, password_hash, password_salt, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       "00000000-0000-4000-a000-000000000001",
       "student@learninghub.edu",
@@ -201,12 +227,35 @@ export function getDatabase(): DatabaseSync {
       "B.Tech Computer Science",
       2026,
       "approved",
+      studentHash,
+      studentSalt,
       new Date().toISOString(),
     );
+  } else if (!existingStudent.password_hash || !existingStudent.password_hash.trim()) {
+    db.prepare("UPDATE users SET password_hash = ?, password_salt = ? WHERE email = ?").run(studentHash, studentSalt, "student@learninghub.edu");
   }
 
   dbInstance = db;
   return db;
+}
+
+/* -------------------------------------------------------------
+   CRYPTOGRAPHIC PASSWORD APIS
+------------------------------------------------------------- */
+export function hashPassword(password: string, existingSalt?: string): { hash: string; salt: string } {
+  const salt = existingSalt || crypto.randomBytes(16).toString("hex");
+  const hash = crypto.pbkdf2Sync(password, salt, 100000, 64, "sha512").toString("hex");
+  return { hash, salt };
+}
+
+export function verifyPassword(password: string, hash: string, salt: string): boolean {
+  if (!password || !hash || !salt) return false;
+  try {
+    const computed = crypto.pbkdf2Sync(password, salt, 100000, 64, "sha512").toString("hex");
+    return crypto.timingSafeEqual(Buffer.from(computed), Buffer.from(hash));
+  } catch {
+    return false;
+  }
 }
 
 /* -------------------------------------------------------------
@@ -222,6 +271,7 @@ export function createUser(data: {
   department?: string;
   degree?: string;
   graduation_year?: number | null;
+  password?: string;
 }): DbUser {
   const db = getDatabase();
   const id = crypto.randomUUID();
@@ -229,9 +279,17 @@ export function createUser(data: {
   const email = data.email.toLowerCase().trim();
   const role = data.role || (email.includes("admin") ? "admin" : "student");
 
+  let pHash = "";
+  let pSalt = "";
+  if (data.password) {
+    const { hash, salt } = hashPassword(data.password);
+    pHash = hash;
+    pSalt = salt;
+  }
+
   db.prepare(`
-    INSERT INTO users (id, email, role, full_name, phone, college, register_number, department, degree, graduation_year, enrollment_status, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'approved', ?)
+    INSERT INTO users (id, email, role, full_name, phone, college, register_number, department, degree, graduation_year, enrollment_status, password_hash, password_salt, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'approved', ?, ?, ?)
   `).run(
     id,
     email,
@@ -243,10 +301,32 @@ export function createUser(data: {
     (data.department || "").trim(),
     (data.degree || "").trim(),
     data.graduation_year ?? 2026,
+    pHash,
+    pSalt,
     now,
   );
 
   return getUserById(id)!;
+}
+
+export function validateUserCredentials(email: string, password: string): { user: DbUser | null; error?: string } {
+  const cleanEmail = email.toLowerCase().trim();
+  const user = getUserByEmail(cleanEmail);
+
+  if (!user) {
+    return { user: null, error: "No account found with this email. Please register first." };
+  }
+
+  if (!user.password_hash || !user.password_salt) {
+    return { user: null, error: "Account password is not set or has expired. Please contact administration." };
+  }
+
+  const isValid = verifyPassword(password, user.password_hash, user.password_salt);
+  if (!isValid) {
+    return { user: null, error: "Incorrect password. Please verify your credentials." };
+  }
+
+  return { user, error: undefined };
 }
 
 export function getUserById(id: string): DbUser | null {

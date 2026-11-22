@@ -90,18 +90,6 @@ export async function getCurrentIdentity(): Promise<SessionIdentity | null> {
     }
   }
 
-  // Fallback dev session via HTTP cookie
-  const sessionCookie = cookieStore.get("psl_dev_session");
-  if (sessionCookie?.value) {
-    try {
-      const parsed = JSON.parse(decodeURIComponent(sessionCookie.value));
-      if (parsed && parsed.id && parsed.role) {
-        return parsed as SessionIdentity;
-      }
-    } catch {
-      // invalid cookie format
-    }
-  }
   return null;
 }
 
@@ -129,16 +117,6 @@ export async function getRole(userId: string): Promise<"admin" | "student"> {
     // ignore
   }
 
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("psl_dev_session");
-  if (sessionCookie?.value) {
-    try {
-      const parsed = JSON.parse(decodeURIComponent(sessionCookie.value));
-      return parsed.role === "admin" ? "admin" : "student";
-    } catch {
-      return "student";
-    }
-  }
   return "student";
 }
 

@@ -9,6 +9,7 @@ import {
   recordAssessmentAttempt,
   savePracticeTask,
   getUserBySessionToken,
+  validateUserCredentials,
 } from "@/lib/db";
 
 export async function POST(request: NextRequest) {
@@ -66,60 +67,109 @@ export async function POST(request: NextRequest) {
       return response;
     }
 
-    if (action === "dev_register") {
+    if (action === "register" || action === "dev_register") {
       const email = String(body.email || "").toLowerCase().trim();
-      let user = getUserByEmail(email);
+      const password = String(body.password || "").trim();
+      const fullName = String(body.full_name || "").trim();
 
-      if (!user) {
-        user = createUser({
-          email,
-          role: "student",
-          full_name: String(body.full_name || "Enrolled Student").trim(),
-          phone: String(body.phone || "").trim(),
-          college: String(body.college || "Engineering College").trim(),
-          register_number: String(body.register_number || "REG-2026-001").trim(),
-          department: String(body.department || "Computer Science").trim(),
-          degree: String(body.degree || "B.Tech").trim(),
-          graduation_year: body.graduation_year ? Number(body.graduation_year) : 2026,
-        });
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return NextResponse.json({ error: "A valid student email address is required." }, { status: 400 });
+      }
+      if (!password || password.length < 8) {
+        return NextResponse.json({ error: "Password must be at least 8 characters." }, { status: 400 });
+      }
+      if (!fullName || fullName.length < 3) {
+        return NextResponse.json({ error: "Full name must be at least 3 characters." }, { status: 400 });
       }
 
+      // Check if user already exists
+      const existing = getUserByEmail(email);
+      if (existing) {
+        return NextResponse.json(
+          { error: "An account with this email address already exists. Please sign in instead." },
+          { status: 409 },
+        );
+      }
+
+      // Create new verified user in database with full profile & hashed password
+      const user = createUser({
+        email,
+        role: "student",
+        full_name: fullName,
+        phone: String(body.phone || "").trim(),
+        college: String(body.college || "Engineering College").trim(),
+        register_number: String(body.register_number || "REG-2026-001").trim(),
+        department: String(body.department || "Computer Science and Engineering").trim(),
+        degree: String(body.degree || "B.Tech").trim(),
+        graduation_year: body.graduation_year ? Number(body.graduation_year) : 2026,
+        password,
+      });
+
       const token = createSession(user.id);
-      response.cookies.set("psl_session", token, {
+      const res = NextResponse.json({
+        ok: true,
+        role: user.role,
+        redirect: "/portal",
+        user: {
+          id: user.id,
+          email: user.email,
+          fullName: user.full_name,
+          role: user.role,
+        },
+      });
+
+      res.cookies.set("psl_session", token, {
         path: "/",
         httpOnly: true,
         sameSite: "lax",
         maxAge: 60 * 60 * 24 * 7,
       });
 
-      return response;
+      return res;
     }
 
-    if (action === "dev_login") {
+    if (action === "login" || action === "dev_login") {
       const email = String(body.email || "").toLowerCase().trim();
-      let user = getUserByEmail(email);
+      const password = String(body.password || "").trim();
 
-      if (!user) {
-        const isAdmin = email.includes("admin") || email === "admin@learninghub.edu";
-        user = createUser({
-          email,
-          role: isAdmin ? "admin" : "student",
-          full_name: isAdmin ? "Prof. Sairam Vasudevan" : email.split("@")[0],
-          college: isAdmin ? "Learning Hub Admin" : "Engineering College",
-          register_number: isAdmin ? "ADMIN-01" : "REG-2026",
-          graduation_year: 2026,
-        });
+      if (!email) {
+        return NextResponse.json({ error: "Email address is required." }, { status: 400 });
+      }
+      if (!password) {
+        return NextResponse.json({ error: "Password is required." }, { status: 400 });
       }
 
+      // Verify credentials against database
+      const validation = validateUserCredentials(email, password);
+      if (validation.error || !validation.user) {
+        return NextResponse.json(
+          { error: validation.error || "Authentication failed. Invalid email or password." },
+          { status: 401 },
+        );
+      }
+
+      const user = validation.user;
       const token = createSession(user.id);
-      response.cookies.set("psl_session", token, {
+      const res = NextResponse.json({
+        ok: true,
+        role: user.role,
+        redirect: user.role === "admin" ? "/admin" : "/portal",
+        user: {
+          id: user.id,
+          email: user.email,
+          fullName: user.full_name,
+          role: user.role,
+        },
+      });
+
+      res.cookies.set("psl_session", token, {
         path: "/",
         httpOnly: true,
         sameSite: "lax",
         maxAge: 60 * 60 * 24 * 7,
       });
 
-      return response;
+      return res;
     }
 
     if (action === "update_progress") {

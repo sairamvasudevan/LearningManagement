@@ -10,6 +10,7 @@ export function LoginForm() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const hasSupabase = isSupabaseConfigured();
@@ -23,11 +24,12 @@ export function LoginForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: role === "admin" ? "demo_admin" : "demo_student" }),
       });
-      if (!res.ok) throw new Error("Could not start demo session.");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Could not start session.");
       router.replace(role === "admin" ? "/admin" : "/portal");
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to launch demo session.");
+      setError(err instanceof Error ? err.message : "Failed to launch session.");
       setBusy(false);
     }
   }
@@ -48,19 +50,28 @@ export function LoginForm() {
         router.replace("/portal");
         router.refresh();
       } else {
-        // Fallback local dev login
+        // Real SQLite Backend Login & Password Verification
         const res = await fetch("/api/auth/session", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: "dev_login", email }),
+          body: JSON.stringify({
+            action: "login",
+            email: email.trim(),
+            password: password.trim(),
+          }),
         });
-        if (!res.ok) throw new Error("Local dev login failed.");
-        const isAdmin = email.includes("admin") || email === "admin@learninghub.edu";
-        router.replace(isAdmin ? "/admin" : "/portal");
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          throw new Error(data.error || "Authentication failed. Invalid email or password.");
+        }
+
+        router.replace(data.redirect || (data.role === "admin" ? "/admin" : "/portal"));
         router.refresh();
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Sign-in failed. Please try again.");
+      setError(err instanceof Error ? err.message : "Sign-in failed. Please verify your credentials.");
     } finally {
       setBusy(false);
     }
@@ -68,37 +79,6 @@ export function LoginForm() {
 
   return (
     <div className="auth-form-wrapper">
-      {!hasSupabase && (
-        <div className="dev-sandbox-card">
-          <div className="dev-sandbox-head">
-            <span className="dev-sandbox-badge">DEV SANDBOX ACTIVE</span>
-            <span>Local mode without live Supabase</span>
-          </div>
-          <p>
-            You can test the entire platform right now. Click either demo account below to sign in
-            instantly, or enter any email in the form.
-          </p>
-          <div className="demo-actions-grid">
-            <button
-              type="button"
-              className="button button-primary button-small"
-              disabled={busy}
-              onClick={() => handleDemoLogin("student")}
-            >
-              🚀 Sign in as Demo Student
-            </button>
-            <button
-              type="button"
-              className="button button-dark button-small"
-              disabled={busy}
-              onClick={() => handleDemoLogin("admin")}
-            >
-              🛡️ Sign in as Demo Admin
-            </button>
-          </div>
-        </div>
-      )}
-
       <form className="form-stack" onSubmit={submit}>
         <label>
           Email address
@@ -108,29 +88,112 @@ export function LoginForm() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@college.edu or admin@learninghub.edu"
+            placeholder="name@college.edu or admin@learninghub.edu"
           />
         </label>
-        <label>
+        <label style={{ position: "relative" }}>
           Password
-          <input
-            type="password"
-            autoComplete="current-password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Your password"
-          />
+          <div style={{ position: "relative" }}>
+            <input
+              type={showPassword ? "text" : "password"}
+              autoComplete="current-password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Your password"
+              style={{ width: "100%", paddingRight: "40px" }}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              style={{
+                position: "absolute",
+                right: "8px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                background: "transparent",
+                border: "none",
+                fontSize: "12px",
+                color: "#94a3b8",
+                cursor: "pointer",
+              }}
+            >
+              {showPassword ? "Hide" : "Show"}
+            </button>
+          </div>
         </label>
+
         {error && (
-          <div className="form-alert" role="alert">
-            {error}
+          <div
+            className="form-alert"
+            role="alert"
+            style={{
+              background: "rgba(239, 68, 68, 0.12)",
+              border: "1px solid #ef4444",
+              color: "#fca5a5",
+              borderRadius: "6px",
+              padding: "10px 14px",
+              fontSize: "13px",
+              fontWeight: 600,
+            }}
+          >
+            ⚠️ {error}
           </div>
         )}
-        <button className="button button-primary button-full" disabled={busy}>
-          {busy ? "Signing in…" : "Sign in to portal"}
+
+        <button className="button button-primary button-full" disabled={busy} style={{ marginTop: "8px" }}>
+          {busy ? "Authenticating…" : "Sign in to Portal"}
         </button>
+
+        <div style={{ textAlign: "center", marginTop: "14px", fontSize: "13px", color: "#64748b" }}>
+          Don&apos;t have an account?{" "}
+          <Link href="/register" style={{ color: "#ff6a00", fontWeight: 700, textDecoration: "none" }}>
+            Enroll &amp; Register Free →
+          </Link>
+        </div>
       </form>
+
+      {/* Official Verified Demo Credentials */}
+      <div
+        style={{
+          marginTop: "24px",
+          background: "#0f172a",
+          border: "1px solid #1e293b",
+          borderRadius: "8px",
+          padding: "16px",
+        }}
+      >
+        <div style={{ fontSize: "11px", fontWeight: 800, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "8px" }}>
+          Official Demo Accounts (Pre-Seeded)
+        </div>
+        <div style={{ fontSize: "12px", color: "#cbd5e1", lineHeight: 1.5, marginBottom: "12px" }}>
+          You can also test with verified credentials or click below:
+          <ul style={{ margin: "6px 0", paddingLeft: "18px", color: "#94a3b8" }}>
+            <li>Student: <code>student@learninghub.edu</code> / <code>StudentPassword123!</code></li>
+            <li>Faculty Admin: <code>admin@learninghub.edu</code> / <code>AdminPassword123!</code></li>
+          </ul>
+        </div>
+        <div className="demo-actions-grid" style={{ display: "flex", gap: "8px" }}>
+          <button
+            type="button"
+            className="button button-small"
+            style={{ flex: 1, fontSize: "11px" }}
+            disabled={busy}
+            onClick={() => handleDemoLogin("student")}
+          >
+            🎓 Demo Student
+          </button>
+          <button
+            type="button"
+            className="button button-dark button-small"
+            style={{ flex: 1, fontSize: "11px" }}
+            disabled={busy}
+            onClick={() => handleDemoLogin("admin")}
+          >
+            🛡️ Demo Admin
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -271,24 +334,6 @@ export function RegisterForm() {
     });
   }
 
-  async function handleDemoFastEnroll() {
-    setBusy(true);
-    setFormError("");
-    try {
-      const res = await fetch("/api/auth/session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "demo_student" }),
-      });
-      if (!res.ok) throw new Error("Could not start demo student session.");
-      router.replace("/portal");
-      router.refresh();
-    } catch (err) {
-      setFormError(err instanceof Error ? err.message : "Failed to launch demo.");
-      setBusy(false);
-    }
-  }
-
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setFormError("");
@@ -337,17 +382,20 @@ export function RegisterForm() {
           );
         }
       } else {
-        // Fallback local dev registration
+        // Real SQLite Backend Registration with profile & PBKDF2 password hashing
         const res = await fetch("/api/auth/session", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            action: "dev_register",
+            action: "register",
             ...values,
           }),
         });
-        if (!res.ok) throw new Error("Local registration failed.");
-        router.replace("/portal");
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error(data.error || "Registration failed. Please review your details.");
+        }
+        router.replace(data.redirect || "/portal");
         router.refresh();
       }
     } catch (err) {
@@ -359,36 +407,33 @@ export function RegisterForm() {
 
   return (
     <div className="auth-form-wrapper">
-      {!hasSupabase && (
-        <div className="dev-sandbox-card">
-          <div className="dev-sandbox-head">
-            <span className="dev-sandbox-badge">DEV SANDBOX ACTIVE</span>
-            <span>Testing Mode</span>
-          </div>
-          <p>
-            Supabase keys are not set in <code>.env.local</code> yet. You can register with your own details
-            below, click <b>Auto-fill Sample Student</b>, or jump straight in as a demo learner.
-          </p>
-          <div className="demo-actions-grid">
-            <button
-              type="button"
-              className="button button-small"
-              onClick={fillSample}
-              disabled={busy}
-            >
-              ✨ Auto-fill Sample Student
-            </button>
-            <button
-              type="button"
-              className="button button-primary button-small"
-              onClick={handleDemoFastEnroll}
-              disabled={busy}
-            >
-              🚀 Instant Demo Student Portal
-            </button>
-          </div>
+      <div
+        style={{
+          background: "#0f172a",
+          border: "1px solid #1e293b",
+          borderRadius: "8px",
+          padding: "16px",
+          marginBottom: "20px",
+        }}
+      >
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px", flexWrap: "wrap", gap: "8px" }}>
+          <span style={{ fontSize: "11px", fontWeight: 800, color: "#38bdf8", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+            🎓 Official Student Registration
+          </span>
+          <button
+            type="button"
+            className="button button-small"
+            onClick={fillSample}
+            disabled={busy}
+            style={{ fontSize: "11px", padding: "4px 10px" }}
+          >
+            ⚡ Auto-fill Sample Details
+          </button>
         </div>
-      )}
+        <p style={{ margin: 0, fontSize: "12px", color: "#94a3b8", lineHeight: 1.5 }}>
+          Create your verified institutional profile. All credentials and academic records are securely hashed and stored in the database.
+        </p>
+      </div>
 
       <form className="form-stack" onSubmit={submit} noValidate>
         <div className="form-grid">
@@ -579,8 +624,20 @@ export function RegisterForm() {
         )}
 
         {formError && (
-          <div className="form-alert" role="alert">
-            {formError}
+          <div
+            className="form-alert"
+            role="alert"
+            style={{
+              background: "rgba(239, 68, 68, 0.12)",
+              border: "1px solid #ef4444",
+              color: "#fca5a5",
+              borderRadius: "6px",
+              padding: "10px 14px",
+              fontSize: "13px",
+              fontWeight: 600,
+            }}
+          >
+            ⚠️ {formError}
           </div>
         )}
         {success && (
@@ -592,6 +649,13 @@ export function RegisterForm() {
         <button className="button button-cn-primary button-full" disabled={busy}>
           {busy ? "Creating your student profile…" : "Complete Registration & Enroll (₹0 Free)"}
         </button>
+
+        <div style={{ textAlign: "center", marginTop: "14px", fontSize: "13px", color: "#64748b" }}>
+          Already registered?{" "}
+          <Link href="/login" style={{ color: "#ff6a00", fontWeight: 700, textDecoration: "none" }}>
+            Sign In with Your Password →
+          </Link>
+        </div>
       </form>
     </div>
   );
