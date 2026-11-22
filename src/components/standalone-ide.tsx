@@ -308,6 +308,7 @@ export function StandaloneIde() {
   const [selectedPreset, setSelectedPreset] = useState<string>("hello");
   const [code, setCode] = useState<string>("");
   const [stdin, setStdin] = useState<string>("");
+  const [showStdinBox, setShowStdinBox] = useState<boolean>(true);
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [result, setResult] = useState<ExecutionResult | null>(null);
   const [activeConsoleTab, setActiveConsoleTab] = useState<"output" | "stdin">("output");
@@ -867,7 +868,7 @@ export function StandaloneIde() {
         <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "#0d131f", minWidth: "350px" }}>
           {mode === "compiler" ? (
             <>
-              {/* Console Navigation Tabs */}
+              {/* Console Navigation Bar */}
               <div
                 style={{
                   display: "flex",
@@ -876,42 +877,24 @@ export function StandaloneIde() {
                   background: "#0a0e17",
                   borderBottom: "1px solid #1e293b",
                   padding: "0 12px",
+                  height: "38px",
                 }}
               >
-                <div style={{ display: "flex", gap: "2px" }}>
-                  <button
-                    type="button"
-                    onClick={() => setActiveConsoleTab("output")}
-                    style={{
-                      padding: "8px 14px",
-                      background: activeConsoleTab === "output" ? "#0d131f" : "transparent",
-                      color: activeConsoleTab === "output" ? "#10b981" : "#64748b",
-                      border: "none",
-                      borderBottom: activeConsoleTab === "output" ? "2px solid #10b981" : "2px solid transparent",
-                      fontSize: "12px",
-                      fontWeight: 700,
-                      cursor: "pointer",
-                    }}
-                  >
-                    📟 Output &amp; Terminal
-                  </button>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <span style={{ fontSize: "12px", fontWeight: 700, color: "#10b981", display: "flex", alignItems: "center", gap: "6px" }}>
+                    <span>📟 Execution Output</span>
+                  </span>
 
-                  <button
-                    type="button"
-                    onClick={() => setActiveConsoleTab("stdin")}
-                    style={{
-                      padding: "8px 14px",
-                      background: activeConsoleTab === "stdin" ? "#0d131f" : "transparent",
-                      color: activeConsoleTab === "stdin" ? "#38bdf8" : "#64748b",
-                      border: "none",
-                      borderBottom: activeConsoleTab === "stdin" ? "2px solid #38bdf8" : "2px solid transparent",
-                      fontSize: "12px",
-                      fontWeight: 700,
-                      cursor: "pointer",
-                    }}
-                  >
-                    📥 Custom Input (STDIN) {stdin.trim() ? "•" : ""}
-                  </button>
+                  <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", color: "#94a3b8", cursor: "pointer" }}>
+                    <input
+                      type="checkbox"
+                      checked={showStdinBox}
+                      onChange={(e) => setShowStdinBox(e.target.checked)}
+                      style={{ accentColor: "#0284c7" }}
+                    />
+                    <span>Input (STDIN) Box</span>
+                    {stdin.trim() && <span style={{ color: "#38bdf8", fontWeight: 800 }}>•</span>}
+                  </label>
                 </div>
 
                 {result && (
@@ -934,76 +917,67 @@ export function StandaloneIde() {
                 )}
               </div>
 
-              {/* Console Body */}
+              {/* Console Body: Top STDIN Box (if enabled) + Bottom Output Terminal */}
               <div style={{ flex: 1, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column" }}>
-                {activeConsoleTab === "output" ? (
+                {/* 1. Custom STDIN Input Drawer */}
+                {showStdinBox && (
                   <div
                     style={{
-                      flex: 1,
-                      background: "#080c14",
-                      padding: "16px",
-                      overflowY: "auto",
-                      fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
-                      fontSize: "12px",
-                      lineHeight: "1.5",
+                      height: "120px",
+                      background: "#0a0f1d",
+                      borderBottom: "1px solid #1e293b",
+                      display: "flex",
+                      flexDirection: "column",
+                      padding: "8px 12px",
                     }}
                   >
-                    {isRunning ? (
-                      <div style={{ color: "#38bdf8", padding: "20px 0" }}>
-                        ⚡ Compiling and executing in isolated native runtime...
-                      </div>
-                    ) : !result ? (
-                      <div style={{ color: "#475569", padding: "40px 10px", textAlign: "center" }}>
-                        <div style={{ fontSize: "28px", marginBottom: "8px" }}>▶</div>
-                        <div style={{ fontSize: "13px", color: "#94a3b8", marginBottom: "4px" }}>Click "Run" to execute code</div>
-                        <p style={{ margin: 0, fontSize: "11px" }}>Supports standard input, dynamic memory, and algorithms.</p>
-                      </div>
-                    ) : (
-                      <div>
-                        {result.compilationError && (
-                          <div style={{ marginBottom: "12px" }}>
-                            <div style={{ color: "#ef4444", fontWeight: 700, marginBottom: "4px" }}>Compilation Error:</div>
-                            <pre style={{ margin: 0, color: "#fca5a5", whiteSpace: "pre-wrap" }}>{result.compilationError}</pre>
-                          </div>
-                        )}
-
-                        {result.stderr && !result.compilationError && (
-                          <div style={{ marginBottom: "12px" }}>
-                            <div style={{ color: "#f59e0b", fontWeight: 700, marginBottom: "4px" }}>Standard Error (STDERR):</div>
-                            <pre style={{ margin: 0, color: "#fcd34d", whiteSpace: "pre-wrap" }}>{result.stderr}</pre>
-                          </div>
-                        )}
-
-                        {result.stdout ? (
-                          <div>
-                            <div style={{ color: "#10b981", fontWeight: 700, marginBottom: "4px" }}>Standard Output (STDOUT):</div>
-                            <pre style={{ margin: 0, color: "#f8fafc", whiteSpace: "pre-wrap" }}>{result.stdout}</pre>
-                          </div>
-                        ) : (
-                          !result.compilationError &&
-                          !result.stderr && (
-                            <div style={{ color: "#64748b", fontStyle: "italic" }}>Program exited normally with empty output.</div>
-                          )
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                      <span style={{ fontSize: "11px", fontWeight: 700, color: "#38bdf8" }}>
+                        📥 Custom Input (STDIN) — Fed into Scanner, cin, scanf, input()
+                      </span>
+                      <div style={{ display: "flex", gap: "8px" }}>
+                        <button
+                          type="button"
+                          onClick={() => setStdin("Alex Rivera\n21\n")}
+                          style={{
+                            background: "transparent",
+                            border: "none",
+                            color: "#94a3b8",
+                            fontSize: "10px",
+                            cursor: "pointer",
+                            textDecoration: "underline",
+                          }}
+                        >
+                          + Sample Input
+                        </button>
+                        {stdin && (
+                          <button
+                            type="button"
+                            onClick={() => setStdin("")}
+                            style={{
+                              background: "transparent",
+                              border: "none",
+                              color: "#64748b",
+                              fontSize: "10px",
+                              cursor: "pointer",
+                            }}
+                          >
+                            Clear
+                          </button>
                         )}
                       </div>
-                    )}
-                  </div>
-                ) : (
-                  <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "#080c14", padding: "14px" }}>
-                    <div style={{ fontSize: "12px", color: "#94a3b8", marginBottom: "6px" }}>
-                      Provide Custom Input (passed into standard input / cin / scanf / sys.stdin):
                     </div>
                     <textarea
                       value={stdin}
                       onChange={(e) => setStdin(e.target.value)}
-                      placeholder="e.g. 5&#10;10 20 30 40 50"
+                      placeholder="Type inputs here (one per line, e.g.&#10;Alex Rivera&#10;21)"
                       style={{
                         flex: 1,
-                        background: "#0f172a",
-                        color: "#f8fafc",
-                        border: "1px solid #334155",
-                        borderRadius: "6px",
-                        padding: "12px",
+                        background: "#060911",
+                        color: "#e2e8f0",
+                        border: "1px solid #1f293d",
+                        borderRadius: "4px",
+                        padding: "6px 10px",
                         fontFamily: "monospace",
                         fontSize: "12px",
                         resize: "none",
@@ -1012,6 +986,114 @@ export function StandaloneIde() {
                     />
                   </div>
                 )}
+
+                {/* 2. Terminal Output (STDOUT / STDERR) */}
+                <div
+                  style={{
+                    flex: 1,
+                    background: "#080c14",
+                    padding: "16px",
+                    overflowY: "auto",
+                    fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+                    fontSize: "12px",
+                    lineHeight: "1.5",
+                  }}
+                >
+                  {isRunning ? (
+                    <div style={{ color: "#38bdf8", padding: "20px 0" }}>
+                      ⚡ Compiling and executing in isolated native runtime...
+                    </div>
+                  ) : !result ? (
+                    <div style={{ color: "#475569", padding: "40px 10px", textAlign: "center" }}>
+                      <div style={{ fontSize: "28px", marginBottom: "8px" }}>▶</div>
+                      <div style={{ fontSize: "13px", color: "#94a3b8", marginBottom: "4px" }}>Click "Run" to execute code</div>
+                      <p style={{ margin: 0, fontSize: "11px" }}>Supports standard input, dynamic memory, and algorithms.</p>
+                    </div>
+                  ) : (
+                    <div>
+                      {/* Smart Missing Input Helper (NoSuchElementException / EOFError) */}
+                      {result.stderr &&
+                        (result.stderr.includes("NoSuchElementException") ||
+                          result.stderr.includes("EOFError") ||
+                          result.stderr.includes("end of file")) &&
+                        !stdin.trim() && (
+                          <div
+                            style={{
+                              background: "rgba(245, 158, 11, 0.12)",
+                              border: "1px solid #f59e0b",
+                              borderRadius: "8px",
+                              padding: "14px",
+                              marginBottom: "16px",
+                            }}
+                          >
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "8px",
+                                color: "#fbbf24",
+                                fontWeight: 800,
+                                fontSize: "13px",
+                                marginBottom: "4px",
+                              }}
+                            >
+                              <span>💡 Missing Input in STDIN</span>
+                            </div>
+                            <p style={{ margin: "0 0 10px", fontSize: "12px", color: "#fef3c7", lineHeight: 1.5 }}>
+                              Your program called <code>Scanner.nextLine()</code> or standard input, but the <b>Custom Input (STDIN)</b> box was empty! In online compilers, inputs must be entered into the STDIN box before clicking Run.
+                            </p>
+                            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setShowStdinBox(true);
+                                  setStdin("Alex Rivera\n21\n");
+                                }}
+                                style={{
+                                  background: "#f59e0b",
+                                  color: "#0f172a",
+                                  border: "none",
+                                  padding: "5px 12px",
+                                  borderRadius: "4px",
+                                  fontSize: "11px",
+                                  fontWeight: 800,
+                                  cursor: "pointer",
+                                }}
+                              >
+                                Insert Sample Input ("Alex Rivera\n21")
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                      {result.compilationError && (
+                        <div style={{ marginBottom: "12px" }}>
+                          <div style={{ color: "#ef4444", fontWeight: 700, marginBottom: "4px" }}>Compilation Error:</div>
+                          <pre style={{ margin: 0, color: "#fca5a5", whiteSpace: "pre-wrap" }}>{result.compilationError}</pre>
+                        </div>
+                      )}
+
+                      {result.stderr && !result.compilationError && (
+                        <div style={{ marginBottom: "12px" }}>
+                          <div style={{ color: "#f59e0b", fontWeight: 700, marginBottom: "4px" }}>Standard Error (STDERR):</div>
+                          <pre style={{ margin: 0, color: "#fcd34d", whiteSpace: "pre-wrap" }}>{result.stderr}</pre>
+                        </div>
+                      )}
+
+                      {result.stdout ? (
+                        <div>
+                          <div style={{ color: "#10b981", fontWeight: 700, marginBottom: "4px" }}>Standard Output (STDOUT):</div>
+                          <pre style={{ margin: 0, color: "#f8fafc", whiteSpace: "pre-wrap" }}>{result.stdout}</pre>
+                        </div>
+                      ) : (
+                        !result.compilationError &&
+                        !result.stderr && (
+                          <div style={{ color: "#64748b", fontStyle: "italic" }}>Program exited normally with empty output.</div>
+                        )
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             </>
           ) : (
