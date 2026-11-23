@@ -2,6 +2,16 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function proxy(request: NextRequest) {
+  // Enforce Localhost-Only Access: Block all LAN IP and external access
+  const host = request.headers.get("host") || "";
+  const hostname = host.split(":")[0];
+  if (hostname !== "localhost" && hostname !== "127.0.0.1") {
+    return new NextResponse("Access Forbidden: External LAN IP access is disabled.", {
+      status: 403,
+      headers: { "Content-Type": "text/plain" },
+    });
+  }
+
   let response = NextResponse.next({ request });
 
   // Add anti-caching and security headers to all dynamic HTML/RSC responses

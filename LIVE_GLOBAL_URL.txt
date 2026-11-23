@@ -1,9 +1,8 @@
 =============================================================================
-PROBLEM SOLVING LAB LMS - ACTIVE ACCESS POINTS (OFFLINE LOCAL LAB MODE)
+PROBLEM SOLVING LAB LMS - ACTIVE ACCESS POINTS (LOCAL-ONLY MODE)
 =============================================================================
-Operating Mode       : 100% Offline (Local Classroom Lab Intranet Only)
-Local Classroom IP   : http://10.10.156.68:3000
-Localhost Direct     : http://localhost:3000
+Operating Mode       : Strictly Localhost (Local Machine Only)
+Local Access         : http://localhost:3000
+LAN / IP Access      : DISABLED (127.0.0.1 binding only, external IPs blocked)
 Public Tunnel Status : OFFLINE / DISABLED
-Native Compilers     : Clang (C/C++), OpenJDK 17 (Java), Python 3 (All 100% Local)
 =============================================================================

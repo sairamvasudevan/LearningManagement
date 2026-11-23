@@ -37,9 +37,9 @@ get_local_ip() {
 LOCAL_IP=$(get_local_ip)
 
 echo "========================================================"
-echo "  Problem Solving Lab LMS - Global Access Watchdog"
+echo "  Problem Solving Lab LMS - Access Watchdog"
 echo "========================================================"
-echo "  Local LAN IP : http://${LOCAL_IP}:3000"
+echo "  Local Access : http://localhost:3000"
 echo "  Health Check : http://localhost:3000/api/health"
 echo "========================================================"
 
