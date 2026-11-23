@@ -15,24 +15,6 @@ export function LoginForm() {
   const [error, setError] = useState("");
   const hasSupabase = isSupabaseConfigured();
 
-  async function handleDemoLogin(role: "student" | "admin") {
-    setBusy(true);
-    setError("");
-    try {
-      const res = await fetch("/api/auth/session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: role === "admin" ? "demo_admin" : "demo_student" }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || "Could not start session.");
-      window.location.href = role === "admin" ? "/admin" : "/portal";
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to launch session.");
-      setBusy(false);
-    }
-  }
-
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
@@ -142,48 +124,6 @@ export function LoginForm() {
           {busy ? "Authenticating…" : "Sign in to Portal"}
         </button>
       </form>
-
-      {/* Official Verified Demo Credentials */}
-      <div
-        style={{
-          marginTop: "24px",
-          background: "var(--bg-subtle)",
-          border: "1px solid var(--border-normal)",
-          borderRadius: "14px",
-          padding: "16px 18px",
-        }}
-      >
-        <div style={{ fontSize: "11px", fontWeight: 800, color: "var(--apple-blue-accent)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "8px" }}>
-          Official Demo Accounts (Pre-Seeded)
-        </div>
-        <div style={{ fontSize: "12px", color: "var(--text-secondary)", lineHeight: 1.5, marginBottom: "12px" }}>
-          You can also test with verified credentials or click below:
-          <ul style={{ margin: "6px 0", paddingLeft: "18px", color: "var(--text-secondary)" }}>
-            <li>Student: <code style={{ color: "var(--text-primary)", background: "rgba(255,255,255,0.06)", padding: "2px 6px", borderRadius: "4px" }}>student@learninghub.edu</code> / <code style={{ color: "var(--text-primary)", background: "rgba(255,255,255,0.06)", padding: "2px 6px", borderRadius: "4px" }}>StudentPassword123!</code></li>
-            <li>Faculty Admin: <code style={{ color: "var(--text-primary)", background: "rgba(255,255,255,0.06)", padding: "2px 6px", borderRadius: "4px" }}>admin@learninghub.edu</code> / <code style={{ color: "var(--text-primary)", background: "rgba(255,255,255,0.06)", padding: "2px 6px", borderRadius: "4px" }}>AdminPassword123!</code></li>
-          </ul>
-        </div>
-        <div className="demo-actions-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
-          <button
-            type="button"
-            className="button button-small"
-            style={{ fontSize: "11px" }}
-            disabled={busy}
-            onClick={() => handleDemoLogin("student")}
-          >
-            🎓 Demo Student
-          </button>
-          <button
-            type="button"
-            className="button button-dark button-small"
-            style={{ fontSize: "11px" }}
-            disabled={busy}
-            onClick={() => handleDemoLogin("admin")}
-          >
-            🛡️ Demo Admin
-          </button>
-        </div>
-      </div>
     </div>
   );
 }

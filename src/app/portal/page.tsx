@@ -475,14 +475,19 @@ export default async function StudentPortalPage() {
                         return (
                           <tr key={att.id}>
                             <td>
-                              <b>Module {String(att.module_number).padStart(2, "0")}</b>
+                              <Link href={`/learn/${att.module_number}`} style={{ textDecoration: "none", color: "var(--apple-blue-accent)", fontWeight: 700 }}>
+                                Module {String(att.module_number).padStart(2, "0")} →
+                              </Link>
                             </td>
                             <td>
-                              <span
-                                className={att.passed ? "table-passed" : "table-active"}
-                              >
-                                {att.passed ? "Passed ✓" : "Review Needed"}
-                              </span>
+                              <Link href={`/learn/${att.module_number}`} style={{ textDecoration: "none" }}>
+                                <span
+                                  className={att.passed ? "table-passed" : "table-active"}
+                                  style={{ cursor: "pointer" }}
+                                >
+                                  {att.passed ? "Passed ✓" : "Review Mistakes ❯"}
+                                </span>
+                              </Link>
                             </td>
                             <td>
                               <b>

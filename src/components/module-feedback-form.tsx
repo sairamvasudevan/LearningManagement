@@ -23,10 +23,18 @@ const EASE_LABELS: Record<number, string> = {
 export function ModuleFeedbackForm({
   moduleNumber,
   defaultExpanded = true,
+  currentUser,
   onFeedbackSaved,
 }: {
   moduleNumber: number;
   defaultExpanded?: boolean;
+  currentUser?: {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+    college?: string;
+  };
   onFeedbackSaved?: () => void;
 }) {
   const [isOpen, setIsOpen] = useState(defaultExpanded);
@@ -40,6 +48,8 @@ export function ModuleFeedbackForm({
   const [errorMsg, setErrorMsg] = useState("");
   const [hoveredHelpfulness, setHoveredHelpfulness] = useState<number | null>(null);
   const [hoveredEase, setHoveredEase] = useState<number | null>(null);
+  const [reviewer, setReviewer] = useState(currentUser || null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(Boolean(currentUser));
 
   // Fetch student's existing feedback for this module if already submitted
   useEffect(() => {
@@ -49,12 +59,20 @@ export function ModuleFeedbackForm({
         const res = await fetch(`/api/feedback?moduleNumber=${moduleNumber}`);
         if (res.ok) {
           const data = await res.json();
-          if (!cancelled && data.feedback) {
-            setHelpfulness(data.feedback.helpfulness_rating || 5);
-            setDifficulty(data.feedback.difficulty_level || "just_right");
-            setEaseOfUse(data.feedback.ease_of_use_rating || 5);
-            setFeedbackText(data.feedback.feedback_text || "");
-            setSubmitted(true);
+          if (!cancelled) {
+            if (data.authenticated === false) {
+              setIsAuthenticated(false);
+            } else if (data.authenticated === true) {
+              setIsAuthenticated(true);
+              if (data.user) setReviewer(data.user);
+            }
+            if (data.feedback) {
+              setHelpfulness(data.feedback.helpfulness_rating || 5);
+              setDifficulty(data.feedback.difficulty_level || "just_right");
+              setEaseOfUse(data.feedback.ease_of_use_rating || 5);
+              setFeedbackText(data.feedback.feedback_text || "");
+              setSubmitted(true);
+            }
           }
         }
       } catch {
@@ -127,14 +145,72 @@ export function ModuleFeedbackForm({
 
       {isOpen && (
         <div className="feedback-card-content">
+          {!isAuthenticated ? (
+            <div
+              style={{
+                background: "rgba(0, 113, 227, 0.08)",
+                border: "1px solid rgba(0, 113, 227, 0.3)",
+                borderRadius: "12px",
+                padding: "16px 20px",
+                marginBottom: "18px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: "12px",
+              }}
+            >
+              <div>
+                <div style={{ fontWeight: 800, color: "var(--apple-blue-accent)", fontSize: "13px", marginBottom: "4px" }}>
+                  🔒 Verified Student Review Required
+                </div>
+                <div style={{ fontSize: "12px", color: "var(--text-secondary)", lineHeight: 1.5 }}>
+                  Please sign in to submit your rating, difficulty telemetry, and upgrade suggestions for Module {String(moduleNumber).padStart(2, "0")}.
+                </div>
+              </div>
+              <a
+                href={`/login?redirect=/learn/${moduleNumber}`}
+                className="button button-small button-cn-primary"
+                style={{ textDecoration: "none", fontSize: "11px", padding: "6px 14px", whiteSpace: "nowrap" }}
+              >
+                Sign in to Review →
+              </a>
+            </div>
+          ) : reviewer ? (
+            <div
+              style={{
+                background: "rgba(52, 199, 89, 0.08)",
+                border: "1px solid rgba(52, 199, 89, 0.25)",
+                borderRadius: "10px",
+                padding: "10px 16px",
+                marginBottom: "16px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: "8px",
+                fontSize: "12px",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                <span style={{ color: "var(--apple-green)", fontWeight: 700 }}>✓ Verified Reviewer:</span>
+                <b style={{ color: "var(--text-primary)" }}>{reviewer.name}</b>
+                {reviewer.college && <span style={{ color: "var(--text-secondary)" }}>· {reviewer.college}</span>}
+              </div>
+              <span className="admin-chip" style={{ fontSize: "9px", padding: "2px 7px" }}>
+                {reviewer.role.toUpperCase()}
+              </span>
+            </div>
+          ) : null}
+
           {submitted ? (
             <div className="feedback-success-banner">
               <div className="success-icon">✓</div>
               <div className="success-text">
-                <b>Thank you for your feedback!</b>
+                <b>Thank you{reviewer?.name ? `, ${reviewer.name}` : ""}! Your review is officially recorded.</b>
                 <p>
                   Your ratings ({helpfulness}/5 Helpfulness · {difficulty.replace("_", " ")} · {easeOfUse}/5 Ease of Use)
-                  have been permanently recorded in the faculty platform analytics.
+                  have been permanently saved in the academic telemetry database to calibrate future curriculum updates.
                 </p>
               </div>
               <button
@@ -279,10 +355,14 @@ export function ModuleFeedbackForm({
               <div className="feedback-actions-row">
                 <button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !isAuthenticated}
                   className="button button-cn-primary"
                 >
-                  {isSubmitting ? "Submitting Telemetry..." : "Submit Module Feedback →"}
+                  {!isAuthenticated
+                    ? "Sign In to Submit Feedback"
+                    : isSubmitting
+                    ? "Submitting Telemetry..."
+                    : "Submit Module Feedback →"}
                 </button>
                 <span className="feedback-privacy-note">
                   🔒 Saved permanently in academic database to calibrate next release.

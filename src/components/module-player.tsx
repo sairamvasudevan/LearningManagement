@@ -18,8 +18,18 @@ type Review = {
 
 export function ModulePlayer({
   curriculum,
+  isAdmin = false,
+  currentUser,
 }: {
   curriculum: ModuleCurriculum;
+  isAdmin?: boolean;
+  currentUser?: {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+    college?: string;
+  };
 }) {
   const {
     moduleNumber,
@@ -188,11 +198,12 @@ export function ModulePlayer({
         {/* Top Reader Navigation Bar */}
         <header className="reader-top-bar">
           <div className="reader-top-left">
-            <Link href="/portal" className="reader-back-btn">
-              ← Return to Dashboard
+            <Link href={isAdmin ? "/admin/feedback" : "/portal"} className="reader-back-btn">
+              {isAdmin ? "← Return to Admin Feedback" : "← Return to Dashboard"}
             </Link>
             <div className="reader-badge-wrap">
-              <span className="badge-flame">Stage 01</span>
+              {isAdmin && <span className="admin-chip" style={{ background: "#4338ca", color: "#fff" }}>FACULTY REVIEW</span>}
+              <span className="badge-flame">Stage {String(Math.ceil(moduleNumber / 10)).padStart(2, "0")}</span>
               <span className="badge-category">Module {String(moduleNumber).padStart(2, "0")} of 100</span>
             </div>
           </div>
@@ -396,7 +407,7 @@ export function ModulePlayer({
 
           {/* Module Experience & Feedback */}
           <div style={{ marginTop: 24, marginBottom: 28 }}>
-            <ModuleFeedbackForm moduleNumber={moduleNumber} defaultExpanded={false} />
+            <ModuleFeedbackForm moduleNumber={moduleNumber} defaultExpanded={false} currentUser={currentUser} />
           </div>
 
           {/* Section 6: Transition to Mastery Checkpoint */}
@@ -578,7 +589,7 @@ export function ModulePlayer({
 
         {/* Immediate Post-Assessment Module Feedback Widget */}
         <div style={{ marginTop: 40, width: "100%", textAlign: "left" }}>
-          <ModuleFeedbackForm moduleNumber={moduleNumber} defaultExpanded={true} />
+          <ModuleFeedbackForm moduleNumber={moduleNumber} defaultExpanded={true} currentUser={currentUser} />
         </div>
       </div>
     );

@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     const identity = await getCurrentIdentity();
     if (!identity) {
       return NextResponse.json(
-        { error: "Authentication required to submit module feedback." },
+        { error: "Authentication required: Please sign in with your student account to record verified feedback.", needsAuth: true },
         { status: 401 },
       );
     }
@@ -81,17 +81,13 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const identity = await getCurrentIdentity();
-    if (!identity) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const searchParams = request.nextUrl.searchParams;
     const modNumParam = searchParams.get("moduleNumber");
     const summaryParam = searchParams.get("summary");
 
     // Admin requesting full metrics and summaries
     if (summaryParam === "true") {
-      if (identity.role !== "admin") {
+      if (!identity || identity.role !== "admin") {
         return NextResponse.json({ error: "Admin privilege required" }, { status: 403 });
       }
       const metrics = getModuleFeedbackMetrics();
@@ -99,16 +95,33 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ ok: true, metrics, list });
     }
 
-    // Specific module feedback lookup for the current user
+    // Specific module feedback lookup
     if (modNumParam) {
       const moduleNumber = Number(modNumParam);
       if (!moduleNumber || moduleNumber < 1 || moduleNumber > 100) {
         return NextResponse.json({ error: "Invalid module number" }, { status: 400 });
       }
 
+      // If user is not signed in, return clean unauthenticated payload without console errors
+      if (!identity) {
+        return NextResponse.json({
+          ok: true,
+          authenticated: false,
+          feedback: null,
+        });
+      }
+
       const userFeedback = getModuleFeedbackForUser(identity.id, moduleNumber);
       return NextResponse.json({
         ok: true,
+        authenticated: true,
+        user: {
+          id: identity.id,
+          name: identity.fullName || identity.email.split("@")[0],
+          email: identity.email,
+          role: identity.role,
+          college: identity.college,
+        },
         feedback: userFeedback,
       });
     }

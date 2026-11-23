@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentIdentity } from "@/lib/auth";
 import {
   createUser,
   getUserByEmail,
@@ -173,9 +174,14 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === "update_progress") {
+      const identity = await getCurrentIdentity();
       const sessionToken = request.cookies.get("psl_session")?.value;
       const user = sessionToken ? getUserBySessionToken(sessionToken) : null;
-      const userId = user ? user.id : "00000000-0000-4000-a000-000000000001";
+      const userId = identity?.id || user?.id || (process.env.NODE_ENV === "development" ? "00000000-0000-4000-a000-000000000001" : null);
+
+      if (!userId) {
+        return NextResponse.json({ error: "Authentication required to update learning records." }, { status: 401 });
+      }
 
       const modNum = Number(body.moduleNumber || 1);
       const score = Number(body.score || 0);
@@ -192,13 +198,18 @@ export async function POST(request: NextRequest) {
         answersJson: JSON.stringify(body.answers || {}),
       });
 
-      return NextResponse.json({ ok: true, savedToDb: true });
+      return NextResponse.json({ ok: true, savedToDb: true, userId });
     }
 
     if (action === "submit_practice_task") {
+      const identity = await getCurrentIdentity();
       const sessionToken = request.cookies.get("psl_session")?.value;
       const user = sessionToken ? getUserBySessionToken(sessionToken) : null;
-      const userId = user ? user.id : "00000000-0000-4000-a000-000000000001";
+      const userId = identity?.id || user?.id || (process.env.NODE_ENV === "development" ? "00000000-0000-4000-a000-000000000001" : null);
+
+      if (!userId) {
+        return NextResponse.json({ error: "Authentication required to submit practice tasks." }, { status: 401 });
+      }
 
       const submission = savePracticeTask({
         userId,

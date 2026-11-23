@@ -14,18 +14,20 @@ export default async function LearnModulePage({ params }: PageProps) {
   if (!Number.isInteger(moduleNumber) || moduleNumber < 1 || moduleNumber > 100) notFound();
 
   const identity = await requireIdentity();
-  if ((await getRole(identity.id)) === "admin") redirect("/admin");
+  const role = await getRole(identity.id);
+  const isAdmin = role === "admin";
 
   // Check if authored in curriculum
   const curriculum = MODULES_CURRICULUM[moduleNumber];
   if (!curriculum) {
-    redirect("/portal");
+    redirect(isAdmin ? "/admin/feedback" : "/portal");
   }
 
   // Stage start modules (1, 11, 21, 31, 41, 51, 61, 71, 81, 91) are unlocked by default.
   // Subsequent modules require the immediate preceding module to be completed with >= 80%.
+  // Faculty & Administrators can freely inspect and review any curriculum module!
   const isStageStart = moduleNumber % 10 === 1;
-  if (!isStageStart && moduleNumber > 1) {
+  if (!isAdmin && !isStageStart && moduleNumber > 1) {
     const progressList = getUserProgress(identity.id);
     const completedSet = new Set(
       progressList.filter((p) => p.status === "completed").map((p) => p.module_number),
@@ -35,5 +37,17 @@ export default async function LearnModulePage({ params }: PageProps) {
     }
   }
 
-  return <ModulePlayer key={moduleNumber} curriculum={curriculum} />;
+  return (
+    <ModulePlayer
+      key={moduleNumber}
+      curriculum={curriculum}
+      isAdmin={isAdmin}
+      currentUser={{
+        id: identity.id,
+        name: identity.fullName || identity.email.split("@")[0],
+        email: identity.email,
+        role,
+      }}
+    />
+  );
 }
