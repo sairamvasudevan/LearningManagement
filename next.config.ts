@@ -30,7 +30,6 @@ function productionContentSecurityPolicy() {
     "font-src 'self' https://fonts.gstatic.com data:",
     `connect-src 'self' ${supabaseConnectSources}`.trim(),
     "img-src 'self' data: blob:",
-    "upgrade-insecure-requests",
   ].join("; ");
 }
 
@@ -40,13 +39,10 @@ const nextConfig: NextConfig = {
     "/course-content": ["./private-content/module-01.html"],
   },
   async headers() {
-    const headers = process.env.NODE_ENV === "production"
-      ? [
-          ...securityHeaders,
-          { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
-          { key: "Content-Security-Policy", value: productionContentSecurityPolicy() },
-        ]
-      : securityHeaders;
+    const headers = [
+      ...securityHeaders,
+      { key: "Content-Security-Policy", value: productionContentSecurityPolicy() },
+    ];
     return [{ source: "/(.*)", headers }];
   },
 };
