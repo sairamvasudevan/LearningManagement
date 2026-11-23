@@ -92,7 +92,7 @@ export default async function CourseDetailPage({ params }: PageProps) {
             <span className="eyebrow">COURSE REGISTRATION</span>
             <div className="enroll-price">
               <div className="price-tag-row">
-                <strong style={{ color: course.isFree ? "var(--teal)" : "var(--navy)" }}>
+                <strong style={{ color: "#34c759" }}>
                   {course.priceLabel}
                 </strong>
                 {course.originalPrice && <del className="price-struck">{course.originalPrice}</del>}
@@ -113,17 +113,17 @@ export default async function CourseDetailPage({ params }: PageProps) {
             {!isFlagship && (
               <div
                 style={{
-                  background: "#1e1b4b",
-                  border: "1px solid #4338ca",
-                  borderRadius: "8px",
+                  background: "rgba(0, 113, 227, 0.1)",
+                  border: "1px solid rgba(0, 113, 227, 0.3)",
+                  borderRadius: "12px",
                   padding: "14px",
                   marginBottom: "16px",
-                  color: "#e0e7ff",
+                  color: "#f5f5f7",
                   fontSize: "12px",
                   lineHeight: 1.5,
                 }}
               >
-                <div style={{ fontWeight: 800, color: "#f59e0b", marginBottom: "4px" }}>
+                <div style={{ fontWeight: 800, color: "#ff9f0a", marginBottom: "4px" }}>
                   🔒 Prerequisite Enforced
                 </div>
                 Full interactive sandboxes and verified submissions require mastering the 100-Hour Flagship <b>Problem Solving Lab</b>. You can preview Chapter 01 immediately.
@@ -235,7 +235,7 @@ export default async function CourseDetailPage({ params }: PageProps) {
             </div>
 
             <div className="surface-card" style={{ padding: 28 }}>
-              <h3 style={{ font: "800 20px Manrope, sans-serif", color: "var(--navy)", margin: "0 0 12px" }}>
+              <h3 style={{ fontSize: 20, fontWeight: 800, color: "#f5f5f7", margin: "0 0 12px" }}>
                 Skills &amp; Learning Outcomes
               </h3>
               <div className="ed-skill-tags" style={{ marginBottom: 20 }}>
@@ -245,11 +245,11 @@ export default async function CourseDetailPage({ params }: PageProps) {
                   </span>
                 ))}
               </div>
-              <p style={{ fontSize: 13, color: "var(--muted)", lineHeight: 1.7, margin: "0 0 20px" }}>
+              <p style={{ fontSize: 13, color: "#86868b", lineHeight: 1.7, margin: "0 0 20px" }}>
                 Students who complete the flagship <strong>Problem Solving Lab</strong> will have the
                 mathematical and architectural foundations required for this track.
               </p>
-              <Link className="button button-primary" href="/register?course=problem-solving-lab">
+              <Link className="button button-cn-primary" href="/register?course=problem-solving-lab">
                 Start with Flagship Problem Solving Lab Free →
               </Link>
             </div>

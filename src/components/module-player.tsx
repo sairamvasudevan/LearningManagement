@@ -1,8 +1,10 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useMemo } from "react";
 import Link from "next/link";
 import type { ModuleCurriculum } from "@/lib/curriculum-data";
+import { AudioReader, moduleCurriculumToAudioChunks } from "@/components/audio-reader";
+import { ModuleFeedbackForm } from "@/components/module-feedback-form";
 
 type Review = {
   is_correct: boolean;
@@ -42,6 +44,9 @@ export function ModulePlayer({
   const [error, setError] = useState("");
   const [activeChecklist, setActiveChecklist] = useState<Record<number, boolean>>({});
 
+  // Clean Audio Narration Chunks
+  const audioChunks = useMemo(() => moduleCurriculumToAudioChunks(curriculum), [curriculum]);
+
   // Hands-on practice task state
   const [taskInput, setTaskInput] = useState(practiceTask.starterTemplate);
   const [taskSubmitting, setTaskSubmitting] = useState(false);
@@ -54,6 +59,8 @@ export function ModulePlayer({
     pass_percent: number;
     passed: boolean;
   } | null>(null);
+
+  const [resultFilter, setResultFilter] = useState<"all" | "missed" | "correct">("all");
 
   const question = questions[index];
   const currentReview = question ? reviews[question.question_id] : undefined;
@@ -210,6 +217,14 @@ export function ModulePlayer({
             <span>💻 Hands-on Practice Task</span>
             <span>🎓 {questions.length} Mastery Checkpoint Questions</span>
           </div>
+
+          {/* Audio Reader with Full Player Controls */}
+          <AudioReader
+            title={`Module ${moduleNumber}: ${title}`}
+            subtitle={`${stageTitle} · Listen to full lesson narration`}
+            chunks={audioChunks}
+            badgeLabel="Audio Narrator"
+          />
         </div>
 
         {/* Main Article Body */}
@@ -220,17 +235,17 @@ export function ModulePlayer({
               <div className="section-kicker">{section.kicker}</div>
               <h2>{section.title}</h2>
               {section.content.map((para, pIdx) => (
-                <p key={pIdx}>{para}</p>
+                <p key={pIdx} style={{ whiteSpace: "pre-line" }}>{para}</p>
               ))}
 
               {section.callout && (
                 <div
                   className={`callout-box ${
                     section.callout.type === "warning"
-                      ? "warning-callout"
-                      : section.callout.type === "tip"
-                        ? "tip-callout"
-                        : "rule-callout"
+                    ? "warning-callout"
+                    : section.callout.type === "tip"
+                      ? "tip-callout"
+                      : "rule-callout"
                   }`}
                 >
                   <b>
@@ -271,7 +286,9 @@ export function ModulePlayer({
                       <p>{cs.correctInvariant}</p>
                       {cs.codeOrContract && (
                         <div className="code-snippet-box">
-                          <code>{cs.codeOrContract}</code>
+                          <pre style={{ margin: 0, whiteSpace: "pre-wrap", fontFamily: "inherit" }}>
+                            <code>{cs.codeOrContract}</code>
+                          </pre>
                         </div>
                       )}
                     </div>
@@ -377,6 +394,11 @@ export function ModulePlayer({
             )}
           </section>
 
+          {/* Module Experience & Feedback */}
+          <div style={{ marginTop: 24, marginBottom: 28 }}>
+            <ModuleFeedbackForm moduleNumber={moduleNumber} defaultExpanded={false} />
+          </div>
+
           {/* Section 6: Transition to Mastery Checkpoint */}
           <div className="checkpoint-cta-box">
             <div className="cta-box-content">
@@ -412,6 +434,19 @@ export function ModulePlayer({
   ------------------------------------------------------------- */
   if (mode === "result" && result) {
     const nextMod = moduleNumber + 1;
+    const missedQuestions = questions.filter(
+      (q) => reviews[q.question_id] && !reviews[q.question_id].is_correct,
+    );
+    const correctQuestions = questions.filter(
+      (q) => reviews[q.question_id] && reviews[q.question_id].is_correct,
+    );
+    const displayedQuestions =
+      resultFilter === "missed"
+        ? missedQuestions
+        : resultFilter === "correct"
+        ? correctQuestions
+        : questions;
+
     return (
       <div className="result-screen">
         <span className="eyebrow">MODULE {String(moduleNumber).padStart(2, "0")} · RESULT</span>
@@ -447,6 +482,103 @@ export function ModulePlayer({
           >
             Review Lesson Material &amp; Retry
           </button>
+        </div>
+
+        {/* Detailed Question-by-Question Mistake & Mastery Analysis */}
+        <section className="results-review-section">
+          <div className="results-review-header">
+            <div>
+              <span className="eyebrow">POST-CHECKPOINT CURRICULUM MASTERY</span>
+              <h2>Detailed Question &amp; Mistake Analysis</h2>
+              <p>
+                Study every question below. For any question answered incorrectly, review why your selection failed and why the correct mathematical formulation holds.
+              </p>
+            </div>
+            <div className="review-filter-tabs">
+              <button
+                type="button"
+                className={`filter-tab-btn ${resultFilter === "all" ? "active" : ""}`}
+                onClick={() => setResultFilter("all")}
+              >
+                All Questions ({questions.length})
+              </button>
+              {missedQuestions.length > 0 && (
+                <button
+                  type="button"
+                  className={`filter-tab-btn tab-missed ${resultFilter === "missed" ? "active" : ""}`}
+                  onClick={() => setResultFilter("missed")}
+                >
+                  ❌ Missed ({missedQuestions.length})
+                </button>
+              )}
+              <button
+                type="button"
+                className={`filter-tab-btn tab-correct ${resultFilter === "correct" ? "active" : ""}`}
+                onClick={() => setResultFilter("correct")}
+              >
+                ✓ Correct ({correctQuestions.length})
+              </button>
+            </div>
+          </div>
+
+          <div className="results-questions-grid">
+            {displayedQuestions.map((q) => {
+              const rev = reviews[q.question_id];
+              const isCorrect = rev?.is_correct;
+              const selectedIdx = selected[q.question_id];
+              return (
+                <div
+                  key={q.question_id}
+                  className={`result-q-card ${isCorrect ? "q-card-correct" : "q-card-wrong"}`}
+                >
+                  <div className="q-card-topbar">
+                    <div className="q-card-number">
+                      <span className={`q-status-dot ${isCorrect ? "dot-green" : "dot-red"}`} />
+                      <b>Question {q.sort_order}: {q.title}</b>
+                    </div>
+                    <span className={`q-mark-badge ${isCorrect ? "badge-green" : "badge-red"}`}>
+                      {rev ? rev.marks_awarded : 0} / {q.marks} Marks {isCorrect ? "✓ Mastered" : "⚠️ Incorrect"}
+                    </span>
+                  </div>
+
+                  <p className="q-card-prompt">{q.prompt}</p>
+
+                  <div className="q-card-breakdown">
+                    {!isCorrect && selectedIdx !== undefined && (
+                      <div className="q-choice-block choice-wrong">
+                        <span className="choice-title">
+                          ❌ Why Your Answer (Option {String.fromCharCode(65 + selectedIdx)}) Is Wrong:
+                        </span>
+                        <div className="choice-text">&ldquo;{q.options[selectedIdx]}&rdquo;</div>
+                        <div className="choice-reason">
+                          <b>Misconception / Flaw:</b> {q.option_explanations[selectedIdx] || "Violates the required invariant."}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="q-choice-block choice-correct">
+                      <span className="choice-title">
+                        ✅ Why the Correct Answer (Option {String.fromCharCode(65 + q.correct_index)}) Is Right:
+                      </span>
+                      <div className="choice-text">&ldquo;{q.options[q.correct_index]}&rdquo;</div>
+                      <div className="choice-reason">
+                        <b>Mathematical Proof:</b> {q.option_explanations[q.correct_index]}
+                      </div>
+                    </div>
+
+                    <div className="q-card-takeaway">
+                      <b>💡 Core Pedagogical Principle:</b> {q.explanation}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Immediate Post-Assessment Module Feedback Widget */}
+        <div style={{ marginTop: 40, width: "100%", textAlign: "left" }}>
+          <ModuleFeedbackForm moduleNumber={moduleNumber} defaultExpanded={true} />
         </div>
       </div>
     );
