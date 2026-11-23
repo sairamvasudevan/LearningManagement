@@ -114,7 +114,7 @@ export default async function CourseDetailPage({ params }: PageProps) {
               ))}
             </ul>
 
-            {!isFlagship && (
+            {!isFlagship && course.slug !== "dsa-mastery-lab" && course.slug !== "web-dev-mern-lab" && (
               <div
                 style={{
                   background: "rgba(0, 113, 227, 0.1)",
@@ -146,19 +146,31 @@ export default async function CourseDetailPage({ params }: PageProps) {
                   Already registered? Sign in
                 </Link>
               </>
+            ) : course.slug === "dsa-mastery-lab" ? (
+              <>
+                <Link className="button button-cn-primary button-full" href="/dsa">
+                  ⚡ Launch DSA Arena &amp; Code Free →
+                </Link>
+                <Link className="button button-full" href="/dsa/two-sum" style={{ marginTop: 9 }}>
+                  Solve Problem 01: Two Sum →
+                </Link>
+              </>
+            ) : course.slug === "web-dev-mern-lab" ? (
+              <>
+                <Link className="button button-cn-primary button-full" href="/web-dev">
+                  🌐 Launch Web Dev Studio &amp; Sandbox →
+                </Link>
+                <Link className="button button-full" href="/web-dev/html-intro" style={{ marginTop: 9 }}>
+                  Open Chapter 01 Sandbox →
+                </Link>
+              </>
             ) : (
               <>
                 <Link
                   className="button button-cn-primary button-full"
-                  href={
-                    course.slug === "web-dev-mern-lab"
-                      ? "/web-dev/html-intro"
-                      : course.slug === "dsa-mastery-lab"
-                      ? "/dsa/two-sum"
-                      : `/courses/${course.slug}`
-                  }
+                  href={`/courses/${course.slug}`}
                 >
-                  👁️ Open Chapter 01 Preview →
+                  👁️ Open Track Preview →
                 </Link>
                 <Link
                   className="button button-quiet button-full"

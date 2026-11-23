@@ -649,13 +649,17 @@ export function CourseCatalogSection() {
                         style={{ padding: "6px 14px", fontSize: "11.5px" }}
                         href={
                           course.slug === "web-dev-mern-lab"
-                            ? "/web-dev/html-intro"
+                            ? "/web-dev"
                             : course.slug === "dsa-mastery-lab"
-                            ? "/dsa/two-sum"
+                            ? "/dsa"
                             : `/courses/${course.slug}`
                         }
                       >
-                        Preview First Part 👁️
+                        {course.slug === "dsa-mastery-lab"
+                          ? "Launch Arena →"
+                          : course.slug === "web-dev-mern-lab"
+                          ? "Launch Studio →"
+                          : "Preview Track 👁️"}
                       </Link>
                     </>
                   ) : (

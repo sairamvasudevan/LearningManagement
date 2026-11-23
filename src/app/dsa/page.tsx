@@ -3,14 +3,11 @@ import { SiteHeader } from "@/components/site-header";
 import { DSA_PROBLEMS } from "@/lib/dsa-problems";
 import { getCurrentIdentity } from "@/lib/auth";
 import { getUserSolvedDsaProblemIds } from "@/lib/db";
-import { checkCourseAccess } from "@/lib/course-prerequisites";
-import { PrerequisiteLockBanner } from "@/components/prerequisite-lock";
 
 export const dynamic = "force-dynamic";
 
 export default async function DsaCoursePage() {
   const identity = await getCurrentIdentity();
-  const access = checkCourseAccess(identity?.id, "dsa-mastery-lab");
   const userId = identity?.id || "";
   const solvedIds = userId ? Array.from(getUserSolvedDsaProblemIds(userId)) : [];
   const solvedSet = new Set(solvedIds);
@@ -104,14 +101,6 @@ export default async function DsaCoursePage() {
             </div>
           </div>
         </div>
-
-        {/* Prerequisite Lock Banner */}
-        <PrerequisiteLockBanner
-          access={access}
-          courseTitle="DSA CodeStudio: Algorithmic Arena"
-          firstPartLabel="Problem 01 (Two Sum)"
-          previewUrl="/dsa/two-sum"
-        />
 
         {/* Quick Stats Grid */}
         <div
@@ -218,57 +207,23 @@ export default async function DsaCoursePage() {
               <tbody>
                 {DSA_PROBLEMS.map((prob, idx) => {
                   const isSolved = solvedSet.has(prob.id);
-                  const isPreview = prob.id === "two-sum";
-                  const isLocked = access.isLocked && !isPreview;
 
                   return (
-                    <tr key={prob.id} style={{ opacity: isLocked ? 0.75 : 1 }}>
+                    <tr key={prob.id}>
                       <td style={{ textAlign: "center" }}>
                         {isSolved ? (
                           <span style={{ color: "#10b981", fontWeight: 800, fontSize: "16px" }}>✓</span>
-                        ) : isLocked ? (
-                          <span style={{ color: "#94a3b8", fontSize: "14px" }}>🔒</span>
                         ) : (
-                          <span style={{ color: "#cbd5e1" }}>○</span>
+                          <span style={{ color: "var(--apple-blue-accent)", fontSize: "14px" }}>○</span>
                         )}
                       </td>
                       <td>
                         <Link
                           href={`/dsa/${prob.id}`}
-                          style={{ fontWeight: 700, color: isLocked ? "var(--text-secondary)" : "var(--text-primary)", textDecoration: "none" }}
+                          style={{ fontWeight: 700, color: "var(--text-primary)", textDecoration: "none" }}
                         >
                           {idx + 1}. {prob.title}
                         </Link>
-                        {isPreview && (
-                          <span
-                            style={{
-                              marginLeft: "8px",
-                              fontSize: "10px",
-                              fontWeight: 800,
-                              background: "#e0f2fe",
-                              color: "#0284c7",
-                              padding: "2px 6px",
-                              borderRadius: "4px",
-                            }}
-                          >
-                            👁️ Open Preview
-                          </span>
-                        )}
-                        {isLocked && (
-                          <span
-                            style={{
-                              marginLeft: "8px",
-                              fontSize: "10px",
-                              fontWeight: 700,
-                              background: "#f1f5f9",
-                              color: "#64748b",
-                              padding: "2px 6px",
-                              borderRadius: "4px",
-                            }}
-                          >
-                            Locked
-                          </span>
-                        )}
                       </td>
                       <td>
                         <span className="tag-pill" style={{ background: "#f1f5f9", color: "#475569" }}>
@@ -294,27 +249,15 @@ export default async function DsaCoursePage() {
                           className={`button button-small ${
                             isSolved
                               ? "button-outline"
-                              : isPreview
-                              ? "button-cn-primary"
-                              : isLocked
-                              ? "button-dark"
                               : "button-cn-primary"
                           }`}
                           style={{
                             fontSize: "11px",
                             padding: "6px 12px",
                             whiteSpace: "nowrap",
-                            color: isLocked ? "#94a3b8" : undefined,
-                            borderColor: isLocked ? "#475569" : undefined,
                           }}
                         >
-                          {isSolved
-                            ? "Solve Again"
-                            : isPreview
-                            ? "Preview Challenge →"
-                            : isLocked
-                            ? "🔒 Locked (Preview Only)"
-                            : "Solve Challenge →"}
+                          {isSolved ? "Solve Again" : "Solve Challenge →"}
                         </Link>
                       </td>
                     </tr>

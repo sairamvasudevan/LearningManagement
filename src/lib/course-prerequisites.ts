@@ -22,15 +22,15 @@ export const FLAGSHIP_TOTAL_MODULES = 100;
  * (completing the 100-Hour Problem Solving Lab) before accessing advanced tracks.
  */
 export function checkCourseAccess(userId: string | null | undefined, courseSlug: string): CourseAccessStatus {
-  // Flagship 100-Hour Problem Solving Lab is always unlocked for study
-  if (courseSlug === FLAGSHIP_SLUG) {
+  // Flagship 100-Hour Problem Solving Lab and Interactive Coding Tracks (DSA CodeStudio & Web Dev Sandbox) are 100% unlocked for direct student practice
+  if (courseSlug === FLAGSHIP_SLUG || courseSlug === "dsa-mastery-lab" || courseSlug === "web-dev-mern-lab") {
     return {
       courseSlug,
-      isFlagship: true,
+      isFlagship: courseSlug === FLAGSHIP_SLUG,
       isLocked: false,
       canStudy: true,
       canPreviewFirstPart: true,
-      completedModulesCount: 0,
+      completedModulesCount: FLAGSHIP_TOTAL_MODULES,
       totalRequiredModules: FLAGSHIP_TOTAL_MODULES,
       percentageCompleted: 100,
       reason: null,

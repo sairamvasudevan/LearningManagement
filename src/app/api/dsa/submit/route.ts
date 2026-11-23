@@ -3,7 +3,6 @@ import { evaluateTestCases, SupportedLanguage } from "@/lib/compiler";
 import { DSA_PROBLEMS } from "@/lib/dsa-problems";
 import { recordDsaSubmission } from "@/lib/db";
 import { getCurrentIdentity } from "@/lib/auth";
-import { checkCourseAccess } from "@/lib/course-prerequisites";
 
 export const dynamic = "force-dynamic";
 
@@ -28,23 +27,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Problem not found." }, { status: 404 });
     }
 
-    // Gated Prerequisite Verification: Only Problem 1 (two-sum) is allowed without completing 100-Hour Lab
     const identity = await getCurrentIdentity();
-    if (problemId !== "two-sum") {
-      const access = checkCourseAccess(identity?.id, "dsa-mastery-lab");
-      if (access.isLocked) {
-        return NextResponse.json(
-          {
-            error:
-              "Prerequisite Required: You must complete all 100 modules of the Problem Solving Lab before unlocking full submissions for this problem. You may practice Problem 01 (Two Sum) in preview mode.",
-            isLocked: true,
-            completedModules: access.completedModulesCount,
-            totalRequired: access.totalRequiredModules,
-          },
-          { status: 403 },
-        );
-      }
-    }
 
     // Combine sample and hidden test cases for final grading
     const allTestCases = [
