@@ -4294,6 +4294,70 @@ td small {
   font-size: 11px;
 }
 
+.auth-card,
+.register-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-normal);
+  border-radius: 20px;
+  padding: 36px 32px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.auth-card h2,
+.register-card h2 {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  color: var(--text-primary);
+  margin: 10px 0 6px;
+}
+
+.auth-card > p,
+.register-card > p {
+  color: var(--text-secondary);
+  font-size: 13.5px;
+  line-height: 1.6;
+  margin: 0 0 24px;
+}
+
+.form-stack {
+  display: grid;
+  gap: 16px;
+}
+
+.form-stack label {
+  display: grid;
+  gap: 6px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.form-stack input,
+.form-stack select,
+.inline-form input,
+.mode-row select {
+  width: 100%;
+  border: 1px solid var(--border-normal);
+  border-radius: 10px;
+  background: var(--bg-input, rgba(255, 255, 255, 0.04));
+  padding: 12px 14px;
+  color: var(--text-primary);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.form-stack input:focus,
+.form-stack select:focus,
+.inline-form input:focus,
+.mode-row select:focus {
+  border-color: var(--apple-blue-accent);
+  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.2);
+}
+
 .auth-form-wrapper {
   display: flex;
   flex-direction: column;
@@ -4340,6 +4404,39 @@ td small {
   position: sticky;
   top: 90px;
   padding-top: 8px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+/* RESPONSIVE OVERRIDES FOR AUTH & REGISTER */
+@media (max-width: 900px) {
+  .auth-page {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    margin: 28px auto 60px;
+    padding: 0 16px;
+    min-height: auto;
+  }
+  .register-layout {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    margin: 28px auto 60px;
+    padding: 0 16px;
+  }
+  .register-intro {
+    position: static;
+  }
+  .auth-card,
+  .register-card {
+    padding: 24px 18px;
+  }
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .selected-package-card {

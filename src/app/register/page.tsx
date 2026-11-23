@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { RegisterForm } from "@/components/auth-forms";
 import { COURSE_PACKAGES } from "@/lib/courses";
@@ -9,15 +8,11 @@ export const dynamic = "force-dynamic";
 
 export default async function RegisterPage() {
   const identity = await getCurrentIdentity();
-  if (identity) {
-    redirect(identity.role === "admin" ? "/admin" : "/portal");
-  }
-
   const course = COURSE_PACKAGES[0];
 
   return (
     <>
-      <SiteHeader />
+      <SiteHeader signedIn={Boolean(identity)} admin={identity?.role === "admin"} />
       <main className="register-layout">
         <div className="register-intro">
           <span className="eyebrow">STUDENT REGISTRATION</span>
@@ -52,8 +47,52 @@ export default async function RegisterPage() {
         </div>
 
         <section className="register-card">
+          <span className="eyebrow">NEW STUDENT ENROLLMENT</span>
           <h2>Create your student account</h2>
           <p>All fields marked with * are required. Registration for {course.title} is free.</p>
+
+          {identity && (
+            <div
+              style={{
+                marginBottom: "22px",
+                padding: "16px 18px",
+                background: "rgba(0, 113, 227, 0.12)",
+                border: "1px solid rgba(0, 113, 227, 0.35)",
+                borderRadius: "14px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "10px",
+              }}
+            >
+              <div style={{ fontSize: "12px", color: "var(--apple-blue-accent)", fontWeight: 700 }}>
+                ✓ Currently signed in as {identity.fullName || identity.email} ({identity.role})
+              </div>
+              <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
+                <Link
+                  href={identity.role === "admin" ? "/admin" : "/portal"}
+                  className="button button-small button-cn-primary"
+                  style={{ textDecoration: "none", fontSize: "11px", padding: "6px 14px" }}
+                >
+                  Go to {identity.role === "admin" ? "Admin Portal" : "Student Hub"} →
+                </Link>
+                <form action="/auth/signout" method="POST" style={{ margin: 0 }}>
+                  <button
+                    type="submit"
+                    className="button button-small button-quiet"
+                    style={{
+                      fontSize: "11px",
+                      padding: "6px 14px",
+                      color: "var(--apple-red)",
+                      borderColor: "rgba(255, 69, 58, 0.3)",
+                    }}
+                  >
+                    Sign out
+                  </button>
+                </form>
+              </div>
+            </div>
+          )}
+
           <RegisterForm />
           <div className="auth-bottom">
             Already registered? <Link href="/login">Sign in</Link>
