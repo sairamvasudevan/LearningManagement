@@ -4,6 +4,7 @@ import { useCallback, useState, useMemo } from "react";
 import Link from "next/link";
 import type { ModuleCurriculum } from "@/lib/curriculum-data";
 import { AudioReader, moduleCurriculumToAudioChunks } from "@/components/audio-reader";
+import { ModuleFeedbackForm } from "@/components/module-feedback-form";
 
 type Review = {
   is_correct: boolean;
@@ -390,6 +391,11 @@ export function ModulePlayer({
             )}
           </section>
 
+          {/* Module Experience & Feedback */}
+          <div style={{ marginTop: 24, marginBottom: 28 }}>
+            <ModuleFeedbackForm moduleNumber={moduleNumber} defaultExpanded={false} />
+          </div>
+
           {/* Section 6: Transition to Mastery Checkpoint */}
           <div className="checkpoint-cta-box">
             <div className="cta-box-content">
@@ -460,6 +466,11 @@ export function ModulePlayer({
           >
             Review Lesson Material &amp; Retry
           </button>
+        </div>
+
+        {/* Immediate Post-Assessment Module Feedback Widget */}
+        <div style={{ marginTop: 40, width: "100%", textAlign: "left" }}>
+          <ModuleFeedbackForm moduleNumber={moduleNumber} defaultExpanded={true} />
         </div>
       </div>
     );

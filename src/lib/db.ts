@@ -67,6 +67,26 @@ export type DbDsaSubmission = {
   created_at: string;
 };
 
+export type DbModuleFeedback = {
+  id: string;
+  user_id: string;
+  module_number: number;
+  stage_id: number;
+  helpfulness_rating: number; // 1-5
+  difficulty_level: "too_easy" | "just_right" | "too_hard";
+  ease_of_use_rating: number; // 1-5
+  feedback_text: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type DbModuleFeedbackWithUser = DbModuleFeedback & {
+  user_name: string;
+  user_email: string;
+  user_college: string;
+  user_register_number: string;
+};
+
 let dbInstance: DatabaseSync | null = null;
 
 export function getDatabase(): DatabaseSync {
@@ -163,6 +183,23 @@ export function getDatabase(): DatabaseSync {
       FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
     );
     CREATE INDEX IF NOT EXISTS idx_dsa_sub_user ON dsa_submissions(user_id, problem_id);
+
+    CREATE TABLE IF NOT EXISTS module_feedback (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      module_number INTEGER NOT NULL,
+      stage_id INTEGER NOT NULL DEFAULT 1,
+      helpfulness_rating INTEGER NOT NULL,
+      difficulty_level TEXT NOT NULL,
+      ease_of_use_rating INTEGER NOT NULL,
+      feedback_text TEXT DEFAULT '',
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      UNIQUE(user_id, module_number),
+      FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+    );
+    CREATE INDEX IF NOT EXISTS idx_mod_feedback_module ON module_feedback(module_number);
+    CREATE INDEX IF NOT EXISTS idx_mod_feedback_user ON module_feedback(user_id);
   `);
 
   // Schema migration for password_hash and password_salt
@@ -234,6 +271,55 @@ export function getDatabase(): DatabaseSync {
   } else if (!existingStudent.password_hash || !existingStudent.password_hash.trim()) {
     db.prepare("UPDATE users SET password_hash = ?, password_salt = ? WHERE email = ?").run(studentHash, studentSalt, "student@learninghub.edu");
   }
+
+  // Pre-seed sample module feedback if empty
+  try {
+    const feedbackCountRow = db.prepare("SELECT COUNT(*) as count FROM module_feedback").get() as { count: number };
+    if (feedbackCountRow && feedbackCountRow.count === 0) {
+      const demoUserId = "00000000-0000-4000-a000-000000000001";
+      const now = new Date().toISOString();
+      const insertFeedback = db.prepare(`
+        INSERT INTO module_feedback (id, user_id, module_number, stage_id, helpfulness_rating, difficulty_level, ease_of_use_rating, feedback_text, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+      insertFeedback.run(
+        "fb-demo-01",
+        demoUserId,
+        1,
+        1,
+        5,
+        "just_right",
+        5,
+        "The step-by-step loop invariant formulation and the invariant checklist were brilliant. The interactive hints in the checkpoint helped me think through edge cases without spoiling the solution.",
+        now,
+        now,
+      );
+      insertFeedback.run(
+        "fb-demo-02",
+        demoUserId,
+        2,
+        1,
+        4,
+        "just_right",
+        5,
+        "Great coverage of monotonic properties and prefix sums. Would love 1 additional diagram showing the 2D prefix sum inclusion-exclusion region.",
+        now,
+        now,
+      );
+      insertFeedback.run(
+        "fb-demo-03",
+        demoUserId,
+        3,
+        1,
+        5,
+        "too_hard",
+        4,
+        "Sliding window dynamic contractions are conceptually tough. The examples are deep; maybe add a beginner stepping-stone question before the shrink condition.",
+        now,
+        now,
+      );
+    }
+  } catch {}
 
   dbInstance = db;
   return db;
@@ -643,6 +729,7 @@ export function getDatabaseHealth() {
   const attemptCount = (db.prepare("SELECT COUNT(*) as count FROM assessment_attempts").get() as { count: number }).count;
   const submissionCount = (db.prepare("SELECT COUNT(*) as count FROM practice_submissions").get() as { count: number }).count;
   const dsaCount = (db.prepare("SELECT COUNT(*) as count FROM dsa_submissions").get() as { count: number }).count;
+  const feedbackCount = (db.prepare("SELECT COUNT(*) as count FROM module_feedback").get() as { count: number }).count;
 
   return {
     status: integrity?.integrity_check === "ok" ? "healthy" : "degraded",
@@ -654,6 +741,254 @@ export function getDatabaseHealth() {
       assessmentAttempts: attemptCount,
       practiceSubmissions: submissionCount,
       dsaSubmissions: dsaCount,
+      moduleFeedback: feedbackCount,
     },
+  };
+}
+
+/* -------------------------------------------------------------
+   MODULE FEEDBACK & PLATFORM UPGRADE ANALYTICS APIS
+------------------------------------------------------------- */
+
+export function upsertModuleFeedback(data: {
+  userId: string;
+  moduleNumber: number;
+  stageId?: number;
+  helpfulnessRating: number;
+  difficultyLevel: "too_easy" | "just_right" | "too_hard";
+  easeOfUseRating: number;
+  feedbackText: string;
+}): DbModuleFeedback {
+  const db = getDatabase();
+  const now = new Date().toISOString();
+  const id = `fb-${data.moduleNumber}-${crypto.randomBytes(6).toString("hex")}`;
+  const stageId = data.stageId || Math.ceil(data.moduleNumber / 10);
+
+  // Clamping ratings 1-5
+  const helpfulness = Math.max(1, Math.min(5, Math.round(data.helpfulnessRating)));
+  const easeOfUse = Math.max(1, Math.min(5, Math.round(data.easeOfUseRating)));
+  const difficulty = ["too_easy", "just_right", "too_hard"].includes(data.difficultyLevel)
+    ? data.difficultyLevel
+    : "just_right";
+  const text = (data.feedbackText || "").trim();
+
+  db.prepare(`
+    INSERT INTO module_feedback (
+      id, user_id, module_number, stage_id, helpfulness_rating, difficulty_level, ease_of_use_rating, feedback_text, created_at, updated_at
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(user_id, module_number) DO UPDATE SET
+      stage_id = excluded.stage_id,
+      helpfulness_rating = excluded.helpfulness_rating,
+      difficulty_level = excluded.difficulty_level,
+      ease_of_use_rating = excluded.ease_of_use_rating,
+      feedback_text = excluded.feedback_text,
+      updated_at = excluded.updated_at
+  `).run(
+    id,
+    data.userId,
+    data.moduleNumber,
+    stageId,
+    helpfulness,
+    difficulty,
+    easeOfUse,
+    text,
+    now,
+    now,
+  );
+
+  const saved = db.prepare(`
+    SELECT * FROM module_feedback WHERE user_id = ? AND module_number = ?
+  `).get(data.userId, data.moduleNumber) as unknown as DbModuleFeedback;
+
+  return saved;
+}
+
+export function getModuleFeedbackForUser(userId: string, moduleNumber: number): DbModuleFeedback | null {
+  const db = getDatabase();
+  const row = db.prepare(`
+    SELECT * FROM module_feedback WHERE user_id = ? AND module_number = ?
+  `).get(userId, moduleNumber) as unknown as DbModuleFeedback | undefined;
+  return row || null;
+}
+
+export function getAllModuleFeedback(options?: {
+  moduleNumber?: number;
+  limit?: number;
+  offset?: number;
+}): DbModuleFeedbackWithUser[] {
+  const db = getDatabase();
+  const limit = options?.limit ?? 100;
+  const offset = options?.offset ?? 0;
+
+  if (options?.moduleNumber !== undefined && options.moduleNumber > 0) {
+    const rows = db.prepare(`
+      SELECT f.*, u.full_name as user_name, u.email as user_email, u.college as user_college, u.register_number as user_register_number
+      FROM module_feedback f
+      JOIN users u ON f.user_id = u.id
+      WHERE f.module_number = ?
+      ORDER BY f.updated_at DESC
+      LIMIT ? OFFSET ?
+    `).all(options.moduleNumber, limit, offset) as unknown as DbModuleFeedbackWithUser[];
+    return rows.map((r) => ({ ...r }));
+  }
+
+  const rows = db.prepare(`
+    SELECT f.*, u.full_name as user_name, u.email as user_email, u.college as user_college, u.register_number as user_register_number
+    FROM module_feedback f
+    JOIN users u ON f.user_id = u.id
+    ORDER BY f.updated_at DESC
+    LIMIT ? OFFSET ?
+  `).all(limit, offset) as unknown as DbModuleFeedbackWithUser[];
+  return rows.map((r) => ({ ...r }));
+}
+
+export type ModuleFeedbackMetrics = {
+  totalCount: number;
+  distinctModulesCount: number;
+  avgHelpfulness: number;
+  avgEaseOfUse: number;
+  difficultyBreakdown: {
+    tooEasy: number;
+    justRight: number;
+    tooHard: number;
+    total: number;
+  };
+  moduleSummaries: Record<
+    number,
+    {
+      count: number;
+      avgHelpfulness: number;
+      avgEaseOfUse: number;
+      difficulty: { tooEasy: number; justRight: number; tooHard: number };
+    }
+  >;
+  flaggedModules: Array<{
+    moduleNumber: number;
+    count: number;
+    avgHelpfulness: number;
+    avgEaseOfUse: number;
+    topDifficulty: string;
+    sampleFeedback: string[];
+    reason: string;
+  }>;
+};
+
+export function getModuleFeedbackMetrics(): ModuleFeedbackMetrics {
+  const db = getDatabase();
+
+  const totalRow = db.prepare(`
+    SELECT 
+      COUNT(*) as count,
+      COUNT(DISTINCT module_number) as distinct_modules,
+      AVG(helpfulness_rating) as avg_helpfulness,
+      AVG(ease_of_use_rating) as avg_ease_of_use
+    FROM module_feedback
+  `).get() as { count: number; distinct_modules: number; avg_helpfulness: number | null; avg_ease_of_use: number | null };
+
+  const diffRows = db.prepare(`
+    SELECT difficulty_level, COUNT(*) as count
+    FROM module_feedback
+    GROUP BY difficulty_level
+  `).all() as { difficulty_level: string; count: number }[];
+
+  let tooEasy = 0;
+  let justRight = 0;
+  let tooHard = 0;
+  for (const r of diffRows) {
+    if (r.difficulty_level === "too_easy") tooEasy = r.count;
+    else if (r.difficulty_level === "too_hard") tooHard = r.count;
+    else justRight = r.count;
+  }
+
+  // Per-module aggregations
+  const perModuleRows = db.prepare(`
+    SELECT 
+      module_number,
+      COUNT(*) as count,
+      AVG(helpfulness_rating) as avg_helpfulness,
+      AVG(ease_of_use_rating) as avg_ease_of_use
+    FROM module_feedback
+    GROUP BY module_number
+    ORDER BY module_number ASC
+  `).all() as { module_number: number; count: number; avg_helpfulness: number; avg_ease_of_use: number }[];
+
+  const moduleSummaries: ModuleFeedbackMetrics["moduleSummaries"] = {};
+  for (const row of perModuleRows) {
+    const mDiff = db.prepare(`
+      SELECT difficulty_level, COUNT(*) as count
+      FROM module_feedback
+      WHERE module_number = ?
+      GROUP BY difficulty_level
+    `).all(row.module_number) as { difficulty_level: string; count: number }[];
+
+    let mEasy = 0;
+    let mRight = 0;
+    let mHard = 0;
+    for (const d of mDiff) {
+      if (d.difficulty_level === "too_easy") mEasy = d.count;
+      else if (d.difficulty_level === "too_hard") mHard = d.count;
+      else mRight = d.count;
+    }
+
+    moduleSummaries[row.module_number] = {
+      count: row.count,
+      avgHelpfulness: Number((row.avg_helpfulness || 0).toFixed(1)),
+      avgEaseOfUse: Number((row.avg_ease_of_use || 0).toFixed(1)),
+      difficulty: { tooEasy: mEasy, justRight: mRight, tooHard: mHard },
+    };
+  }
+
+  // Flagged modules for platform upgrades:
+  // e.g. avgHelpfulness < 4.0 OR tooHard >= 30% OR tooEasy >= 30%
+  const flaggedModules: ModuleFeedbackMetrics["flaggedModules"] = [];
+  for (const [modStr, sum] of Object.entries(moduleSummaries)) {
+    const modNum = Number(modStr);
+    const reasons: string[] = [];
+
+    if (sum.avgHelpfulness < 4.0) {
+      reasons.push(`Helpfulness rating (${sum.avgHelpfulness}/5.0) is below target threshold 4.0`);
+    }
+    const hardPct = sum.count > 0 ? (sum.difficulty.tooHard / sum.count) * 100 : 0;
+    if (hardPct >= 30) {
+      reasons.push(`${Math.round(hardPct)}% of learners reported content is Too Hard / steep learning curve`);
+    }
+    const easyPct = sum.count > 0 ? (sum.difficulty.tooEasy / sum.count) * 100 : 0;
+    if (easyPct >= 30) {
+      reasons.push(`${Math.round(easyPct)}% of learners reported content is Too Easy / needs more rigor`);
+    }
+
+    if (reasons.length > 0) {
+      const sampleTexts = db.prepare(`
+        SELECT feedback_text FROM module_feedback 
+        WHERE module_number = ? AND feedback_text != ''
+        ORDER BY updated_at DESC LIMIT 3
+      `).all(modNum) as { feedback_text: string }[];
+
+      flaggedModules.push({
+        moduleNumber: modNum,
+        count: sum.count,
+        avgHelpfulness: sum.avgHelpfulness,
+        avgEaseOfUse: sum.avgEaseOfUse,
+        topDifficulty: hardPct >= easyPct && hardPct > 0 ? "Too Hard" : easyPct > 0 ? "Too Easy" : "Optimal",
+        sampleFeedback: sampleTexts.map((t) => t.feedback_text),
+        reason: reasons.join("; "),
+      });
+    }
+  }
+
+  return {
+    totalCount: totalRow?.count || 0,
+    distinctModulesCount: totalRow?.distinct_modules || 0,
+    avgHelpfulness: Number((totalRow?.avg_helpfulness || 0).toFixed(1)),
+    avgEaseOfUse: Number((totalRow?.avg_ease_of_use || 0).toFixed(1)),
+    difficultyBreakdown: {
+      tooEasy,
+      justRight,
+      tooHard,
+      total: totalRow?.count || 0,
+    },
+    moduleSummaries,
+    flaggedModules,
   };
 }

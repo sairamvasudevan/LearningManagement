@@ -2,7 +2,7 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
-import { getAdminMetrics } from "@/lib/db";
+import { getAdminMetrics, getModuleFeedbackMetrics } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +11,7 @@ export default async function AdminHome() {
 
   // Load live SQLite metrics
   const metrics = getAdminMetrics();
+  const feedbackMetrics = getModuleFeedbackMetrics();
   let studentCount = metrics.totalStudents;
   let approvedCount = metrics.approvedStudents;
   let pendingCount = Math.max(0, metrics.totalStudents - metrics.approvedStudents);
@@ -100,9 +101,17 @@ export default async function AdminHome() {
           <b>{completedLessonsCount}</b>
           <span>Lessons completed</span>
         </div>
+        <div>
+          <b>{feedbackMetrics.totalCount}</b>
+          <span>Module reviews</span>
+        </div>
+        <div>
+          <b>{feedbackMetrics.avgHelpfulness} / 5.0</b>
+          <span>Avg content rating</span>
+        </div>
       </section>
 
-      <section className="admin-nav-grid">
+      <section className="admin-nav-grid" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
         <Link className="admin-nav-card" href="/admin/students">
           <div className="admin-nav-icon">01</div>
           <h2>Students &amp; progress tracker</h2>
@@ -120,6 +129,14 @@ export default async function AdminHome() {
             enrollment and assign students by email.
           </p>
           <b>Manage access →</b>
+        </Link>
+        <Link className="admin-nav-card" href="/admin/feedback">
+          <div className="admin-nav-icon" style={{ background: "rgba(255, 159, 10, 0.15)", color: "#ff9f0a" }}>03</div>
+          <h2>Module Feedback &amp; Upgrades</h2>
+          <p>
+            Student ratings on content helpfulness, difficulty level, and user-friendliness across all 100 modules. Automated platform upgrade suggestions.
+          </p>
+          <b>Review module telemetry →</b>
         </Link>
       </section>
 
