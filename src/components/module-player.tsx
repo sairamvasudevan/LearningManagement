@@ -1,10 +1,8 @@
 "use client";
 
-import { useCallback, useState, useMemo } from "react";
+import { useCallback, useState } from "react";
 import Link from "next/link";
 import type { ModuleCurriculum } from "@/lib/curriculum-data";
-import { AudioReader, moduleCurriculumToAudioChunks } from "@/components/audio-reader";
-import { ModuleFeedbackForm } from "@/components/module-feedback-form";
 
 type Review = {
   is_correct: boolean;
@@ -43,9 +41,6 @@ export function ModulePlayer({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [activeChecklist, setActiveChecklist] = useState<Record<number, boolean>>({});
-
-  // Clean Audio Narration Chunks
-  const audioChunks = useMemo(() => moduleCurriculumToAudioChunks(curriculum), [curriculum]);
 
   // Hands-on practice task state
   const [taskInput, setTaskInput] = useState(practiceTask.starterTemplate);
@@ -215,14 +210,6 @@ export function ModulePlayer({
             <span>💻 Hands-on Practice Task</span>
             <span>🎓 {questions.length} Mastery Checkpoint Questions</span>
           </div>
-
-          {/* Audio Reader with Full Player Controls */}
-          <AudioReader
-            title={`Module ${moduleNumber}: ${title}`}
-            subtitle={`${stageTitle} · Listen to full lesson narration`}
-            chunks={audioChunks}
-            badgeLabel="Audio Narrator"
-          />
         </div>
 
         {/* Main Article Body */}
@@ -233,17 +220,18 @@ export function ModulePlayer({
               <div className="section-kicker">{section.kicker}</div>
               <h2>{section.title}</h2>
               {section.content.map((para, pIdx) => (
-                <p key={pIdx} style={{ whiteSpace: "pre-line" }}>{para}</p>
+                <p key={pIdx}>{para}</p>
               ))}
 
               {section.callout && (
                 <div
-                  className={`callout-box ${section.callout.type === "warning"
+                  className={`callout-box ${
+                    section.callout.type === "warning"
                       ? "warning-callout"
                       : section.callout.type === "tip"
                         ? "tip-callout"
                         : "rule-callout"
-                    }`}
+                  }`}
                 >
                   <b>
                     {section.callout.type === "warning"
@@ -283,9 +271,7 @@ export function ModulePlayer({
                       <p>{cs.correctInvariant}</p>
                       {cs.codeOrContract && (
                         <div className="code-snippet-box">
-                          <pre style={{ margin: 0, whiteSpace: "pre-wrap", fontFamily: "inherit" }}>
-                            <code>{cs.codeOrContract}</code>
-                          </pre>
+                          <code>{cs.codeOrContract}</code>
                         </div>
                       )}
                     </div>
@@ -314,7 +300,7 @@ export function ModulePlayer({
                     <input
                       type="checkbox"
                       checked={Boolean(activeChecklist[chIdx])}
-                      onChange={() => { }}
+                      onChange={() => {}}
                     />
                     <div>
                       <b>{item}</b>
@@ -391,11 +377,6 @@ export function ModulePlayer({
             )}
           </section>
 
-          {/* Module Experience & Feedback */}
-          <div style={{ marginTop: 24, marginBottom: 28 }}>
-            <ModuleFeedbackForm moduleNumber={moduleNumber} defaultExpanded={false} />
-          </div>
-
           {/* Section 6: Transition to Mastery Checkpoint */}
           <div className="checkpoint-cta-box">
             <div className="cta-box-content">
@@ -467,11 +448,6 @@ export function ModulePlayer({
             Review Lesson Material &amp; Retry
           </button>
         </div>
-
-        {/* Immediate Post-Assessment Module Feedback Widget */}
-        <div style={{ marginTop: 40, width: "100%", textAlign: "left" }}>
-          <ModuleFeedbackForm moduleNumber={moduleNumber} defaultExpanded={true} />
-        </div>
       </div>
     );
   }
@@ -536,8 +512,9 @@ export function ModulePlayer({
               <button
                 key={i}
                 type="button"
-                className={`option-button ${chosen ? "selected" : ""} ${correct ? "option-correct" : ""
-                  } ${wrong ? "option-wrong" : ""}`}
+                className={`option-button ${chosen ? "selected" : ""} ${
+                  correct ? "option-correct" : ""
+                } ${wrong ? "option-wrong" : ""}`}
                 disabled={Boolean(currentReview)}
                 onClick={() =>
                   setSelected((current) => ({ ...current, [question.question_id]: i }))
@@ -586,32 +563,132 @@ export function ModulePlayer({
           </div>
         </div>
 
-        {/* Instant Review & Explanation */}
+        {/* Instant Senior Invariant Review & Detailed Misconception Breakdown */}
         {currentReview && (
           <div
-            className={`answer-explanation ${currentReview.is_correct ? "answer-good" : "answer-review"
-              }`}
+            className={`review-explanation-card ${
+              currentReview.is_correct ? "review-correct" : "review-wrong"
+            }`}
           >
-            <div className="answer-heading">
-              <b>{currentReview.is_correct ? "✓ Correct Answer" : "⚠️ Review Expected Invariant"}</b>
-              <span>
-                {currentReview.marks_awarded} / {currentReview.max_marks} marks awarded
+            <div className="review-card-topbar">
+              <div className="review-title-group">
+                <span className="review-status-icon">
+                  {currentReview.is_correct ? "✓" : "❌"}
+                </span>
+                <div>
+                  <h3 className="review-status-title">
+                    {currentReview.is_correct
+                      ? "Correct Invariant Formulated!"
+                      : "Incorrect Formulation · Detailed Misconception Breakdown"}
+                  </h3>
+                  <p className="review-status-sub">
+                    {currentReview.is_correct
+                      ? `Full marks awarded (${currentReview.marks_awarded}/${currentReview.max_marks}). Review the proof and distractor breakdown below.`
+                      : `0 / ${currentReview.max_marks} marks awarded. Examine why your selected option failed and why the correct answer is mathematically sound.`}
+                  </p>
+                </div>
+              </div>
+              <span
+                className={`review-badge-pill ${
+                  currentReview.is_correct ? "badge-green" : "badge-red"
+                }`}
+              >
+                {currentReview.marks_awarded} / {currentReview.max_marks} Marks
               </span>
             </div>
-            <p>
-              <b>Explanation:</b> {currentReview.explanation}
-            </p>
-            <details style={{ marginTop: 8 }}>
-              <summary style={{ cursor: "pointer", fontWeight: 700, color: "var(--teal)" }}>
-                View analysis of all options
+
+            {/* High-Contrast Comparison Grid */}
+            <div className="review-contrast-grid">
+              {!currentReview.is_correct && (
+                <div className="contrast-box box-wrong">
+                  <div className="contrast-box-header">
+                    <span className="contrast-badge badge-wrong">
+                      ❌ Why Your Answer (Option {String.fromCharCode(65 + currentReview.selected_index)}) Is Wrong
+                    </span>
+                  </div>
+                  <div className="contrast-option-text">
+                    &ldquo;{question.options[currentReview.selected_index]}&rdquo;
+                  </div>
+                  <div className="contrast-explanation">
+                    <b>Flaw &amp; Invariant Violation:</b>{" "}
+                    {currentReview.option_explanations[currentReview.selected_index] ||
+                      "This option violates the required state transition or fails on critical edge cases."}
+                  </div>
+                </div>
+              )}
+
+              <div
+                className={`contrast-box box-correct ${
+                  currentReview.is_correct ? "contrast-box-full" : ""
+                }`}
+              >
+                <div className="contrast-box-header">
+                  <span className="contrast-badge badge-correct">
+                    ✅ Why Option {String.fromCharCode(65 + currentReview.correct_index)} Is The Right Answer
+                  </span>
+                </div>
+                <div className="contrast-option-text">
+                  &ldquo;{question.options[currentReview.correct_index]}&rdquo;
+                </div>
+                <div className="contrast-explanation">
+                  <b>Correct Mathematical Invariant:</b>{" "}
+                  {currentReview.option_explanations[currentReview.correct_index] ||
+                    currentReview.explanation}
+                </div>
+              </div>
+            </div>
+
+            {/* Senior Architectural Takeaway */}
+            <div className="review-takeaway-box">
+              <div className="takeaway-header">
+                <span className="takeaway-bulb">💡</span>
+                <b>Senior Technical Principle &amp; Invariant Proof:</b>
+              </div>
+              <p className="takeaway-text">{currentReview.explanation}</p>
+            </div>
+
+            {/* Complete Options Comparison Accordion */}
+            <details className="review-all-options-details" open={!currentReview.is_correct}>
+              <summary className="review-details-summary">
+                <span>View Full 4-Option Comparative Analysis</span>
+                <span className="summary-caret">▼</span>
               </summary>
-              <ul style={{ paddingLeft: 20, margin: "8px 0 0" }}>
-                {currentReview.option_explanations.map((text, i) => (
-                  <li key={i} style={{ margin: "5px 0", fontSize: 13 }}>
-                    <b>Option {String.fromCharCode(65 + i)}:</b> {text}
-                  </li>
-                ))}
-              </ul>
+              <div className="review-options-list">
+                {question.options.map((opt, optIdx) => {
+                  const isThisSelected = currentReview.selected_index === optIdx;
+                  const isThisCorrect = currentReview.correct_index === optIdx;
+                  return (
+                    <div
+                      key={optIdx}
+                      className={`review-option-item ${
+                        isThisCorrect
+                          ? "opt-correct"
+                          : isThisSelected
+                          ? "opt-selected-wrong"
+                          : "opt-neutral"
+                      }`}
+                    >
+                      <div className="option-item-header">
+                        <b>
+                          Option {String.fromCharCode(65 + optIdx)}: {opt}
+                        </b>
+                        {isThisCorrect ? (
+                          <span className="option-badge-tag tag-correct">✅ Correct Answer</span>
+                        ) : isThisSelected ? (
+                          <span className="option-badge-tag tag-wrong">
+                            ❌ Your Choice (Flawed)
+                          </span>
+                        ) : (
+                          <span className="option-badge-tag tag-distractor">⚠️ Distractor</span>
+                        )}
+                      </div>
+                      <p className="option-item-explanation">
+                        {currentReview.option_explanations[optIdx]}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
             </details>
           </div>
         )}
