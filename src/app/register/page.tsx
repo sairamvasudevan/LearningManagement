@@ -1,9 +1,18 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { RegisterForm } from "@/components/auth-forms";
 import { COURSE_PACKAGES } from "@/lib/courses";
+import { getCurrentIdentity } from "@/lib/auth";
 
-export default function RegisterPage() {
+export const dynamic = "force-dynamic";
+
+export default async function RegisterPage() {
+  const identity = await getCurrentIdentity();
+  if (identity) {
+    redirect(identity.role === "admin" ? "/admin" : "/portal");
+  }
+
   const course = COURSE_PACKAGES[0];
 
   return (

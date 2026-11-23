@@ -26,8 +26,7 @@ export function LoginForm() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || "Could not start session.");
-      router.replace(role === "admin" ? "/admin" : "/portal");
-      router.refresh();
+      window.location.href = role === "admin" ? "/admin" : "/portal";
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to launch session.");
       setBusy(false);
@@ -47,8 +46,7 @@ export function LoginForm() {
           password,
         });
         if (authError) throw authError;
-        router.replace("/portal");
-        router.refresh();
+        window.location.href = "/portal";
       } else {
         // Real SQLite Backend Login & Password Verification
         const res = await fetch("/api/auth/session", {
@@ -67,8 +65,7 @@ export function LoginForm() {
           throw new Error(data.error || "Authentication failed. Invalid email or password.");
         }
 
-        router.replace(data.redirect || (data.role === "admin" ? "/admin" : "/portal"));
-        router.refresh();
+        window.location.href = data.redirect || (data.role === "admin" ? "/admin" : "/portal");
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Sign-in failed. Please verify your credentials.");
@@ -144,13 +141,6 @@ export function LoginForm() {
         <button className="button button-primary button-full" disabled={busy} style={{ marginTop: "8px" }}>
           {busy ? "Authenticating…" : "Sign in to Portal"}
         </button>
-
-        <div style={{ textAlign: "center", marginTop: "14px", fontSize: "13px", color: "var(--text-secondary)" }}>
-          Don&apos;t have an account?{" "}
-          <Link href="/register" style={{ color: "var(--apple-blue-accent)", fontWeight: 700, textDecoration: "none" }}>
-            Enroll &amp; Register Free →
-          </Link>
-        </div>
       </form>
 
       {/* Official Verified Demo Credentials */}
@@ -374,8 +364,7 @@ export function RegisterForm() {
         if (authError) throw authError;
         if (data.session) {
           await supabase.rpc("request_course_enrollment");
-          router.replace("/portal");
-          router.refresh();
+          window.location.href = "/portal";
         } else {
           setSuccess(
             "Your account has been created. Check your email to verify the address, then sign in to complete course registration.",
@@ -395,8 +384,7 @@ export function RegisterForm() {
         if (!res.ok) {
           throw new Error(data.error || "Registration failed. Please review your details.");
         }
-        router.replace(data.redirect || "/portal");
-        router.refresh();
+        window.location.href = data.redirect || "/portal";
       }
     } catch (err) {
       setFormError(err instanceof Error ? err.message : "Registration failed. Please review your details.");

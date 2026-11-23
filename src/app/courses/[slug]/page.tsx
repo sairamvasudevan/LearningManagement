@@ -4,6 +4,9 @@ import { SiteHeader } from "@/components/site-header";
 import { getCoursePackageBySlug, PLATFORM_NAME } from "@/lib/courses";
 import catalog from "@/lib/course-catalog.json";
 import { CourseDetailAudioReader } from "@/components/audio-reader";
+import { getCurrentIdentity } from "@/lib/auth";
+
+export const dynamic = "force-dynamic";
 
 type PageProps = { params: Promise<{ slug: string }> };
 
@@ -12,11 +15,12 @@ export default async function CourseDetailPage({ params }: PageProps) {
   const course = getCoursePackageBySlug(slug);
   if (!course) notFound();
 
+  const identity = await getCurrentIdentity();
   const isFlagship = course.slug === "problem-solving-lab";
 
   return (
     <>
-      <SiteHeader />
+      <SiteHeader signedIn={Boolean(identity)} admin={identity?.role === "admin"} />
       <main className="public-main">
         <div className="breadcrumb-row">
           <Link href="/#courses">← All course packages</Link>

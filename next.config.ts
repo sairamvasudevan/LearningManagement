@@ -5,6 +5,10 @@ const securityHeaders = [
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "X-Frame-Options", value: "SAMEORIGIN" },
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+  { key: "Strict-Transport-Security", value: "max-age=0" },
+  { key: "Cache-Control", value: "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0" },
+  { key: "Pragma", value: "no-cache" },
+  { key: "Expires", value: "0" },
 ];
 
 function productionContentSecurityPolicy() {
@@ -19,17 +23,17 @@ function productionContentSecurityPolicy() {
     }
   }
   return [
-    "default-src 'self'",
+    "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:",
     "base-uri 'self'",
     "object-src 'none'",
     "frame-ancestors 'self'",
-    "frame-src 'self'",
+    "frame-src 'self' blob: data:",
     "form-action 'self'",
-    "script-src 'self' 'unsafe-inline'",
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com data:",
     "font-src 'self' https://fonts.gstatic.com data:",
-    `connect-src 'self' ${supabaseConnectSources}`.trim(),
-    "img-src 'self' data: blob:",
+    `connect-src 'self' ${supabaseConnectSources} ws: wss: *`.trim(),
+    "img-src 'self' data: blob: *",
   ].join("; ");
 }
 

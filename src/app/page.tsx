@@ -10,6 +10,9 @@ import {
 } from "@/components/home-interactive";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { PLATFORM_NAME, PLATFORM_SUBTITLE } from "@/lib/courses";
+import { getCurrentIdentity } from "@/lib/auth";
+
+export const dynamic = "force-dynamic";
 
 const HIRING_BENCHMARKS = [
   { name: "Google", tag: "FAANG", icon: "🌐" },
@@ -22,12 +25,13 @@ const HIRING_BENCHMARKS = [
   { name: "Goldman Sachs", tag: "FinTech", icon: "🏛️" },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
   const hasSupabase = isSupabaseConfigured();
+  const identity = await getCurrentIdentity();
 
   return (
     <>
-      <SiteHeader />
+      <SiteHeader signedIn={Boolean(identity)} admin={identity?.role === "admin"} />
 
       {/* 1. APPLE-STYLE HERO SECTION */}
       <section className="apple-hero-section">
