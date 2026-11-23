@@ -124,55 +124,55 @@ export default async function DsaCoursePage() {
         >
           <div
             style={{
-              background: "#ffffff",
-              border: "1px solid #e2e8f0",
-              borderRadius: "12px",
+              background: "var(--bg-card)",
+              border: "1px solid var(--border-normal)",
+              borderRadius: "14px",
               padding: "20px",
             }}
           >
-            <div style={{ fontSize: "12px", color: "#64748b", fontWeight: 600 }}>Total Problems</div>
-            <div style={{ fontSize: "28px", fontWeight: 800, color: "#0f172a", marginTop: "4px" }}>
+            <div style={{ fontSize: "12px", color: "var(--text-secondary)", fontWeight: 600 }}>Total Problems</div>
+            <div style={{ fontSize: "28px", fontWeight: 800, color: "var(--text-primary)", marginTop: "4px" }}>
               {totalProblems}
             </div>
           </div>
           <div
             style={{
-              background: "#ffffff",
-              border: "1px solid #e2e8f0",
-              borderRadius: "12px",
+              background: "var(--bg-card)",
+              border: "1px solid var(--border-normal)",
+              borderRadius: "14px",
               padding: "20px",
             }}
           >
-            <div style={{ fontSize: "12px", color: "#64748b", fontWeight: 600 }}>Solved by You</div>
-            <div style={{ fontSize: "28px", fontWeight: 800, color: "#10b981", marginTop: "4px" }}>
+            <div style={{ fontSize: "12px", color: "var(--text-secondary)", fontWeight: 600 }}>Solved by You</div>
+            <div style={{ fontSize: "28px", fontWeight: 800, color: "var(--apple-green)", marginTop: "4px" }}>
               {solvedSet.size} / {totalProblems}
             </div>
           </div>
           <div
             style={{
-              background: "#ffffff",
-              border: "1px solid #e2e8f0",
-              borderRadius: "12px",
+              background: "var(--bg-card)",
+              border: "1px solid var(--border-normal)",
+              borderRadius: "14px",
               padding: "20px",
             }}
           >
-            <div style={{ fontSize: "12px", color: "#64748b", fontWeight: 600 }}>Difficulty Breakdown</div>
-            <div style={{ fontSize: "14px", fontWeight: 700, color: "#334155", marginTop: "8px" }}>
-              <span style={{ color: "#10b981" }}>{easyCount} Easy</span> ·{" "}
-              <span style={{ color: "#f59e0b" }}>{mediumCount} Medium</span> ·{" "}
-              <span style={{ color: "#ef4444" }}>{hardCount} Hard</span>
+            <div style={{ fontSize: "12px", color: "var(--text-secondary)", fontWeight: 600 }}>Difficulty Breakdown</div>
+            <div style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-primary)", marginTop: "8px" }}>
+              <span style={{ color: "var(--apple-green)" }}>{easyCount} Easy</span> ·{" "}
+              <span style={{ color: "var(--apple-amber)" }}>{mediumCount} Medium</span> ·{" "}
+              <span style={{ color: "var(--apple-red)" }}>{hardCount} Hard</span>
             </div>
           </div>
           <div
             style={{
-              background: "#ffffff",
-              border: "1px solid #e2e8f0",
-              borderRadius: "12px",
+              background: "var(--bg-card)",
+              border: "1px solid var(--border-normal)",
+              borderRadius: "14px",
               padding: "20px",
             }}
           >
-            <div style={{ fontSize: "12px", color: "#64748b", fontWeight: 600 }}>Supported Runtimes</div>
-            <div style={{ fontSize: "14px", fontWeight: 700, color: "#0284c7", marginTop: "8px" }}>
+            <div style={{ fontSize: "12px", color: "var(--text-secondary)", fontWeight: 600 }}>Supported Runtimes</div>
+            <div style={{ fontSize: "14px", fontWeight: 700, color: "var(--apple-blue-accent)", marginTop: "8px" }}>
               Clang (C/C++) · JDK 17 · Python 3
             </div>
           </div>
@@ -181,25 +181,25 @@ export default async function DsaCoursePage() {
         {/* Problems Table */}
         <div
           style={{
-            background: "#ffffff",
-            border: "1px solid #e2e8f0",
-            borderRadius: "12px",
+            background: "var(--bg-card)",
+            border: "1px solid var(--border-normal)",
+            borderRadius: "14px",
             overflow: "hidden",
           }}
         >
           <div
             style={{
               padding: "20px 24px",
-              borderBottom: "1px solid #e2e8f0",
+              borderBottom: "1px solid var(--border-normal)",
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
             }}
           >
-            <h2 style={{ fontSize: "18px", fontWeight: 800, margin: 0, color: "#0f172a" }}>
+            <h2 style={{ fontSize: "18px", fontWeight: 800, margin: 0, color: "var(--text-primary)" }}>
               Curated Interview DSA Problem Bank
             </h2>
-            <span style={{ fontSize: "13px", color: "#64748b", fontWeight: 600 }}>
+            <span style={{ fontSize: "13px", color: "var(--text-secondary)", fontWeight: 600 }}>
               {totalProblems} Practice Challenges Available
             </span>
           </div>
@@ -235,7 +235,7 @@ export default async function DsaCoursePage() {
                       <td>
                         <Link
                           href={`/dsa/${prob.id}`}
-                          style={{ fontWeight: 700, color: isLocked ? "#475569" : "#0f172a", textDecoration: "none" }}
+                          style={{ fontWeight: 700, color: isLocked ? "var(--text-secondary)" : "var(--text-primary)", textDecoration: "none" }}
                         >
                           {idx + 1}. {prob.title}
                         </Link>

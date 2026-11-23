@@ -246,7 +246,7 @@ export function ModulePlayer({
                     : section.callout.type === "tip"
                       ? "tip-callout"
                       : "rule-callout"
-                  }`}
+                    }`}
                 >
                   <b>
                     {section.callout.type === "warning"
@@ -317,7 +317,7 @@ export function ModulePlayer({
                     <input
                       type="checkbox"
                       checked={Boolean(activeChecklist[chIdx])}
-                      onChange={() => {}}
+                      onChange={() => { }}
                     />
                     <div>
                       <b>{item}</b>
@@ -644,9 +644,8 @@ export function ModulePlayer({
               <button
                 key={i}
                 type="button"
-                className={`option-button ${chosen ? "selected" : ""} ${
-                  correct ? "option-correct" : ""
-                } ${wrong ? "option-wrong" : ""}`}
+                className={`option-button ${chosen ? "selected" : ""} ${correct ? "option-correct" : ""
+                  } ${wrong ? "option-wrong" : ""}`}
                 disabled={Boolean(currentReview)}
                 onClick={() =>
                   setSelected((current) => ({ ...current, [question.question_id]: i }))
@@ -698,9 +697,8 @@ export function ModulePlayer({
         {/* Instant Senior Invariant Review & Detailed Misconception Breakdown */}
         {currentReview && (
           <div
-            className={`review-explanation-card ${
-              currentReview.is_correct ? "review-correct" : "review-wrong"
-            }`}
+            className={`review-explanation-card ${currentReview.is_correct ? "review-correct" : "review-wrong"
+              }`}
           >
             <div className="review-card-topbar">
               <div className="review-title-group">
@@ -721,9 +719,8 @@ export function ModulePlayer({
                 </div>
               </div>
               <span
-                className={`review-badge-pill ${
-                  currentReview.is_correct ? "badge-green" : "badge-red"
-                }`}
+                className={`review-badge-pill ${currentReview.is_correct ? "badge-green" : "badge-red"
+                  }`}
               >
                 {currentReview.marks_awarded} / {currentReview.max_marks} Marks
               </span>
@@ -750,9 +747,8 @@ export function ModulePlayer({
               )}
 
               <div
-                className={`contrast-box box-correct ${
-                  currentReview.is_correct ? "contrast-box-full" : ""
-                }`}
+                className={`contrast-box box-correct ${currentReview.is_correct ? "contrast-box-full" : ""
+                  }`}
               >
                 <div className="contrast-box-header">
                   <span className="contrast-badge badge-correct">
@@ -792,13 +788,12 @@ export function ModulePlayer({
                   return (
                     <div
                       key={optIdx}
-                      className={`review-option-item ${
-                        isThisCorrect
-                          ? "opt-correct"
-                          : isThisSelected
+                      className={`review-option-item ${isThisCorrect
+                        ? "opt-correct"
+                        : isThisSelected
                           ? "opt-selected-wrong"
                           : "opt-neutral"
-                      }`}
+                        }`}
                     >
                       <div className="option-item-header">
                         <b>

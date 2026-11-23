@@ -145,9 +145,9 @@ export function LoginForm() {
           {busy ? "Authenticating…" : "Sign in to Portal"}
         </button>
 
-        <div style={{ textAlign: "center", marginTop: "14px", fontSize: "13px", color: "#64748b" }}>
+        <div style={{ textAlign: "center", marginTop: "14px", fontSize: "13px", color: "var(--text-secondary)" }}>
           Don&apos;t have an account?{" "}
-          <Link href="/register" style={{ color: "#ff6a00", fontWeight: 700, textDecoration: "none" }}>
+          <Link href="/register" style={{ color: "var(--apple-blue-accent)", fontWeight: 700, textDecoration: "none" }}>
             Enroll &amp; Register Free →
           </Link>
         </div>
@@ -157,27 +157,27 @@ export function LoginForm() {
       <div
         style={{
           marginTop: "24px",
-          background: "#0f172a",
-          border: "1px solid #1e293b",
-          borderRadius: "8px",
-          padding: "16px",
+          background: "var(--bg-subtle)",
+          border: "1px solid var(--border-normal)",
+          borderRadius: "14px",
+          padding: "16px 18px",
         }}
       >
-        <div style={{ fontSize: "11px", fontWeight: 800, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "8px" }}>
+        <div style={{ fontSize: "11px", fontWeight: 800, color: "var(--apple-blue-accent)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "8px" }}>
           Official Demo Accounts (Pre-Seeded)
         </div>
-        <div style={{ fontSize: "12px", color: "#cbd5e1", lineHeight: 1.5, marginBottom: "12px" }}>
+        <div style={{ fontSize: "12px", color: "var(--text-secondary)", lineHeight: 1.5, marginBottom: "12px" }}>
           You can also test with verified credentials or click below:
-          <ul style={{ margin: "6px 0", paddingLeft: "18px", color: "#94a3b8" }}>
-            <li>Student: <code>student@learninghub.edu</code> / <code>StudentPassword123!</code></li>
-            <li>Faculty Admin: <code>admin@learninghub.edu</code> / <code>AdminPassword123!</code></li>
+          <ul style={{ margin: "6px 0", paddingLeft: "18px", color: "var(--text-secondary)" }}>
+            <li>Student: <code style={{ color: "var(--text-primary)", background: "rgba(255,255,255,0.06)", padding: "2px 6px", borderRadius: "4px" }}>student@learninghub.edu</code> / <code style={{ color: "var(--text-primary)", background: "rgba(255,255,255,0.06)", padding: "2px 6px", borderRadius: "4px" }}>StudentPassword123!</code></li>
+            <li>Faculty Admin: <code style={{ color: "var(--text-primary)", background: "rgba(255,255,255,0.06)", padding: "2px 6px", borderRadius: "4px" }}>admin@learninghub.edu</code> / <code style={{ color: "var(--text-primary)", background: "rgba(255,255,255,0.06)", padding: "2px 6px", borderRadius: "4px" }}>AdminPassword123!</code></li>
           </ul>
         </div>
-        <div className="demo-actions-grid" style={{ display: "flex", gap: "8px" }}>
+        <div className="demo-actions-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
           <button
             type="button"
             className="button button-small"
-            style={{ flex: 1, fontSize: "11px" }}
+            style={{ fontSize: "11px" }}
             disabled={busy}
             onClick={() => handleDemoLogin("student")}
           >
@@ -186,7 +186,7 @@ export function LoginForm() {
           <button
             type="button"
             className="button button-dark button-small"
-            style={{ flex: 1, fontSize: "11px" }}
+            style={{ fontSize: "11px" }}
             disabled={busy}
             onClick={() => handleDemoLogin("admin")}
           >
@@ -409,15 +409,15 @@ export function RegisterForm() {
     <div className="auth-form-wrapper">
       <div
         style={{
-          background: "#0f172a",
-          border: "1px solid #1e293b",
-          borderRadius: "8px",
-          padding: "16px",
+          background: "var(--bg-subtle)",
+          border: "1px solid var(--border-normal)",
+          borderRadius: "14px",
+          padding: "16px 18px",
           marginBottom: "20px",
         }}
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px", flexWrap: "wrap", gap: "8px" }}>
-          <span style={{ fontSize: "11px", fontWeight: 800, color: "#38bdf8", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+          <span style={{ fontSize: "11px", fontWeight: 800, color: "var(--apple-blue-accent)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
             🎓 Official Student Registration
           </span>
           <button
@@ -430,7 +430,7 @@ export function RegisterForm() {
             ⚡ Auto-fill Sample Details
           </button>
         </div>
-        <p style={{ margin: 0, fontSize: "12px", color: "#94a3b8", lineHeight: 1.5 }}>
+        <p style={{ margin: 0, fontSize: "12px", color: "var(--text-secondary)", lineHeight: 1.5 }}>
           Create your verified institutional profile. All credentials and academic records are securely hashed and stored in the database.
         </p>
       </div>
@@ -650,9 +650,9 @@ export function RegisterForm() {
           {busy ? "Creating your student profile…" : "Complete Registration & Enroll (₹0 Free)"}
         </button>
 
-        <div style={{ textAlign: "center", marginTop: "14px", fontSize: "13px", color: "#64748b" }}>
+        <div style={{ textAlign: "center", marginTop: "14px", fontSize: "13px", color: "var(--text-secondary)" }}>
           Already registered?{" "}
-          <Link href="/login" style={{ color: "#ff6a00", fontWeight: 700, textDecoration: "none" }}>
+          <Link href="/login" style={{ color: "var(--apple-blue-accent)", fontWeight: 700, textDecoration: "none" }}>
             Sign In with Your Password →
           </Link>
         </div>

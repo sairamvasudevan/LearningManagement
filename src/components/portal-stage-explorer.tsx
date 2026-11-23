@@ -129,10 +129,10 @@ export function PortalStageExplorer({
       {/* Active Stage Header Box */}
       <div
         style={{
-          background: "linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)",
-          border: "1px solid #e2e8f0",
-          borderRadius: "12px",
-          padding: "16px 20px",
+          background: "linear-gradient(135deg, #161617 0%, #1c1c1e 100%)",
+          border: "1px solid var(--border-normal)",
+          borderRadius: "16px",
+          padding: "18px 22px",
           marginBottom: "16px",
           display: "flex",
           justifyContent: "space-between",
@@ -148,27 +148,27 @@ export function PortalStageExplorer({
               fontWeight: 800,
               textTransform: "uppercase",
               letterSpacing: "0.08em",
-              color: "#ff6a00",
+              color: "var(--apple-blue-accent)",
             }}
           >
             STAGE {String(activeStage.id).padStart(2, "0")} OF 10 · 10 LESSONS
           </span>
-          <h4 style={{ margin: "4px 0 2px", fontSize: "18px", color: "#0f172a" }}>
+          <h4 style={{ margin: "4px 0 2px", fontSize: "18px", color: "var(--text-primary)" }}>
             {activeStage.title}
           </h4>
-          <p style={{ margin: 0, fontSize: "13px", color: "#64748b" }}>
+          <p style={{ margin: 0, fontSize: "13px", color: "var(--text-secondary)" }}>
             {activeStage.description}
           </p>
         </div>
         <div style={{ textAlign: "right" }}>
-          <div style={{ fontSize: "14px", fontWeight: 700, color: "#0f172a" }}>
+          <div style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-primary)" }}>
             {stageCompletedCount} / {activeModules.length} Modules Mastered ({stagePct}%)
           </div>
           <div
             style={{
               width: "180px",
               height: "6px",
-              background: "#cbd5e1",
+              background: "#242426",
               borderRadius: "99px",
               overflow: "hidden",
               marginTop: "6px",
@@ -178,7 +178,7 @@ export function PortalStageExplorer({
               style={{
                 width: `${stagePct}%`,
                 height: "100%",
-                background: stagePct === 100 ? "#10b981" : "#ff6a00",
+                background: stagePct === 100 ? "var(--apple-green)" : "var(--apple-blue-accent)",
                 borderRadius: "99px",
                 transition: "width 0.3s ease",
               }}
@@ -223,7 +223,7 @@ export function PortalStageExplorer({
                     <span className="tag-pill">2 Case Studies</span>
                     <span className="tag-pill">Hands-on Task</span>
                     <span className="tag-pill">6 Questions</span>
-                    <span className="tag-pill" style={{ color: "#0369a1", background: "#e0f2fe" }}>
+                    <span className="tag-pill" style={{ color: "var(--apple-blue-accent)", background: "var(--apple-blue-subtle)" }}>
                       {m.focus.split(";")[0]}
                     </span>
                   </div>
