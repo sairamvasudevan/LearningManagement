@@ -3,6 +3,7 @@ import { evaluateTestCases, SupportedLanguage } from "@/lib/compiler";
 import { DSA_PROBLEMS } from "@/lib/dsa-problems";
 import { recordDsaSubmission } from "@/lib/db";
 import { getCurrentIdentity } from "@/lib/auth";
+import { getDsaMockComment } from "@/lib/dsa-mocking";
 
 export const dynamic = "force-dynamic";
 
@@ -68,8 +69,20 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    const mockComment = getDsaMockComment({
+      problemId,
+      status: evaluation.status,
+      code,
+      language,
+      testCasesPassed: evaluation.testCasesPassed,
+      totalTestCases: evaluation.totalTestCases,
+      results: evaluation.results,
+      compileOutput: evaluation.compileOutput,
+    });
+
     return NextResponse.json({
       submissionId,
+      mockComment,
       ...evaluation,
     });
   } catch (err: any) {

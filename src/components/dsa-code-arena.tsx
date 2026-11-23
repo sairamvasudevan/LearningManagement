@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { DsaProblem, DSA_PROBLEMS } from "@/lib/dsa-problems";
 import { SupportedLanguage } from "@/lib/compiler";
+import { getDsaMockComment, DsaMockFeedback } from "@/lib/dsa-mocking";
 
 interface DsaCodeArenaProps {
   initialProblem: DsaProblem;
@@ -450,137 +451,216 @@ export function DsaCodeArena({
                     </div>
                   ) : submissionResult ? (
                     /* Submission Evaluation Result */
-                    <div className="dsa-submission-report">
-                      <div
-                        className={`dsa-status-banner ${
-                          submissionResult.status === "ACCEPTED"
-                            ? "banner-accepted"
-                            : "banner-failed"
-                        }`}
-                      >
-                        <span className="banner-icon">
-                          {submissionResult.status === "ACCEPTED" ? "✓" : "✗"}
-                        </span>
-                        <div>
-                          <div className="banner-status-title">{submissionResult.status}</div>
-                          <div className="banner-stats">
-                            Passed {submissionResult.testCasesPassed} of{" "}
-                            {submissionResult.totalTestCases} Test Cases · Total Time:{" "}
-                            {submissionResult.executionTimeMs}ms
-                          </div>
-                        </div>
-                      </div>
+                    (() => {
+                      const submissionMock = submissionResult.mockComment || getDsaMockComment({
+                        problemId: problem.id,
+                        status: submissionResult.status,
+                        code,
+                        language,
+                        testCasesPassed: submissionResult.testCasesPassed,
+                        totalTestCases: submissionResult.totalTestCases,
+                        results: submissionResult.results,
+                        compileOutput: submissionResult.compileOutput,
+                      });
 
-                      {submissionResult.compileOutput && (
-                        <div className="dsa-error-box">
-                          <b>Compiler Output:</b>
-                          <pre>{submissionResult.compileOutput}</pre>
-                        </div>
-                      )}
-
-                      {submissionResult.results && submissionResult.results.length > 0 && (
-                        <div className="dsa-tc-results-list">
-                          {submissionResult.results.map((r: any, idx: number) => (
-                            <div
-                              key={idx}
-                              className={`dsa-tc-item ${r.passed ? "tc-passed" : "tc-failed"}`}
-                            >
-                              <div className="dsa-tc-header">
-                                <span>
-                                  Testcase {idx + 1}: {r.passed ? "Passed ✓" : "Failed ✗"}
-                                </span>
-                                <span>{r.timeMs}ms</span>
+                      return (
+                        <div className="dsa-submission-report">
+                          <div
+                            className={`dsa-status-banner ${
+                              submissionResult.status === "ACCEPTED"
+                                ? "banner-accepted"
+                                : "banner-failed"
+                            }`}
+                          >
+                            <span className="banner-icon">
+                              {submissionResult.status === "ACCEPTED" ? "✓" : "✗"}
+                            </span>
+                            <div>
+                              <div className="banner-status-title">{submissionResult.status}</div>
+                              <div className="banner-stats">
+                                Passed {submissionResult.testCasesPassed} of{" "}
+                                {submissionResult.totalTestCases} Test Cases · Total Time:{" "}
+                                {submissionResult.executionTimeMs}ms
                               </div>
-                              {!r.passed && (
-                                <div className="dsa-diff-grid">
-                                  <div>
-                                    <small>Input:</small>
-                                    <pre>{r.input}</pre>
-                                  </div>
-                                  <div>
-                                    <small>Expected Output:</small>
-                                    <pre>{r.expected}</pre>
-                                  </div>
-                                  <div>
-                                    <small>Your Output:</small>
-                                    <pre>{r.actual || r.error || "(Empty)"}</pre>
-                                  </div>
-                                </div>
-                              )}
                             </div>
-                          ))}
+                          </div>
+
+                          {submissionMock && (
+                            <div className="dsa-mock-card">
+                              <div className="dsa-mock-header">
+                                <span className="dsa-mock-badge">{submissionMock.badge}</span>
+                                <h4 className="dsa-mock-headline">{submissionMock.headline}</h4>
+                              </div>
+                              <div className="dsa-mock-quote">
+                                <span className="dsa-mock-quote-mark">&ldquo;</span>
+                                {submissionMock.mock}
+                                <span className="dsa-mock-quote-mark">&rdquo;</span>
+                              </div>
+                              <div className="dsa-mock-details">
+                                <div className="dsa-mock-mistake">
+                                  <b>🤦 The Silly Mistake:</b> {submissionMock.sillyMistake}
+                                </div>
+                                <div className="dsa-mock-hint">
+                                  <b>💡 Senior SDE Fix:</b> {submissionMock.hint}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {submissionResult.compileOutput && (
+                            <div className="dsa-error-box">
+                              <b>Compiler Output:</b>
+                              <pre>{submissionResult.compileOutput}</pre>
+                            </div>
+                          )}
+
+                          {submissionResult.results && submissionResult.results.length > 0 && (
+                            <div className="dsa-tc-results-list">
+                              {submissionResult.results.map((r: any, idx: number) => (
+                                <div
+                                  key={idx}
+                                  className={`dsa-tc-item ${r.passed ? "tc-passed" : "tc-failed"}`}
+                                >
+                                  <div className="dsa-tc-header">
+                                    <span>
+                                      Testcase {idx + 1}: {r.passed ? "Passed ✓" : "Failed ✗"}
+                                    </span>
+                                    <span>{r.timeMs}ms</span>
+                                  </div>
+                                  {!r.passed && (
+                                    <div className="dsa-diff-grid">
+                                      <div>
+                                        <small>Input:</small>
+                                        <pre>{r.input}</pre>
+                                      </div>
+                                      <div>
+                                        <small>Expected Output:</small>
+                                        <pre>{r.expected}</pre>
+                                      </div>
+                                      <div>
+                                        <small>Your Output:</small>
+                                        <pre>{r.actual || r.error || "(Empty)"}</pre>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
+                      );
+                    })()
                   ) : executionResult ? (
                     /* Interactive Run Result */
-                    <div className="dsa-run-report">
-                      <div
-                        className={`dsa-status-banner ${
-                          executionResult.status === "SUCCESS" || executionResult.status === "ACCEPTED"
-                            ? "banner-accepted"
-                            : "banner-failed"
-                        }`}
-                      >
-                        <div>
-                          <div className="banner-status-title">
-                            {executionResult.status || "COMPLETED"}
-                          </div>
-                          <div className="banner-stats">
-                            Execution Time: {executionResult.executionTimeMs || 0}ms
-                          </div>
-                        </div>
-                      </div>
+                    (() => {
+                      const runMock = getDsaMockComment({
+                        problemId: problem.id,
+                        status:
+                          executionResult.status ||
+                          (executionResult.stderr
+                            ? "RUNTIME_ERROR"
+                            : executionResult.results?.some((r: any) => !r.passed)
+                            ? "FAILED"
+                            : "SUCCESS"),
+                        code,
+                        language,
+                        results: executionResult.results,
+                        compileOutput: executionResult.compileOutput,
+                        stderr: executionResult.stderr,
+                      });
 
-                      {executionResult.compileOutput && (
-                        <div className="dsa-error-box">
-                          <b>Compiler Diagnostics:</b>
-                          <pre>{executionResult.compileOutput}</pre>
-                        </div>
-                      )}
-
-                      {executionResult.stderr && (
-                        <div className="dsa-error-box">
-                          <b>Runtime Errors / stderr:</b>
-                          <pre>{executionResult.stderr}</pre>
-                        </div>
-                      )}
-
-                      <div className="dsa-stdout-box">
-                        <b>Standard Output:</b>
-                        <pre>{executionResult.stdout || "(No output produced)"}</pre>
-                      </div>
-
-                      {executionResult.results && (
-                        <div className="dsa-tc-results-list">
-                          {executionResult.results.map((r: any, idx: number) => (
-                            <div
-                              key={idx}
-                              className={`dsa-tc-item ${r.passed ? "tc-passed" : "tc-failed"}`}
-                            >
-                              <div className="dsa-tc-header">
-                                <span>{r.id}: {r.passed ? "Passed ✓" : "Failed ✗"}</span>
-                                <span>{r.timeMs}ms</span>
+                      return (
+                        <div className="dsa-run-report">
+                          <div
+                            className={`dsa-status-banner ${
+                              executionResult.status === "SUCCESS" || executionResult.status === "ACCEPTED"
+                                ? "banner-accepted"
+                                : "banner-failed"
+                            }`}
+                          >
+                            <div>
+                              <div className="banner-status-title">
+                                {executionResult.status || "COMPLETED"}
                               </div>
-                              <div className="dsa-diff-grid">
-                                <div>
-                                  <small>Input:</small>
-                                  <pre>{r.input}</pre>
+                              <div className="banner-stats">
+                                Execution Time: {executionResult.executionTimeMs || 0}ms
+                              </div>
+                            </div>
+                          </div>
+
+                          {runMock && (
+                            <div className="dsa-mock-card">
+                              <div className="dsa-mock-header">
+                                <span className="dsa-mock-badge">{runMock.badge}</span>
+                                <h4 className="dsa-mock-headline">{runMock.headline}</h4>
+                              </div>
+                              <div className="dsa-mock-quote">
+                                <span className="dsa-mock-quote-mark">&ldquo;</span>
+                                {runMock.mock}
+                                <span className="dsa-mock-quote-mark">&rdquo;</span>
+                              </div>
+                              <div className="dsa-mock-details">
+                                <div className="dsa-mock-mistake">
+                                  <b>🤦 The Silly Mistake:</b> {runMock.sillyMistake}
                                 </div>
-                                <div>
-                                  <small>Expected:</small>
-                                  <pre>{r.expected}</pre>
-                                </div>
-                                <div>
-                                  <small>Your Output:</small>
-                                  <pre>{r.actual || "(Empty)"}</pre>
+                                <div className="dsa-mock-hint">
+                                  <b>💡 Senior SDE Fix:</b> {runMock.hint}
                                 </div>
                               </div>
                             </div>
-                          ))}
+                          )}
+
+                          {executionResult.compileOutput && (
+                            <div className="dsa-error-box">
+                              <b>Compiler Diagnostics:</b>
+                              <pre>{executionResult.compileOutput}</pre>
+                            </div>
+                          )}
+
+                          {executionResult.stderr && (
+                            <div className="dsa-error-box">
+                              <b>Runtime Errors / stderr:</b>
+                              <pre>{executionResult.stderr}</pre>
+                            </div>
+                          )}
+
+                          <div className="dsa-stdout-box">
+                            <b>Standard Output:</b>
+                            <pre>{executionResult.stdout || "(No output produced)"}</pre>
+                          </div>
+
+                          {executionResult.results && (
+                            <div className="dsa-tc-results-list">
+                              {executionResult.results.map((r: any, idx: number) => (
+                                <div
+                                  key={idx}
+                                  className={`dsa-tc-item ${r.passed ? "tc-passed" : "tc-failed"}`}
+                                >
+                                  <div className="dsa-tc-header">
+                                    <span>{r.id}: {r.passed ? "Passed ✓" : "Failed ✗"}</span>
+                                    <span>{r.timeMs}ms</span>
+                                  </div>
+                                  <div className="dsa-diff-grid">
+                                    <div>
+                                      <small>Input:</small>
+                                      <pre>{r.input}</pre>
+                                    </div>
+                                    <div>
+                                      <small>Expected:</small>
+                                      <pre>{r.expected}</pre>
+                                    </div>
+                                    <div>
+                                      <small>Your Output:</small>
+                                      <pre>{r.actual || "(Empty)"}</pre>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
+                      );
+                    })()
                   ) : (
                     <div className="dsa-placeholder-output">
                       Click <b>Run Code</b> to execute on the sample input, or <b>Submit Solution</b> to
