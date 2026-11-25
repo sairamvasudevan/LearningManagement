@@ -92,6 +92,19 @@ export default async function DsaCoursePage() {
                 Start Coding: {DSA_PROBLEMS[0].title} →
               </Link>
               <Link
+                href="/audio-dsa"
+                className="button button-outline"
+                style={{
+                  color: "#fdba74",
+                  borderColor: "#ea580c",
+                  background: "rgba(234, 88, 12, 0.14)",
+                  padding: "12px 20px",
+                  fontWeight: 700,
+                }}
+              >
+                🎧 Learn via 2-Min Audio Stories (24 Ep) →
+              </Link>
+              <Link
                 href="/portal"
                 className="button button-outline"
                 style={{ color: "#ffffff", borderColor: "#475569", padding: "12px 24px" }}

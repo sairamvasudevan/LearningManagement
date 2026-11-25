@@ -31,10 +31,10 @@ export function SiteHeader({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "signout" }),
       });
-    } catch {}
+    } catch { }
     try {
       await fetch("/auth/signout", { method: "POST" });
-    } catch {}
+    } catch { }
     window.location.href = "/login";
   }
 
@@ -73,30 +73,30 @@ export function SiteHeader({
   const searchResults =
     searchQuery.trim().length > 1
       ? [
-          ...COURSE_PACKAGES.filter(
-            (c) =>
-              c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              c.skills.some((s) => s.toLowerCase().includes(searchQuery.toLowerCase())),
-          ).map((c) => ({
-            title: c.title,
-            sub: `${c.totalHours} hrs · ${c.category}`,
-            href: `/courses/${c.slug}`,
-            badge: c.priceLabel,
+        ...COURSE_PACKAGES.filter(
+          (c) =>
+            c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            c.skills.some((s) => s.toLowerCase().includes(searchQuery.toLowerCase())),
+        ).map((c) => ({
+          title: c.title,
+          sub: `${c.totalHours} hrs · ${c.category}`,
+          href: `/courses/${c.slug}`,
+          badge: c.priceLabel,
+        })),
+        ...catalog.modules
+          .filter(
+            (m) =>
+              m.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              m.objective.toLowerCase().includes(searchQuery.toLowerCase()),
+          )
+          .slice(0, 6)
+          .map((m) => ({
+            title: `Module ${String(m.id).padStart(2, "0")}: ${m.title}`,
+            sub: m.objective,
+            href: m.published ? `/learn/${m.id}` : `/courses/problem-solving-lab`,
+            badge: m.published ? "Live Now" : "Planned",
           })),
-          ...catalog.modules
-            .filter(
-              (m) =>
-                m.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                m.objective.toLowerCase().includes(searchQuery.toLowerCase()),
-            )
-            .slice(0, 6)
-            .map((m) => ({
-              title: `Module ${String(m.id).padStart(2, "0")}: ${m.title}`,
-              sub: m.objective,
-              href: m.published ? `/learn/${m.id}` : `/courses/problem-solving-lab`,
-              badge: m.published ? "Live Now" : "Planned",
-            })),
-        ]
+      ]
       : [];
 
   return (
@@ -142,7 +142,7 @@ export function SiteHeader({
               <div className="futuristic-modules-flyout">
                 <div className="flyout-header">
                   <span className="flyout-kicker">Core System Architecture</span>
-                  <span className="flyout-count">5 Precision Modules</span>
+                  <span className="flyout-count">6 Precision Modules</span>
                 </div>
 
                 <div className="flyout-grid">
@@ -215,6 +215,23 @@ export function SiteHeader({
                   </Link>
 
                   <Link
+                    href="/audio-dsa"
+                    className="flyout-item"
+                    onClick={() => setModulesDropdownOpen(false)}
+                  >
+                    <div className="flyout-icon" style={{ background: "rgba(249, 115, 22, 0.16)", color: "#fdba74" }}>
+                      🎧
+                    </div>
+                    <div>
+                      <div className="flyout-title">
+                        <b>Audio DSA Story Serial</b>
+                        <span className="flyout-badge-amber">24 Episodes</span>
+                      </div>
+                      <div className="flyout-desc">2-minute funny English audio stories teaching all programming &amp; DSA.</div>
+                    </div>
+                  </Link>
+
+                  <Link
                     href="/ide"
                     className="flyout-item"
                     onClick={() => setModulesDropdownOpen(false)}
@@ -249,6 +266,9 @@ export function SiteHeader({
           </Link>
           <Link href="/communication" className="futuristic-nav-link" style={{ color: "#c084fc" }}>
             LSRW Comm
+          </Link>
+          <Link href="/audio-dsa" className="futuristic-nav-link" style={{ color: "#fdba74" }}>
+            Audio DSA
           </Link>
           <Link href="/ide" className="futuristic-nav-link accent-amber">
             Cloud IDE
@@ -433,6 +453,14 @@ export function SiteHeader({
           >
             <span>🎙️ LSRW Communication Lab</span>
             <span className="drawer-badge">Versant / SVAR</span>
+          </Link>
+          <Link
+            href="/audio-dsa"
+            className="mobile-drawer-link"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <span>🎧 Audio DSA Story Series</span>
+            <span className="drawer-badge">24 Stories</span>
           </Link>
           <Link
             href="/ide"

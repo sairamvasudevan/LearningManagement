@@ -175,8 +175,9 @@ export function checkSubmissionRateLimit(clientKey: string): {
   retryAfterSeconds: number;
 } {
   const st = getState();
-  const capacity = 25;
-  const refillPerSec = 2;
+  const isAuthenticated = clientKey.startsWith("user:");
+  const capacity = isAuthenticated ? 120 : 25;
+  const refillPerSec = isAuthenticated ? 10 : 2;
   const now = Date.now();
 
   let bucket = st.rateBuckets.get(clientKey);

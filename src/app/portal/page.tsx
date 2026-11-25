@@ -415,6 +415,59 @@ export default async function StudentPortalPage() {
               </div>
             </div>
 
+            {/* Code by Ear: Audio DSA Story Series Banner */}
+            <div
+              style={{
+                background: "linear-gradient(135deg, #431407 0%, #1e1b4b 100%)",
+                borderRadius: "14px",
+                padding: "20px 24px",
+                color: "#ffffff",
+                marginBottom: "20px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: "16px",
+                border: "1px solid #ea580c",
+              }}
+            >
+              <div>
+                <div style={{ display: "flex", gap: "8px", alignItems: "center", marginBottom: "6px" }}>
+                  <span
+                    style={{
+                      background: "#fdba74",
+                      color: "#431407",
+                      fontSize: "10px",
+                      fontWeight: 800,
+                      padding: "2px 8px",
+                      borderRadius: "99px",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    🎧 24 AUDIO STORIES · UNLOCKED
+                  </span>
+                  <span style={{ fontSize: "12px", color: "#fed7aa", fontWeight: 600 }}>
+                    6 Seasons · 2-Min Funny English Stories · Comparison &amp; Quiz
+                  </span>
+                </div>
+                <h3 style={{ margin: "0 0 4px", fontSize: "18px", color: "#f8fafc" }}>
+                  Code by Ear: Learn Programming &amp; DSA via Audio Stories
+                </h3>
+                <p style={{ margin: 0, fontSize: "13px", color: "#ffedd5", maxWidth: "620px" }}>
+                  Start with Ep 01 (&ldquo;The Chilli Powder Payasam Disaster&rdquo; — Compile vs Runtime Errors) and follow the serial saga all the way through Graphs, DP &amp; Bitmasks.
+                </p>
+              </div>
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                <Link
+                  href="/audio-dsa"
+                  className="button button-cn-primary"
+                  style={{ padding: "10px 18px", fontSize: "13px", fontWeight: 700, background: "#ea580c", borderColor: "#ea580c" }}
+                >
+                  Listen to Story Series →
+                </Link>
+              </div>
+            </div>
+
             {/* Galgotias University Career, Codolio & Resume Profile Banner */}
             <div
               style={{

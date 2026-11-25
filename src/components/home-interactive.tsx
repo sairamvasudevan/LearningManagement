@@ -655,6 +655,8 @@ export function CourseCatalogSection() {
                             ? "/dsa"
                             : course.slug === "communication-lsrw-lab"
                             ? "/communication"
+                            : course.slug === "audio-dsa-stories"
+                            ? "/audio-dsa"
                             : `/courses/${course.slug}`
                         }
                       >
@@ -664,6 +666,8 @@ export function CourseCatalogSection() {
                           ? "Launch Studio →"
                           : course.slug === "communication-lsrw-lab"
                           ? "Launch LSRW →"
+                          : course.slug === "audio-dsa-stories"
+                          ? "Listen Now 🎧 →"
                           : "Preview Track 👁️"}
                       </Link>
                     </>

@@ -347,6 +347,57 @@ export default async function HomePage() {
                 </Link>
               </div>
             </article>
+
+            {/* Module 06: Code by Ear - Audio DSA Story Serial */}
+            <article className="training-module-card comm-span-full" style={{ borderColor: "rgba(249, 115, 22, 0.4)" }}>
+              <div className="training-card-header">
+                <div className="training-card-icon-box" style={{ background: "rgba(249, 115, 22, 0.16)", color: "#fdba74" }}>
+                  🎧
+                </div>
+                <span className="training-card-pill" style={{ background: "rgba(249, 115, 22, 0.16)", color: "#fdba74" }}>
+                  MODULE 06 · AUDIO STORY DSA SERIAL (24 EPISODES)
+                </span>
+              </div>
+
+              <h3 className="training-card-title">Code by Ear: Learn Programming &amp; DSA via 2-Minute Audio Stories</h3>
+              <div className="training-card-subtitle">
+                Funny Real-Life Campus &amp; Kitchen Stories · Side-by-Side Tech Comparisons · Interactive Episode Quizzes
+              </div>
+              <p className="training-card-desc">
+                Learn every foundational concept from Episode 01 (&ldquo;The Chilli Powder Payasam Disaster&rdquo; —
+                Compile-Time vs. Runtime Error) straight through Big-O, Arrays vs. Lists, Hash Maps, Trees, Heaps,
+                Graphs, Dynamic Programming &amp; Bitmasks in one continuous, humorous audio story series.
+              </p>
+
+              <div className="training-card-specs-row">
+                <div className="spec-chip">
+                  <b>24 Episodes · 6 Seasons</b>
+                  <span>Complete Programming + DSA syllabus</span>
+                </div>
+                <div className="spec-chip">
+                  <b>~2 Min / Story</b>
+                  <span>Expressive offline English narration</span>
+                </div>
+                <div className="spec-chip">
+                  <b>Story vs Code Tables</b>
+                  <span>Analogy mapped to exact invariants</span>
+                </div>
+                <div className="spec-chip">
+                  <b style={{ color: "#fdba74" }}>Interactive Check</b>
+                  <span>Audio Q&amp;A + teach-back recall</span>
+                </div>
+              </div>
+
+              <div className="training-card-action-row">
+                <Link href="/audio-dsa" className="apple-btn-primary" style={{ padding: "9px 20px", fontSize: "13px", background: "#ea580c" }}>
+                  <span>Listen to Audio Story Series</span>
+                  <span>→</span>
+                </Link>
+                <Link href="/courses/audio-dsa-stories" className="card-secondary-link">
+                  View Full 24-Episode Syllabus ↗
+                </Link>
+              </div>
+            </article>
           </div>
         </div>
       </section>

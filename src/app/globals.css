@@ -6647,6 +6647,34 @@ td small {
   }
 }
 
+.audio-dsa-grid {
+  display: grid;
+  grid-template-columns: minmax(290px, 350px) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.audio-dsa-sidebar {
+  background: var(--bg-card);
+  border: 1px solid var(--border-normal);
+  border-radius: 16px;
+  padding: 16px;
+  max-height: 82vh;
+  overflow-y: auto;
+  position: sticky;
+  top: 82px;
+}
+
+@media (max-width: 920px) {
+  .audio-dsa-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .audio-dsa-sidebar {
+    position: static;
+    max-height: 360px;
+  }
+}
+
 
 
 

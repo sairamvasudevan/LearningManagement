@@ -405,6 +405,21 @@ export function getDatabase(): DatabaseSync {
       hit_count INTEGER NOT NULL DEFAULT 1,
       updated_at TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS dsa_audio_progress (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      episode_id TEXT NOT NULL,
+      episode_number INTEGER NOT NULL,
+      selected_index INTEGER NOT NULL DEFAULT 0,
+      reflection_text TEXT DEFAULT '',
+      passed INTEGER NOT NULL DEFAULT 0,
+      attempts INTEGER NOT NULL DEFAULT 1,
+      updated_at TEXT NOT NULL,
+      UNIQUE(user_id, episode_id),
+      FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+    );
+    CREATE INDEX IF NOT EXISTS idx_dsa_audio_user ON dsa_audio_progress(user_id, episode_number);
   `);
 
   // Seed default course_settings row if missing
@@ -2260,4 +2275,69 @@ export function storeCachedExecutionResult(cacheKey: string, resultJson: string)
   } catch {
     // Non-fatal cache write failure
   }
+}
+
+export type DbAudioDsaProgress = {
+  id: string;
+  user_id: string;
+  episode_id: string;
+  episode_number: number;
+  selected_index: number;
+  reflection_text: string;
+  passed: number;
+  attempts: number;
+  updated_at: string;
+};
+
+export function recordAudioDsaProgress(data: {
+  userId: string;
+  episodeId: string;
+  episodeNumber: number;
+  selectedIndex: number;
+  reflectionText?: string;
+  passed: boolean;
+}): DbAudioDsaProgress {
+  const db = getDatabase();
+  const now = new Date().toISOString();
+  const id = `audio-dsa-${crypto.randomBytes(6).toString("hex")}`;
+
+  db.prepare(`
+    INSERT INTO dsa_audio_progress (
+      id, user_id, episode_id, episode_number, selected_index, reflection_text, passed, attempts, updated_at
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?)
+    ON CONFLICT(user_id, episode_id) DO UPDATE SET
+      selected_index = excluded.selected_index,
+      reflection_text = CASE
+        WHEN length(excluded.reflection_text) > 0 THEN excluded.reflection_text
+        ELSE dsa_audio_progress.reflection_text
+      END,
+      passed = MAX(dsa_audio_progress.passed, excluded.passed),
+      attempts = dsa_audio_progress.attempts + 1,
+      updated_at = excluded.updated_at
+  `).run(
+    id,
+    data.userId,
+    data.episodeId,
+    data.episodeNumber,
+    data.selectedIndex,
+    (data.reflectionText || "").slice(0, 1200),
+    data.passed ? 1 : 0,
+    now,
+  );
+
+  return db
+    .prepare(
+      "SELECT * FROM dsa_audio_progress WHERE user_id = ? AND episode_id = ?",
+    )
+    .get(data.userId, data.episodeId) as unknown as DbAudioDsaProgress;
+}
+
+export function getUserAudioDsaProgress(userId: string): DbAudioDsaProgress[] {
+  const db = getDatabase();
+  return db
+    .prepare(
+      "SELECT * FROM dsa_audio_progress WHERE user_id = ? ORDER BY episode_number ASC",
+    )
+    .all(userId) as unknown as DbAudioDsaProgress[];
 }

@@ -117,7 +117,8 @@ export default async function CourseDetailPage({ params }: PageProps) {
             {!isFlagship &&
               course.slug !== "dsa-mastery-lab" &&
               course.slug !== "web-dev-mern-lab" &&
-              course.slug !== "communication-lsrw-lab" && (
+              course.slug !== "communication-lsrw-lab" &&
+              course.slug !== "audio-dsa-stories" && (
               <div
                 style={{
                   background: "rgba(0, 113, 227, 0.1)",
@@ -174,6 +175,19 @@ export default async function CourseDetailPage({ params }: PageProps) {
                 </Link>
                 <Link className="button button-full" href="/communication/studio?tab=assessment" style={{ marginTop: 9 }}>
                   🏆 Take Versant/SVAR Mock Test →
+                </Link>
+              </>
+            ) : course.slug === "audio-dsa-stories" ? (
+              <>
+                <Link className="button button-cn-primary button-full" href="/audio-dsa">
+                  🎧 Launch 24-Episode Audio Story Studio →
+                </Link>
+                <Link
+                  className="button button-full"
+                  href="/audio-dsa?ep=ep-01-compile-vs-runtime"
+                  style={{ marginTop: 9 }}
+                >
+                  🍲 Start Ep 01: Chilli Powder Payasam →
                 </Link>
               </>
             ) : (
