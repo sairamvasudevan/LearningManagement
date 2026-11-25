@@ -6647,6 +6647,21 @@ td small {
   }
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
 .audio-dsa-grid {
   display: grid;
   grid-template-columns: minmax(290px, 350px) minmax(0, 1fr);
