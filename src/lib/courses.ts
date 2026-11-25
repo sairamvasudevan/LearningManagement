@@ -24,8 +24,8 @@ export type CourseCatalogItem = {
   highlights: string[];
 };
 
-export const PLATFORM_NAME = "NEXUS ACADEMY";
-export const PLATFORM_SUBTITLE = "Advanced Engineering LMS";
+export const PLATFORM_NAME = "GALGOTIAS NEXUS";
+export const PLATFORM_SUBTITLE = "Galgotias University · Internal Engineering & Placement Hub";
 
 export const COURSE_PACKAGES: CourseCatalogItem[] = [
   {

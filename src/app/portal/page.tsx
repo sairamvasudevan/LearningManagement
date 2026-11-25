@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { requireIdentity, getRole } from "@/lib/auth";
-import { getUserProgress, getUserAttempts, getUserById } from "@/lib/db";
+import { getUserProgress, getUserAttempts, getUserById, getStudentCareerProfile } from "@/lib/db";
 import { COURSE_PACKAGES } from "@/lib/courses";
 import { MODULES_CURRICULUM } from "@/lib/curriculum-data";
 import catalog from "@/lib/course-catalog.json";
@@ -34,6 +34,7 @@ export default async function StudentPortalPage() {
   // Real SQLite progress & attempts
   const progressList = getUserProgress(identity.id);
   const attemptsList = getUserAttempts(identity.id);
+  const careerProfile = getStudentCareerProfile(identity.id);
 
   const approved = profile.enrollment_status === "approved";
   const progressMap = new Map(progressList.map((p) => [p.module_number, p]));
@@ -410,6 +411,61 @@ export default async function StudentPortalPage() {
                   style={{ padding: "10px 16px", fontSize: "12px", color: "#e9d5ff", borderColor: "#7e22ce" }}
                 >
                   Syllabus &amp; Rubrics
+                </Link>
+              </div>
+            </div>
+
+            {/* Galgotias University Career, Codolio & Resume Profile Banner */}
+            <div
+              style={{
+                background: "linear-gradient(135deg, #0c192e 0%, #172554 100%)",
+                borderRadius: "14px",
+                padding: "20px 24px",
+                color: "#ffffff",
+                marginBottom: "20px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: "16px",
+                border: "1px solid #2563eb",
+              }}
+            >
+              <div>
+                <div style={{ display: "flex", gap: "8px", alignItems: "center", marginBottom: "6px" }}>
+                  <span
+                    style={{
+                      background: "#3b82f6",
+                      color: "#ffffff",
+                      fontSize: "10px",
+                      fontWeight: 800,
+                      padding: "2px 8px",
+                      borderRadius: "99px",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    🎓 GALGOTIAS T&amp;P PORTFOLIO
+                  </span>
+                  <span style={{ fontSize: "12px", color: "#93c5fd", fontWeight: 600 }}>
+                    CGPA: {careerProfile?.cgpa ? careerProfile.cgpa.toFixed(2) : "Not Set"} · Codolio:{" "}
+                    {careerProfile?.codolio_total_solved ?? 0} solved · Projects: {careerProfile?.projects.length ?? 0}
+                  </span>
+                </div>
+                <h3 style={{ margin: "0 0 4px", fontSize: "18px", color: "#f8fafc" }}>
+                  Galgotias Campus Career Profile, Codolio &amp; ATS Resume Studio
+                </h3>
+                <p style={{ margin: 0, fontSize: "13px", color: "#dbeafe", maxWidth: "620px" }}>
+                  Keep your Admission No., CGPA, backlogs, Codolio/LeetCode/GitHub handles, projects, and internships up
+                  to date so our Placement Cell can rank and shortlist you for visiting recruiter JDs.
+                </p>
+              </div>
+              <div>
+                <Link
+                  href="/portal/profile"
+                  className="button button-cn-primary"
+                  style={{ padding: "10px 20px", fontSize: "13px", fontWeight: 700 }}
+                >
+                  Edit Career Profile &amp; Resume →
                 </Link>
               </div>
             </div>

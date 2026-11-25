@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
@@ -138,7 +139,10 @@ export default async function AdminStudentsPage() {
             and checkpoint attempts.
           </p>
         </div>
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+          <Link href="/admin/placements" className="button button-cn-primary button-small">
+            🎯 Company JD Matcher →
+          </Link>
           <span
             style={{
               fontSize: 10,

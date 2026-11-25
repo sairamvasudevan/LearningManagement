@@ -87,6 +87,106 @@ export type DbModuleFeedbackWithUser = DbModuleFeedback & {
   user_register_number: string;
 };
 
+export type StudentProjectItem = {
+  id: string;
+  title: string;
+  techStack: string[];
+  summary: string;
+  impactMetric?: string;
+  repoUrl?: string;
+  liveUrl?: string;
+};
+
+export type StudentExperienceItem = {
+  id: string;
+  company: string;
+  role: string;
+  duration: string;
+  highlights: string;
+};
+
+export type DbStudentCareerProfile = {
+  user_id: string;
+  admission_no: string;
+  enrollment_no: string;
+  school: string;
+  branch: string;
+  semester: number;
+  section: string;
+  batch_year: number;
+  cgpa: number;
+  tenth_pct: number;
+  twelfth_pct: number;
+  active_backlogs: number;
+  placement_eligible: boolean;
+  headline: string;
+  career_summary: string;
+  skills: string[];
+  certifications: string[];
+  achievements: string[];
+  projects: StudentProjectItem[];
+  experiences: StudentExperienceItem[];
+  codolio_handle: string;
+  codolio_url: string;
+  codolio_total_solved: number;
+  leetcode_handle: string;
+  leetcode_solved: number;
+  leetcode_rating: number;
+  codechef_handle: string;
+  codechef_rating: number;
+  codeforces_handle: string;
+  codeforces_rating: number;
+  gfg_handle: string;
+  gfg_solved: number;
+  hackerrank_handle: string;
+  github_handle: string;
+  github_repos: number;
+  linkedin_url: string;
+  portfolio_url: string;
+  resume_url: string;
+  updated_at: string;
+};
+
+export type StudentCareerSnapshot = {
+  user: DbUser;
+  career: DbStudentCareerProfile;
+  platformStats: {
+    modulesCompleted: number;
+    dsaSolvedCount: number;
+    bestVersantScore: number | null;
+    latestCefr: string | null;
+  };
+};
+
+export type DbPlacementDrive = {
+  id: string;
+  company_name: string;
+  role_title: string;
+  ctc_package: string;
+  jd_text: string;
+  min_cgpa: number;
+  max_backlogs: number;
+  allowed_branches: string[];
+  required_skills: string[];
+  min_coding_solved: number;
+  min_lsrw_score: number;
+  shortlisted_user_ids: string[];
+  created_by: string;
+  created_at: string;
+};
+
+export function sanitizeExternalUrl(raw: unknown): string {
+  const s = String(raw || "").trim();
+  if (!s) return "";
+  try {
+    const parsed = new URL(s);
+    if (parsed.protocol === "https:" || parsed.protocol === "http:") {
+      return parsed.toString();
+    }
+  } catch {}
+  return "";
+}
+
 let dbInstance: DatabaseSync | null = null;
 
 export function getDatabase(): DatabaseSync {
@@ -234,6 +334,66 @@ export function getDatabase(): DatabaseSync {
       FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
     );
     CREATE INDEX IF NOT EXISTS idx_comm_sub_user ON communication_submissions(user_id, created_at);
+
+    CREATE TABLE IF NOT EXISTS student_career_profiles (
+      user_id TEXT PRIMARY KEY,
+      admission_no TEXT DEFAULT '',
+      enrollment_no TEXT DEFAULT '',
+      school TEXT DEFAULT 'School of Computing Science & Engineering',
+      branch TEXT DEFAULT 'B.Tech CSE',
+      semester INTEGER DEFAULT 6,
+      section TEXT DEFAULT 'A',
+      batch_year INTEGER DEFAULT 2026,
+      cgpa REAL DEFAULT 0,
+      tenth_pct REAL DEFAULT 0,
+      twelfth_pct REAL DEFAULT 0,
+      active_backlogs INTEGER DEFAULT 0,
+      placement_eligible INTEGER DEFAULT 1,
+      headline TEXT DEFAULT '',
+      career_summary TEXT DEFAULT '',
+      skills_json TEXT DEFAULT '[]',
+      certifications_json TEXT DEFAULT '[]',
+      achievements_json TEXT DEFAULT '[]',
+      projects_json TEXT DEFAULT '[]',
+      experiences_json TEXT DEFAULT '[]',
+      codolio_handle TEXT DEFAULT '',
+      codolio_url TEXT DEFAULT '',
+      codolio_total_solved INTEGER DEFAULT 0,
+      leetcode_handle TEXT DEFAULT '',
+      leetcode_solved INTEGER DEFAULT 0,
+      leetcode_rating INTEGER DEFAULT 0,
+      codechef_handle TEXT DEFAULT '',
+      codechef_rating INTEGER DEFAULT 0,
+      codeforces_handle TEXT DEFAULT '',
+      codeforces_rating INTEGER DEFAULT 0,
+      gfg_handle TEXT DEFAULT '',
+      gfg_solved INTEGER DEFAULT 0,
+      hackerrank_handle TEXT DEFAULT '',
+      github_handle TEXT DEFAULT '',
+      github_repos INTEGER DEFAULT 0,
+      linkedin_url TEXT DEFAULT '',
+      portfolio_url TEXT DEFAULT '',
+      resume_url TEXT DEFAULT '',
+      updated_at TEXT NOT NULL,
+      FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS placement_drives (
+      id TEXT PRIMARY KEY,
+      company_name TEXT NOT NULL,
+      role_title TEXT NOT NULL,
+      ctc_package TEXT DEFAULT '',
+      jd_text TEXT NOT NULL,
+      min_cgpa REAL DEFAULT 0,
+      max_backlogs INTEGER DEFAULT 0,
+      allowed_branches_json TEXT DEFAULT '[]',
+      required_skills_json TEXT DEFAULT '[]',
+      min_coding_solved INTEGER DEFAULT 0,
+      min_lsrw_score INTEGER DEFAULT 0,
+      shortlisted_user_ids_json TEXT DEFAULT '[]',
+      created_by TEXT DEFAULT '',
+      created_at TEXT NOT NULL
+    );
   `);
 
   // Seed default course_settings row if missing
@@ -366,6 +526,405 @@ export function getDatabase(): DatabaseSync {
   } catch {}
 
   dbInstance = db;
+
+  // Seed Galgotias University campus career profiles if empty so T&P JD Matcher & Student Resume hub are populated out-of-box
+  try {
+    const careerCountRow = db
+      .prepare("SELECT COUNT(*) as count FROM student_career_profiles")
+      .get() as { count: number };
+    if (careerCountRow && careerCountRow.count === 0) {
+      const now = new Date().toISOString();
+      const upsertStmt = db.prepare(`
+        INSERT OR IGNORE INTO student_career_profiles (
+          user_id, admission_no, enrollment_no, school, branch, semester, section, batch_year,
+          cgpa, tenth_pct, twelfth_pct, active_backlogs, placement_eligible,
+          headline, career_summary, skills_json, certifications_json, achievements_json,
+          projects_json, experiences_json,
+          codolio_handle, codolio_url, codolio_total_solved,
+          leetcode_handle, leetcode_solved, leetcode_rating,
+          codechef_handle, codechef_rating, codeforces_handle, codeforces_rating,
+          gfg_handle, gfg_solved, hackerrank_handle, github_handle, github_repos,
+          linkedin_url, portfolio_url, resume_url, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+
+      // Attach rich Galgotias profile to default student (00000000-...-0001)
+      upsertStmt.run(
+        "00000000-0000-4000-a000-000000000001",
+        "24SCSE1010842",
+        "GU-2022-88421",
+        "School of Computing Science & Engineering",
+        "B.Tech CSE",
+        7,
+        "A3",
+        2026,
+        8.64,
+        92.4,
+        89.8,
+        0,
+        1,
+        "Full-Stack Engineer & Competitive Programmer · React, Node.js, C++",
+        "Final-year Galgotias University B.Tech CSE scholar specializing in scalable Next.js/Node.js backend systems, relational modeling, and dynamic programming.",
+        JSON.stringify(["C++", "Java", "Python", "TypeScript", "React", "Next.js", "Node.js", "SQL", "PostgreSQL", "Docker", "Data Structures", "Algorithms", "System Design"]),
+        JSON.stringify(["AWS Certified Cloud Practitioner", "NPTEL Design & Analysis of Algorithms (Elite Gold)"]),
+        JSON.stringify(["Smart India Hackathon 2025 Finalist", "Top 4% Institute Codolio Rank"]),
+        JSON.stringify([
+          {
+            id: "proj-aditya-1",
+            title: "CampusGrid Distributed Quiz & Code Runner",
+            techStack: ["Next.js", "TypeScript", "SQLite", "Docker", "Node.js"],
+            summary: "Built a sandboxed multi-language execution engine supporting C++, Java, and Python with real-time queue isolation.",
+            impactMetric: "Served 1,200+ lab evaluations at <180ms median latency",
+            repoUrl: "https://github.com/adityasharma-gu/campusgrid",
+          },
+          {
+            id: "proj-aditya-2",
+            title: "PulsePay Ledger Reconciler",
+            techStack: ["Java", "Spring Boot", "PostgreSQL", "REST API"],
+            summary: "Implemented idempotent ledger postings and webhook retry queues.",
+            impactMetric: "99.98% reconciliation consistency across 50k mock txns",
+            repoUrl: "https://github.com/adityasharma-gu/pulsepay",
+          },
+        ]),
+        JSON.stringify([
+          {
+            id: "exp-aditya-1",
+            company: "FinEdge Systems",
+            role: "Software Engineering Intern",
+            duration: "May 2025 – Jul 2025",
+            highlights: "Reduced API P95 response time by 42% using PostgreSQL composite indexes and Redis read-through caching.",
+          },
+        ]),
+        "aditya_gu",
+        "https://codolio.com/profile/aditya_gu",
+        512,
+        "aditya_lc",
+        380,
+        1845,
+        "aditya_cc",
+        1710,
+        "aditya_cf",
+        1430,
+        "aditya_gfg",
+        215,
+        "aditya_hr",
+        "adityasharma-gu",
+        28,
+        "https://linkedin.com/in/adityasharma-gu",
+        "",
+        "",
+        now,
+      );
+
+      // Seed 5 diverse Galgotias University campus student records for realistic T&P JD filtering
+      const cohortSeeds = [
+        {
+          id: "00000000-0000-4000-a000-000000000101",
+          email: "ananya.verma@galgotiasuniversity.edu.in",
+          name: "Ananya Verma",
+          phone: "+91 98112 44001",
+          adm: "23SCSE1040112",
+          enroll: "GU-2022-40112",
+          branch: "B.Tech CSE (AI & ML)",
+          cgpa: 9.18,
+          tenth: 95.0,
+          twelfth: 93.2,
+          backlogs: 0,
+          headline: "Applied ML & Python Backend Engineer · PyTorch, FastAPI, AWS",
+          summary: "Top-decile Galgotias AI & ML undergrad focused on LLM evaluation pipelines, RAG retrieval, and production Python microservices.",
+          skills: ["Python", "PyTorch", "TensorFlow", "FastAPI", "SQL", "PostgreSQL", "Docker", "AWS", "Data Structures", "REST API", "Git"],
+          certs: ["DeepLearning.AI Specialization", "AWS Academy Machine Learning Foundations"],
+          achievements: ["Dean's Merit Scholarship 2024 & 2025", "1st Runner-Up Galgotias AI Hackathon"],
+          projects: [
+            {
+              id: "proj-ananya-1",
+              title: "ClinicalDoc Hybrid RAG Copilot",
+              techStack: ["Python", "FastAPI", "PyTorch", "PostgreSQL", "Docker"],
+              summary: "Constructed hybrid BM25 + dense vector retrieval with hallucination grounding metrics.",
+              impactMetric: "Improved citation precision by 31% on internal clinical QA bench",
+              repoUrl: "https://github.com/ananyaverma-gu/clinical-rag",
+            },
+          ],
+          experiences: [
+            {
+              id: "exp-ananya-1",
+              company: "CortexData Labs",
+              role: "ML Engineering Intern",
+              duration: "Jun 2025 – Aug 2025",
+              highlights: "Automated batch inference pipeline in Python & AWS Lambda handling 20k documents/day.",
+            },
+          ],
+          codolioHandle: "ananya_ml_gu",
+          codolioTotal: 420,
+          lcSolved: 310,
+          lcRating: 1765,
+          ccRating: 1620,
+          cfRating: 1310,
+          gfgSolved: 170,
+          ghHandle: "ananyaverma-gu",
+          ghRepos: 22,
+          versant: 72,
+          cefr: "C1",
+        },
+        {
+          id: "00000000-0000-4000-a000-000000000102",
+          email: "rohan.mehta@galgotiasuniversity.edu.in",
+          name: "Rohan Mehta",
+          phone: "+91 98112 44002",
+          adm: "23SCSE1010298",
+          enroll: "GU-2022-10298",
+          branch: "B.Tech CSE",
+          cgpa: 7.92,
+          tenth: 86.4,
+          twelfth: 84.0,
+          backlogs: 0,
+          headline: "MERN Full-Stack & Cloud Native Developer · React, Node, MongoDB, Kubernetes",
+          summary: "Full-stack builder shipping responsive TypeScript React interfaces and horizontally scaled Node/Express services.",
+          skills: ["JavaScript", "TypeScript", "React", "Next.js", "Node.js", "Express", "MongoDB", "SQL", "Tailwind", "Docker", "Kubernetes", "Git"],
+          certs: ["Meta Front-End Developer Certificate", "MongoDB Associate Developer"],
+          achievements: ["Built Galgotias Technical Fest Registration Portal (8,000+ users)"],
+          projects: [
+            {
+              id: "proj-rohan-1",
+              title: "Galgotias Campus Event & Ticketing Hub",
+              techStack: ["React", "Node.js", "Express", "MongoDB", "Docker"],
+              summary: "Implemented QR pass issuance, role-based coordinator check-in, and real-time seat telemetry.",
+              impactMetric: "Processed 8,200 student registrations during Unifest",
+              repoUrl: "https://github.com/rohanmehta-gu/unifest-hub",
+            },
+            {
+              id: "proj-rohan-2",
+              title: "CollabBoard CRDT Whiteboard",
+              techStack: ["TypeScript", "React", "WebSockets", "Node.js"],
+              summary: "Real-time multi-user canvas with conflict-free state synchronization.",
+              impactMetric: "<40ms sync broadcast latency",
+            },
+          ],
+          experiences: [],
+          codolioHandle: "rohan_dev_gu",
+          codolioTotal: 295,
+          lcSolved: 210,
+          lcRating: 1580,
+          ccRating: 1510,
+          cfRating: 1180,
+          gfgSolved: 135,
+          ghHandle: "rohanmehta-gu",
+          ghRepos: 34,
+          versant: 66,
+          cefr: "B2+",
+        },
+        {
+          id: "00000000-0000-4000-a000-000000000103",
+          email: "priya.nair@galgotiasuniversity.edu.in",
+          name: "Priya Nair",
+          phone: "+91 98112 44003",
+          adm: "23SCSE1010514",
+          enroll: "GU-2022-10514",
+          branch: "B.Tech IT",
+          cgpa: 8.45,
+          tenth: 91.2,
+          twelfth: 90.5,
+          backlogs: 0,
+          headline: "Enterprise Java & Cloud Microservices Engineer · Spring Boot, SQL, AWS",
+          summary: "Strong foundation in Core Java, DBMS, Operating Systems, RESTful Spring Boot services, and clear stakeholder communication.",
+          skills: ["Java", "Spring Boot", "SQL", "MySQL", "PostgreSQL", "REST API", "DBMS", "Operating Systems", "Data Structures", "Algorithms", "AWS"],
+          certs: ["Oracle Certified Associate Java SE 17", "TCS Ion Career Edge Distinction"],
+          achievements: ["Versant C1 Scorer in Campus LSRW Drive", "Led 5-member NSS Tech Literacy Drive"],
+          projects: [
+            {
+              id: "proj-priya-1",
+              title: "FinTrust Loan Underwriting Engine",
+              techStack: ["Java", "Spring Boot", "MySQL", "REST API"],
+              summary: "Role-secured REST microservices calculating DTI risk ratios and automated EMI amortizations.",
+              impactMetric: "98% JUnit service coverage",
+              repoUrl: "https://github.com/priyanair-gu/fintrust",
+            },
+          ],
+          experiences: [
+            {
+              id: "exp-priya-1",
+              company: "Apex Enterprise IT",
+              role: "Backend Java Intern",
+              duration: "Jan 2025 – Mar 2025",
+              highlights: "Migrated 12 legacy JDBC stored procedures to Spring Data JPA + optimized join plans.",
+            },
+          ],
+          codolioHandle: "priya_java_gu",
+          codolioTotal: 360,
+          lcSolved: 265,
+          lcRating: 1690,
+          ccRating: 1640,
+          cfRating: 1240,
+          gfgSolved: 240,
+          ghHandle: "priyanair-gu",
+          ghRepos: 16,
+          versant: 75,
+          cefr: "C1",
+        },
+        {
+          id: "00000000-0000-4000-a000-000000000104",
+          email: "kabir.singh@galgotiasuniversity.edu.in",
+          name: "Kabir Singh",
+          phone: "+91 98112 44004",
+          adm: "23SCSE1020771",
+          enroll: "GU-2022-20771",
+          branch: "B.Tech CSE",
+          cgpa: 7.41,
+          tenth: 81.0,
+          twelfth: 79.5,
+          backlogs: 0,
+          headline: "Competitive Programmer (Candidate Master Track) · C++, Algorithms, Low Latency",
+          summary: "Algorithmic problem solver focused on Graph Theory, Segment Trees, DP optimizations, and C++ systems code.",
+          skills: ["C++", "C", "Data Structures", "Algorithms", "Dynamic Programming", "System Design", "Operating Systems", "Git"],
+          certs: ["ICPC Asia West Kanpur-Mathura Regionalist"],
+          achievements: ["Codeforces Expert (1685)", "Solved 850+ problems unified across Codolio"],
+          projects: [
+            {
+              id: "proj-kabir-1",
+              title: "OrderMatch C++ Lock-Free Simulator",
+              techStack: ["C++", "Data Structures", "Algorithms"],
+              summary: "Order book matcher benchmarked with custom pool allocators.",
+              impactMetric: "1.4M order matches/sec single-thread",
+              repoUrl: "https://github.com/kabirsingh-gu/ordermatch-cpp",
+            },
+          ],
+          experiences: [],
+          codolioHandle: "kabir_cp_gu",
+          codolioTotal: 855,
+          lcSolved: 640,
+          lcRating: 2045,
+          ccRating: 1960,
+          cfRating: 1685,
+          gfgSolved: 190,
+          ghHandle: "kabirsingh-gu",
+          ghRepos: 14,
+          versant: 58,
+          cefr: "B2",
+        },
+        {
+          id: "00000000-0000-4000-a000-000000000105",
+          email: "sneha.patel@galgotiasuniversity.edu.in",
+          name: "Sneha Patel",
+          phone: "+91 98112 44005",
+          adm: "23SCSE1050603",
+          enroll: "GU-2022-50603",
+          branch: "B.Tech CSE (Data Science)",
+          cgpa: 6.85,
+          tenth: 78.0,
+          twelfth: 76.2,
+          backlogs: 1,
+          headline: "Data Analyst & BI Developer · SQL, Python, PowerBI, Pandas",
+          summary: "Focused on SQL cohort analytics, ETL cleanup scripts, and interactive business reporting.",
+          skills: ["Python", "SQL", "PostgreSQL", "MySQL", "Machine Learning", "Git"],
+          certs: ["Google Data Analytics Professional Certificate"],
+          achievements: ["Organized Galgotias DataViz Sprint"],
+          projects: [
+            {
+              id: "proj-sneha-1",
+              title: "Retail Churn Cohort Analyzer",
+              techStack: ["Python", "SQL", "PostgreSQL"],
+              summary: "Retention cohort funnel queries and logistic churn risk model.",
+              impactMetric: "Identified top 3 churn predictors on 40k synthetic rows",
+            },
+          ],
+          experiences: [],
+          codolioHandle: "sneha_data_gu",
+          codolioTotal: 140,
+          lcSolved: 95,
+          lcRating: 1410,
+          ccRating: 1380,
+          cfRating: 950,
+          gfgSolved: 75,
+          ghHandle: "snehapatel-gu",
+          ghRepos: 9,
+          versant: 62,
+          cefr: "B2+",
+        },
+      ];
+
+      const insertUserStmt = db.prepare(`
+        INSERT OR IGNORE INTO users (
+          id, email, role, full_name, phone, college, register_number, department, degree,
+          graduation_year, enrollment_status, password_hash, password_salt, created_at
+        ) VALUES (?, ?, 'student', ?, ?, 'Galgotias University', ?, ?, ?, 2026, 'approved', ?, ?, ?)
+      `);
+      const insertCommStmt = db.prepare(`
+        INSERT OR IGNORE INTO communication_submissions (
+          id, user_id, mode, skill, exercise_id, overall_score, percent_score, cefr_level,
+          sentence_mastery, vocabulary_score, fluency_score, delivery_score, passed, response_summary, feedback_json, created_at
+        ) VALUES (?, ?, 'assessment', 'full_mock', 'corporate-lsrw-mock-v1', ?, ?, ?, ?, ?, ?, ?, 1, 'Seeded campus LSRW benchmark', '{}', ?)
+      `);
+
+      for (const s of cohortSeeds) {
+        insertUserStmt.run(
+          s.id,
+          s.email,
+          s.name,
+          s.phone,
+          s.adm,
+          s.branch,
+          s.branch,
+          studentHash,
+          studentSalt,
+          now,
+        );
+        upsertStmt.run(
+          s.id,
+          s.adm,
+          s.enroll,
+          "School of Computing Science & Engineering",
+          s.branch,
+          7,
+          "A1",
+          2026,
+          s.cgpa,
+          s.tenth,
+          s.twelfth,
+          s.backlogs,
+          s.backlogs === 0 ? 1 : 0,
+          s.headline,
+          s.summary,
+          JSON.stringify(s.skills),
+          JSON.stringify(s.certs),
+          JSON.stringify(s.achievements),
+          JSON.stringify(s.projects),
+          JSON.stringify(s.experiences),
+          s.codolioHandle,
+          `https://codolio.com/profile/${s.codolioHandle}`,
+          s.codolioTotal,
+          `${s.codolioHandle}_lc`,
+          s.lcSolved,
+          s.lcRating,
+          `${s.codolioHandle}_cc`,
+          s.ccRating,
+          `${s.codolioHandle}_cf`,
+          s.cfRating,
+          `${s.codolioHandle}_gfg`,
+          s.gfgSolved,
+          `${s.codolioHandle}_hr`,
+          s.ghHandle,
+          s.ghRepos,
+          `https://linkedin.com/in/${s.ghHandle}`,
+          "",
+          "",
+          now,
+        );
+        insertCommStmt.run(
+          `comm-seed-${s.id.slice(-3)}`,
+          s.id,
+          s.versant,
+          Math.round(((s.versant - 20) / 60) * 100),
+          s.cefr,
+          s.versant,
+          s.versant - 1,
+          s.versant - 2,
+          s.versant + 1,
+          now,
+        );
+      }
+    }
+  } catch {}
+
   return db;
 }
 
@@ -1198,4 +1757,465 @@ export function getUserCompletedCommunicationExerciseIds(userId: string): Set<st
     )
     .all(userId) as unknown as { exercise_id: string }[];
   return new Set(rows.map((r) => r.exercise_id));
+}
+
+/* -------------------------------------------------------------
+   GALGOTIAS UNIVERSITY CAREER PROFILES, CODING HANDLES & T&P CELL
+------------------------------------------------------------- */
+
+function parseJsonArray<T>(raw: unknown, fallback: T[]): T[] {
+  if (typeof raw !== "string" || !raw.trim()) return fallback;
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? (parsed as T[]) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+export function buildEmptyCareerProfile(user: DbUser): DbStudentCareerProfile {
+  return {
+    user_id: user.id,
+    admission_no: user.register_number || "",
+    enrollment_no: "",
+    school: "School of Computing Science & Engineering",
+    branch: user.department || user.degree || "B.Tech CSE",
+    semester: 6,
+    section: "A",
+    batch_year: user.graduation_year || 2026,
+    cgpa: 0,
+    tenth_pct: 0,
+    twelfth_pct: 0,
+    active_backlogs: 0,
+    placement_eligible: true,
+    headline: "",
+    career_summary: "",
+    skills: [],
+    certifications: [],
+    achievements: [],
+    projects: [],
+    experiences: [],
+    codolio_handle: "",
+    codolio_url: "",
+    codolio_total_solved: 0,
+    leetcode_handle: "",
+    leetcode_solved: 0,
+    leetcode_rating: 0,
+    codechef_handle: "",
+    codechef_rating: 0,
+    codeforces_handle: "",
+    codeforces_rating: 0,
+    gfg_handle: "",
+    gfg_solved: 0,
+    hackerrank_handle: "",
+    github_handle: "",
+    github_repos: 0,
+    linkedin_url: "",
+    portfolio_url: "",
+    resume_url: "",
+    updated_at: user.created_at,
+  };
+}
+
+function hydrateCareerRow(row: Record<string, unknown>, user: DbUser): DbStudentCareerProfile {
+  const empty = buildEmptyCareerProfile(user);
+  return {
+    user_id: user.id,
+    admission_no: String(row.admission_no || empty.admission_no),
+    enrollment_no: String(row.enrollment_no || ""),
+    school: String(row.school || empty.school),
+    branch: String(row.branch || empty.branch),
+    semester: Number(row.semester || 6),
+    section: String(row.section || "A"),
+    batch_year: Number(row.batch_year || empty.batch_year),
+    cgpa: Number(row.cgpa || 0),
+    tenth_pct: Number(row.tenth_pct || 0),
+    twelfth_pct: Number(row.twelfth_pct || 0),
+    active_backlogs: Number(row.active_backlogs || 0),
+    placement_eligible: Boolean(Number(row.placement_eligible ?? 1)),
+    headline: String(row.headline || ""),
+    career_summary: String(row.career_summary || ""),
+    skills: parseJsonArray<string>(row.skills_json, []),
+    certifications: parseJsonArray<string>(row.certifications_json, []),
+    achievements: parseJsonArray<string>(row.achievements_json, []),
+    projects: parseJsonArray<StudentProjectItem>(row.projects_json, []),
+    experiences: parseJsonArray<StudentExperienceItem>(row.experiences_json, []),
+    codolio_handle: String(row.codolio_handle || ""),
+    codolio_url: String(row.codolio_url || ""),
+    codolio_total_solved: Number(row.codolio_total_solved || 0),
+    leetcode_handle: String(row.leetcode_handle || ""),
+    leetcode_solved: Number(row.leetcode_solved || 0),
+    leetcode_rating: Number(row.leetcode_rating || 0),
+    codechef_handle: String(row.codechef_handle || ""),
+    codechef_rating: Number(row.codechef_rating || 0),
+    codeforces_handle: String(row.codeforces_handle || ""),
+    codeforces_rating: Number(row.codeforces_rating || 0),
+    gfg_handle: String(row.gfg_handle || ""),
+    gfg_solved: Number(row.gfg_solved || 0),
+    hackerrank_handle: String(row.hackerrank_handle || ""),
+    github_handle: String(row.github_handle || ""),
+    github_repos: Number(row.github_repos || 0),
+    linkedin_url: String(row.linkedin_url || ""),
+    portfolio_url: String(row.portfolio_url || ""),
+    resume_url: String(row.resume_url || ""),
+    updated_at: String(row.updated_at || empty.updated_at),
+  };
+}
+
+export function getStudentCareerProfile(userId: string): DbStudentCareerProfile | null {
+  const db = getDatabase();
+  const user = getUserById(userId);
+  if (!user) return null;
+
+  const row = db
+    .prepare("SELECT * FROM student_career_profiles WHERE user_id = ?")
+    .get(userId) as unknown as Record<string, unknown> | undefined;
+
+  return row ? hydrateCareerRow(row, user) : buildEmptyCareerProfile(user);
+}
+
+export function upsertStudentCareerProfile(
+  userId: string,
+  payload: Partial<Omit<DbStudentCareerProfile, "user_id" | "updated_at">>,
+): DbStudentCareerProfile | null {
+  const db = getDatabase();
+  const user = getUserById(userId);
+  if (!user) return null;
+
+  const prev = getStudentCareerProfile(userId) || buildEmptyCareerProfile(user);
+  const now = new Date().toISOString();
+
+  const clampNum = (val: unknown, fallback: number, min: number, max: number) => {
+    const n = Number(val);
+    if (!Number.isFinite(n)) return fallback;
+    return Math.max(min, Math.min(max, n));
+  };
+
+  const cleanList = (arr: unknown, maxLen: number): string[] =>
+    Array.isArray(arr)
+      ? Array.from(new Set(arr.map((x) => String(x || "").trim()).filter(Boolean))).slice(0, maxLen)
+      : [];
+
+  const cleanProjects: StudentProjectItem[] = Array.isArray(payload.projects)
+    ? payload.projects
+        .slice(0, 12)
+        .map((p, idx) => ({
+          id: String(p?.id || `proj-${idx + 1}`).slice(0, 48),
+          title: String(p?.title || "").trim().slice(0, 120),
+          techStack: cleanList(p?.techStack, 12),
+          summary: String(p?.summary || "").trim().slice(0, 600),
+          impactMetric: String(p?.impactMetric || "").trim().slice(0, 160),
+          repoUrl: sanitizeExternalUrl(p?.repoUrl),
+          liveUrl: sanitizeExternalUrl(p?.liveUrl),
+        }))
+        .filter((p) => p.title.length > 0)
+    : prev.projects;
+
+  const cleanExperiences: StudentExperienceItem[] = Array.isArray(payload.experiences)
+    ? payload.experiences
+        .slice(0, 10)
+        .map((ex, idx) => ({
+          id: String(ex?.id || `exp-${idx + 1}`).slice(0, 48),
+          company: String(ex?.company || "").trim().slice(0, 120),
+          role: String(ex?.role || "").trim().slice(0, 120),
+          duration: String(ex?.duration || "").trim().slice(0, 80),
+          highlights: String(ex?.highlights || "").trim().slice(0, 600),
+        }))
+        .filter((ex) => ex.company.length > 0 && ex.role.length > 0)
+    : prev.experiences;
+
+  const next: DbStudentCareerProfile = {
+    user_id: userId,
+    admission_no: String(payload.admission_no ?? prev.admission_no).trim().slice(0, 40),
+    enrollment_no: String(payload.enrollment_no ?? prev.enrollment_no).trim().slice(0, 40),
+    school: String(payload.school ?? prev.school).trim().slice(0, 120),
+    branch: String(payload.branch ?? prev.branch).trim().slice(0, 100),
+    semester: Math.round(clampNum(payload.semester, prev.semester, 1, 10)),
+    section: String(payload.section ?? prev.section).trim().slice(0, 20),
+    batch_year: Math.round(clampNum(payload.batch_year, prev.batch_year, 2020, 2032)),
+    cgpa: Number(clampNum(payload.cgpa, prev.cgpa, 0, 10).toFixed(2)),
+    tenth_pct: Number(clampNum(payload.tenth_pct, prev.tenth_pct, 0, 100).toFixed(2)),
+    twelfth_pct: Number(clampNum(payload.twelfth_pct, prev.twelfth_pct, 0, 100).toFixed(2)),
+    active_backlogs: Math.round(clampNum(payload.active_backlogs, prev.active_backlogs, 0, 25)),
+    placement_eligible:
+      typeof payload.placement_eligible === "boolean"
+        ? payload.placement_eligible
+        : prev.placement_eligible,
+    headline: String(payload.headline ?? prev.headline).trim().slice(0, 180),
+    career_summary: String(payload.career_summary ?? prev.career_summary).trim().slice(0, 1000),
+    skills: payload.skills !== undefined ? cleanList(payload.skills, 40) : prev.skills,
+    certifications:
+      payload.certifications !== undefined
+        ? cleanList(payload.certifications, 25)
+        : prev.certifications,
+    achievements:
+      payload.achievements !== undefined
+        ? cleanList(payload.achievements, 25)
+        : prev.achievements,
+    projects: cleanProjects,
+    experiences: cleanExperiences,
+    codolio_handle: String(payload.codolio_handle ?? prev.codolio_handle).trim().slice(0, 80),
+    codolio_url:
+      payload.codolio_url !== undefined ? sanitizeExternalUrl(payload.codolio_url) : prev.codolio_url,
+    codolio_total_solved: Math.round(
+      clampNum(payload.codolio_total_solved, prev.codolio_total_solved, 0, 10000),
+    ),
+    leetcode_handle: String(payload.leetcode_handle ?? prev.leetcode_handle).trim().slice(0, 80),
+    leetcode_solved: Math.round(clampNum(payload.leetcode_solved, prev.leetcode_solved, 0, 5000)),
+    leetcode_rating: Math.round(clampNum(payload.leetcode_rating, prev.leetcode_rating, 0, 4500)),
+    codechef_handle: String(payload.codechef_handle ?? prev.codechef_handle).trim().slice(0, 80),
+    codechef_rating: Math.round(clampNum(payload.codechef_rating, prev.codechef_rating, 0, 4500)),
+    codeforces_handle: String(payload.codeforces_handle ?? prev.codeforces_handle)
+      .trim()
+      .slice(0, 80),
+    codeforces_rating: Math.round(
+      clampNum(payload.codeforces_rating, prev.codeforces_rating, 0, 4500),
+    ),
+    gfg_handle: String(payload.gfg_handle ?? prev.gfg_handle).trim().slice(0, 80),
+    gfg_solved: Math.round(clampNum(payload.gfg_solved, prev.gfg_solved, 0, 5000)),
+    hackerrank_handle: String(payload.hackerrank_handle ?? prev.hackerrank_handle)
+      .trim()
+      .slice(0, 80),
+    github_handle: String(payload.github_handle ?? prev.github_handle).trim().slice(0, 80),
+    github_repos: Math.round(clampNum(payload.github_repos, prev.github_repos, 0, 1000)),
+    linkedin_url:
+      payload.linkedin_url !== undefined ? sanitizeExternalUrl(payload.linkedin_url) : prev.linkedin_url,
+    portfolio_url:
+      payload.portfolio_url !== undefined
+        ? sanitizeExternalUrl(payload.portfolio_url)
+        : prev.portfolio_url,
+    resume_url:
+      payload.resume_url !== undefined ? sanitizeExternalUrl(payload.resume_url) : prev.resume_url,
+    updated_at: now,
+  };
+
+  db.prepare(`
+    INSERT INTO student_career_profiles (
+      user_id, admission_no, enrollment_no, school, branch, semester, section, batch_year,
+      cgpa, tenth_pct, twelfth_pct, active_backlogs, placement_eligible,
+      headline, career_summary, skills_json, certifications_json, achievements_json,
+      projects_json, experiences_json,
+      codolio_handle, codolio_url, codolio_total_solved,
+      leetcode_handle, leetcode_solved, leetcode_rating,
+      codechef_handle, codechef_rating, codeforces_handle, codeforces_rating,
+      gfg_handle, gfg_solved, hackerrank_handle, github_handle, github_repos,
+      linkedin_url, portfolio_url, resume_url, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(user_id) DO UPDATE SET
+      admission_no = excluded.admission_no,
+      enrollment_no = excluded.enrollment_no,
+      school = excluded.school,
+      branch = excluded.branch,
+      semester = excluded.semester,
+      section = excluded.section,
+      batch_year = excluded.batch_year,
+      cgpa = excluded.cgpa,
+      tenth_pct = excluded.tenth_pct,
+      twelfth_pct = excluded.twelfth_pct,
+      active_backlogs = excluded.active_backlogs,
+      placement_eligible = excluded.placement_eligible,
+      headline = excluded.headline,
+      career_summary = excluded.career_summary,
+      skills_json = excluded.skills_json,
+      certifications_json = excluded.certifications_json,
+      achievements_json = excluded.achievements_json,
+      projects_json = excluded.projects_json,
+      experiences_json = excluded.experiences_json,
+      codolio_handle = excluded.codolio_handle,
+      codolio_url = excluded.codolio_url,
+      codolio_total_solved = excluded.codolio_total_solved,
+      leetcode_handle = excluded.leetcode_handle,
+      leetcode_solved = excluded.leetcode_solved,
+      leetcode_rating = excluded.leetcode_rating,
+      codechef_handle = excluded.codechef_handle,
+      codechef_rating = excluded.codechef_rating,
+      codeforces_handle = excluded.codeforces_handle,
+      codeforces_rating = excluded.codeforces_rating,
+      gfg_handle = excluded.gfg_handle,
+      gfg_solved = excluded.gfg_solved,
+      hackerrank_handle = excluded.hackerrank_handle,
+      github_handle = excluded.github_handle,
+      github_repos = excluded.github_repos,
+      linkedin_url = excluded.linkedin_url,
+      portfolio_url = excluded.portfolio_url,
+      resume_url = excluded.resume_url,
+      updated_at = excluded.updated_at
+  `).run(
+    next.user_id,
+    next.admission_no,
+    next.enrollment_no,
+    next.school,
+    next.branch,
+    next.semester,
+    next.section,
+    next.batch_year,
+    next.cgpa,
+    next.tenth_pct,
+    next.twelfth_pct,
+    next.active_backlogs,
+    next.placement_eligible ? 1 : 0,
+    next.headline,
+    next.career_summary,
+    JSON.stringify(next.skills),
+    JSON.stringify(next.certifications),
+    JSON.stringify(next.achievements),
+    JSON.stringify(next.projects),
+    JSON.stringify(next.experiences),
+    next.codolio_handle,
+    next.codolio_url,
+    next.codolio_total_solved,
+    next.leetcode_handle,
+    next.leetcode_solved,
+    next.leetcode_rating,
+    next.codechef_handle,
+    next.codechef_rating,
+    next.codeforces_handle,
+    next.codeforces_rating,
+    next.gfg_handle,
+    next.gfg_solved,
+    next.hackerrank_handle,
+    next.github_handle,
+    next.github_repos,
+    next.linkedin_url,
+    next.portfolio_url,
+    next.resume_url,
+    next.updated_at,
+  );
+
+  // Sync branch & reg number onto base user row cleanly
+  db.prepare(
+    "UPDATE users SET register_number = ?, department = ?, degree = ?, graduation_year = ? WHERE id = ?",
+  ).run(
+    next.admission_no || user.register_number,
+    next.branch,
+    next.branch,
+    next.batch_year,
+    userId,
+  );
+
+  return next;
+}
+
+export function getAllStudentsCareerSnapshots(): StudentCareerSnapshot[] {
+  const db = getDatabase();
+  const students = db
+    .prepare("SELECT * FROM users WHERE role = 'student' ORDER BY created_at DESC")
+    .all() as unknown as DbUser[];
+  const careerRows = db
+    .prepare("SELECT * FROM student_career_profiles")
+    .all() as unknown as Array<Record<string, unknown>>;
+  const progressRows = db
+    .prepare("SELECT user_id, COUNT(*) as cnt FROM module_progress WHERE status = 'completed' GROUP BY user_id")
+    .all() as unknown as Array<{ user_id: string; cnt: number }>;
+  const dsaRows = db
+    .prepare("SELECT user_id, COUNT(DISTINCT problem_id) as cnt FROM dsa_submissions WHERE status = 'ACCEPTED' GROUP BY user_id")
+    .all() as unknown as Array<{ user_id: string; cnt: number }>;
+  const commRows = db
+    .prepare(
+      "SELECT user_id, MAX(overall_score) as best_score, cefr_level FROM communication_submissions GROUP BY user_id",
+    )
+    .all() as unknown as Array<{ user_id: string; best_score: number; cefr_level: string }>;
+
+  const careerMap = new Map(careerRows.map((r) => [String(r.user_id), r]));
+  const modMap = new Map(progressRows.map((r) => [r.user_id, Number(r.cnt || 0)]));
+  const dsaMap = new Map(dsaRows.map((r) => [r.user_id, Number(r.cnt || 0)]));
+  const commMap = new Map(commRows.map((r) => [r.user_id, r]));
+
+  return students.map((stu) => {
+    const rawCareer = careerMap.get(stu.id);
+    const comm = commMap.get(stu.id);
+    return {
+      user: { ...stu },
+      career: rawCareer ? hydrateCareerRow(rawCareer, stu) : buildEmptyCareerProfile(stu),
+      platformStats: {
+        modulesCompleted: modMap.get(stu.id) || 0,
+        dsaSolvedCount: dsaMap.get(stu.id) || 0,
+        bestVersantScore: comm ? Number(comm.best_score) : null,
+        latestCefr: comm ? comm.cefr_level : null,
+      },
+    };
+  });
+}
+
+export function createPlacementDrive(data: {
+  companyName: string;
+  roleTitle: string;
+  ctcPackage: string;
+  jdText: string;
+  minCgpa: number;
+  maxBacklogs: number;
+  allowedBranches: string[];
+  requiredSkills: string[];
+  minCodingSolved: number;
+  minLsrwScore: number;
+  shortlistedUserIds: string[];
+  createdBy: string;
+}): DbPlacementDrive {
+  const db = getDatabase();
+  const id = `drive-${crypto.randomBytes(6).toString("hex")}`;
+  const now = new Date().toISOString();
+
+  db.prepare(`
+    INSERT INTO placement_drives (
+      id, company_name, role_title, ctc_package, jd_text, min_cgpa, max_backlogs,
+      allowed_branches_json, required_skills_json, min_coding_solved, min_lsrw_score,
+      shortlisted_user_ids_json, created_by, created_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    id,
+    data.companyName.trim().slice(0, 120),
+    data.roleTitle.trim().slice(0, 120),
+    data.ctcPackage.trim().slice(0, 60),
+    data.jdText.trim().slice(0, 8000),
+    Number(data.minCgpa || 0),
+    Math.round(Number(data.maxBacklogs || 0)),
+    JSON.stringify(data.allowedBranches),
+    JSON.stringify(data.requiredSkills),
+    Math.round(Number(data.minCodingSolved || 0)),
+    Math.round(Number(data.minLsrwScore || 0)),
+    JSON.stringify(data.shortlistedUserIds),
+    data.createdBy,
+    now,
+  );
+
+  return {
+    id,
+    company_name: data.companyName.trim().slice(0, 120),
+    role_title: data.roleTitle.trim().slice(0, 120),
+    ctc_package: data.ctcPackage.trim().slice(0, 60),
+    jd_text: data.jdText.trim().slice(0, 8000),
+    min_cgpa: Number(data.minCgpa || 0),
+    max_backlogs: Math.round(Number(data.maxBacklogs || 0)),
+    allowed_branches: data.allowedBranches,
+    required_skills: data.requiredSkills,
+    min_coding_solved: Math.round(Number(data.minCodingSolved || 0)),
+    min_lsrw_score: Math.round(Number(data.minLsrwScore || 0)),
+    shortlisted_user_ids: data.shortlistedUserIds,
+    created_by: data.createdBy,
+    created_at: now,
+  };
+}
+
+export function getAllPlacementDrives(): DbPlacementDrive[] {
+  const db = getDatabase();
+  const rows = db
+    .prepare("SELECT * FROM placement_drives ORDER BY created_at DESC LIMIT 50")
+    .all() as unknown as Array<Record<string, unknown>>;
+
+  return rows.map((r) => ({
+    id: String(r.id),
+    company_name: String(r.company_name),
+    role_title: String(r.role_title),
+    ctc_package: String(r.ctc_package || ""),
+    jd_text: String(r.jd_text),
+    min_cgpa: Number(r.min_cgpa || 0),
+    max_backlogs: Number(r.max_backlogs || 0),
+    allowed_branches: parseJsonArray<string>(r.allowed_branches_json, []),
+    required_skills: parseJsonArray<string>(r.required_skills_json, []),
+    min_coding_solved: Number(r.min_coding_solved || 0),
+    min_lsrw_score: Number(r.min_lsrw_score || 0),
+    shortlisted_user_ids: parseJsonArray<string>(r.shortlisted_user_ids_json, []),
+    created_by: String(r.created_by || ""),
+    created_at: String(r.created_at),
+  }));
 }

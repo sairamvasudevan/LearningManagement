@@ -10,6 +10,9 @@ import {
   getUserProgress,
   getUserAttempts,
   getPracticeSubmissions,
+  getStudentCareerProfile,
+  getUserSolvedDsaProblemIds,
+  getUserCommunicationSubmissions,
 } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -166,6 +169,11 @@ export default async function AdminStudentDetailPage({ params }: PageProps) {
     }
   }
 
+  const career = getStudentCareerProfile(studentId);
+  const dsaSolvedCount = getUserSolvedDsaProblemIds(studentId).size;
+  const commSubs = getUserCommunicationSubmissions(studentId);
+  const bestVersant = commSubs.length ? Math.max(...commSubs.map((c) => c.overall_score)) : null;
+
   const completedCount = progressList.filter((p) => p.status === "completed").length;
   const inProgressCount = progressList.filter((p) => p.status === "in_progress").length;
   const totalBestScore = progressList.reduce((sum, p) => sum + p.best_score, 0);
@@ -278,6 +286,76 @@ export default async function AdminStudentDetailPage({ params }: PageProps) {
           </div>
         </div>
       </section>
+
+      {career && (
+        <section className="surface-card" style={{ padding: "24px", marginBottom: "20px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px", marginBottom: "14px" }}>
+            <div>
+              <span className="eyebrow" style={{ color: "#60a5fa" }}>GALGOTIAS T&amp;P CAREER &amp; CODING DOSSIER</span>
+              <h2 style={{ margin: "4px 0" }}>
+                {career.headline || `${career.branch} Candidate`}
+              </h2>
+            </div>
+            <Link href="/admin/placements" className="button button-quiet button-small">
+              Open JD Shortlist Engine →
+            </Link>
+          </div>
+
+          <div className="profile-grid" style={{ marginBottom: "16px" }}>
+            <div>
+              <span>Admission / Enroll No.</span>
+              <b>{career.admission_no || profile.register_number} · {career.enrollment_no || "—"}</b>
+            </div>
+            <div>
+              <span>CGPA &amp; School Percentages</span>
+              <b>{career.cgpa.toFixed(2)} CGPA (10th: {career.tenth_pct}% · 12th: {career.twelfth_pct}%)</b>
+            </div>
+            <div>
+              <span>Active Backlogs / Status</span>
+              <b>{career.active_backlogs} backlogs · {career.placement_eligible ? "Eligible" : "Opted Out"}</b>
+            </div>
+            <div>
+              <span>Codolio Unified Profile</span>
+              <b>{career.codolio_handle ? `@${career.codolio_handle} (${career.codolio_total_solved} solved)` : "Not linked"}</b>
+            </div>
+            <div>
+              <span>LeetCode / Codeforces / CodeChef</span>
+              <b>LC {career.leetcode_solved} ({career.leetcode_rating}) · CF {career.codeforces_rating} · CC {career.codechef_rating}</b>
+            </div>
+            <div>
+              <span>GitHub / DSA Arena / LSRW Versant</span>
+              <b>GH {career.github_repos} repos · DSA {dsaSolvedCount} · Versant {bestVersant ? `${bestVersant}/80` : "Pending"}</b>
+            </div>
+          </div>
+
+          {career.skills.length > 0 && (
+            <div style={{ marginBottom: "14px" }}>
+              <small style={{ color: "#86868b", display: "block", marginBottom: "6px" }}>Verified Skills</small>
+              <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                {career.skills.map((s) => (
+                  <span key={s} className="tag-pill">{s}</span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {career.projects.length > 0 && (
+            <div>
+              <small style={{ color: "#86868b", display: "block", marginBottom: "8px" }}>Engineering Projects ({career.projects.length})</small>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "10px" }}>
+                {career.projects.map((p) => (
+                  <div key={p.id} style={{ background: "#111113", border: "1px solid var(--border-subtle)", borderRadius: "10px", padding: "12px" }}>
+                    <b style={{ color: "#f5f5f7" }}>{p.title}</b>
+                    <div style={{ fontSize: "11.5px", color: "#60a5fa", margin: "3px 0" }}>{p.techStack.join(" · ")}</div>
+                    <p style={{ margin: "0 0 4px", fontSize: "12.5px", color: "#cbd5e1" }}>{p.summary}</p>
+                    {p.impactMetric && <small style={{ color: "#34d399" }}>{p.impactMetric}</small>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
+      )}
 
       <section className="surface-card table-card">
         <div className="table-heading">

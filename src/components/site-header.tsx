@@ -110,7 +110,7 @@ export function SiteHeader({
             </div>
             <div className="nexus-brand-text">
               <span className="nexus-brand-name">{PLATFORM_NAME}</span>
-              <span className="nexus-version-pill">ENGINEERING ACADEMY</span>
+              <span className="nexus-version-pill">GALGOTIAS UNIVERSITY HUB</span>
             </div>
           </Link>
 
@@ -341,6 +341,13 @@ export function SiteHeader({
           {/* User Auth Action */}
           {signedIn ? (
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <Link
+                href={admin ? "/admin/placements" : "/portal/profile"}
+                className="futuristic-signin-link"
+                style={{ fontSize: "12px", padding: "6px 10px" }}
+              >
+                {admin ? "T&P Placements" : "Resume & Codolio"}
+              </Link>
               <Link
                 href={admin ? "/admin" : "/portal"}
                 className="portal-status-chip"

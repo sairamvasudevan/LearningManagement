@@ -61,10 +61,10 @@ export default async function AdminHome() {
     <>
       <div className="dashboard-heading">
         <div>
-          <span className="eyebrow">ADMINISTRATION · LEARNING HUB</span>
-          <h1>Course &amp; student overview</h1>
+          <span className="eyebrow">GALGOTIAS UNIVERSITY · T&amp;P &amp; LEARNING HUB</span>
+          <h1>Campus Placement &amp; Cohort Overview</h1>
           <p>
-            Manage course packages, approve registrations, and monitor student learning progress.
+            Manage Galgotias student profiles, run company JD shortlists, approve registrations, and monitor learning telemetry.
           </p>
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
@@ -111,18 +111,27 @@ export default async function AdminHome() {
         </div>
       </section>
 
-      <section className="admin-nav-grid" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
+      <section className="admin-nav-grid" style={{ gridTemplateColumns: "repeat(2, 1fr)" }}>
+        <Link className="admin-nav-card" href="/admin/placements" style={{ borderColor: "rgba(59, 130, 246, 0.4)" }}>
+          <div className="admin-nav-icon" style={{ background: "rgba(59, 130, 246, 0.16)", color: "#60a5fa" }}>01</div>
+          <h2>Galgotias T&amp;P Cell · Company JD Matcher</h2>
+          <p>
+            Paste visiting company JDs, filter by CGPA, branch, backlogs, Codolio/LeetCode &amp; LSRW scores, rank matching
+            students, and export clean recruiter shortlists.
+          </p>
+          <b>Launch Placement &amp; JD Matcher →</b>
+        </Link>
         <Link className="admin-nav-card" href="/admin/students">
-          <div className="admin-nav-icon">01</div>
+          <div className="admin-nav-icon">02</div>
           <h2>Students &amp; progress tracker</h2>
           <p>
-            Search registered students, view their college &amp; roll numbers, inspect completed
-            lessons, and review their assessment scores.
+            Search registered students, inspect admission numbers, Codolio/project portfolios, completed modules, and
+            checkpoint attempts.
           </p>
           <b>Open student tracker →</b>
         </Link>
         <Link className="admin-nav-card" href="/admin/access">
-          <div className="admin-nav-icon">02</div>
+          <div className="admin-nav-icon">03</div>
           <h2>Registration &amp; access control</h2>
           <p>
             Current mode: <b>{registrationMode}</b>. Switch between open, approval, or invite-only
@@ -131,7 +140,7 @@ export default async function AdminHome() {
           <b>Manage access →</b>
         </Link>
         <Link className="admin-nav-card" href="/admin/feedback">
-          <div className="admin-nav-icon" style={{ background: "rgba(255, 159, 10, 0.15)", color: "#ff9f0a" }}>03</div>
+          <div className="admin-nav-icon" style={{ background: "rgba(255, 159, 10, 0.15)", color: "#ff9f0a" }}>04</div>
           <h2>Module Feedback &amp; Upgrades</h2>
           <p>
             Student ratings on content helpfulness, difficulty level, and user-friendliness across all 100 modules. Automated platform upgrade suggestions.
