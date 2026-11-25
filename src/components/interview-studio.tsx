@@ -386,27 +386,63 @@ export function InterviewStudio({
   const totalSlotsAvailable = credits.freeSlots + credits.purchasedSlots;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
-      {/* Top Banner Navigation */}
-      <header className="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-40 px-4 lg:px-8 py-3.5 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+    <div className="interview-page-shell">
+      {/* Cockpit Subnav Bar */}
+      <div className="interview-cockpit-bar">
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
           <Link
             href="/portal"
-            className="text-xs text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5"
+            style={{
+              color: "var(--text-secondary)",
+              fontSize: "12px",
+              textDecoration: "none",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              fontWeight: 600,
+            }}
           >
             <span>&larr;</span> Back to Portal
           </Link>
-          <span className="text-slate-700">|</span>
-          <div className="flex items-center gap-2">
-            <span className="text-lg">🤖</span>
-            <span className="font-bold text-sm sm:text-base tracking-tight bg-gradient-to-r from-emerald-400 via-teal-300 to-sky-400 bg-clip-text text-transparent">
+          <span style={{ color: "var(--border-normal)" }}>|</span>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+            <span style={{ fontSize: "18px" }}>🤖</span>
+            <span
+              style={{
+                fontWeight: 900,
+                fontSize: "15px",
+                color: "#ffffff",
+                letterSpacing: "-0.01em",
+              }}
+            >
               AI Mock Interview Arena
             </span>
-            <span className="hidden sm:inline-block px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-950/80 text-emerald-300 border border-emerald-700/50">
-              Chess ELO Tiers
+            <span
+              style={{
+                background: "rgba(52, 199, 89, 0.14)",
+                color: "#34c759",
+                border: "1px solid rgba(52, 199, 89, 0.35)",
+                fontSize: "11px",
+                fontWeight: 800,
+                padding: "2px 8px",
+                borderRadius: "6px",
+                letterSpacing: "0.02em",
+              }}
+            >
+              NIR 800–2400 · Nexus Interview Rating (ELO)
             </span>
             {signedIn && (
-              <span className="hidden md:inline-block px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-300 border border-slate-700">
+              <span
+                style={{
+                  background: "rgba(255, 255, 255, 0.06)",
+                  color: "var(--text-secondary)",
+                  border: "1px solid var(--border-normal)",
+                  fontSize: "10px",
+                  fontWeight: 600,
+                  padding: "2px 7px",
+                  borderRadius: "6px",
+                }}
+              >
                 Student Verified
               </span>
             )}
@@ -414,8 +450,9 @@ export function InterviewStudio({
         </div>
 
         {/* Right Header Status: Passes & Audio */}
-        <div className="flex items-center gap-3">
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
           <button
+            type="button"
             onClick={() => {
               setAudioMuted((prev) => !prev);
               if (!audioMuted && typeof window !== "undefined") {
@@ -423,27 +460,53 @@ export function InterviewStudio({
                 setIsBotSpeaking(false);
               }
             }}
-            className={`px-2.5 py-1 text-xs rounded-lg border font-medium transition flex items-center gap-1.5 ${
-              audioMuted
-                ? "bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-200"
-                : "bg-teal-950/80 border-teal-700/60 text-teal-300"
-            }`}
+            style={{
+              padding: "5px 11px",
+              fontSize: "12px",
+              borderRadius: "8px",
+              border: `1px solid ${audioMuted ? "var(--border-normal)" : "rgba(41, 151, 255, 0.4)"}`,
+              background: audioMuted ? "rgba(255, 255, 255, 0.05)" : "rgba(41, 151, 255, 0.14)",
+              color: audioMuted ? "var(--text-secondary)" : "#2997ff",
+              fontWeight: 700,
+              cursor: "pointer",
+            }}
             title={audioMuted ? "Audio Muted. Click to Unmute" : "Voice Active. Click to Mute"}
           >
-            <span>{audioMuted ? "🔇 Muted" : "🔊 Voice ON"}</span>
+            <span>{audioMuted ? "🔇 Voice Muted" : "🔊 Voice ON"}</span>
           </button>
 
           {/* Interview Passes Badge */}
-          <div className="flex items-center gap-1.5 bg-slate-800/80 border border-slate-700/80 rounded-lg px-3 py-1">
-            <span className="text-xs text-slate-300">
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              background: "rgba(255, 255, 255, 0.05)",
+              border: "1px solid var(--border-normal)",
+              borderRadius: "8px",
+              padding: "5px 12px",
+              fontSize: "12px",
+            }}
+          >
+            <span style={{ color: "var(--text-secondary)" }}>
               Passes:{" "}
-              <strong className={totalSlotsAvailable > 0 ? "text-emerald-400" : "text-rose-400"}>
+              <strong style={{ color: totalSlotsAvailable > 0 ? "#34c759" : "#ff453a" }}>
                 {totalSlotsAvailable}
               </strong>
             </span>
             <button
+              type="button"
               onClick={() => setShowTopUpModal(true)}
-              className="text-xs text-sky-400 hover:text-sky-300 font-semibold underline underline-offset-2 ml-1"
+              style={{
+                background: "none",
+                border: "none",
+                color: "#2997ff",
+                fontWeight: 700,
+                fontSize: "12px",
+                cursor: "pointer",
+                padding: 0,
+                textDecoration: "underline",
+              }}
             >
               + Recharge
             </button>
@@ -451,25 +514,56 @@ export function InterviewStudio({
 
           {activeSession && activeSession.status === "active" && (
             <button
+              type="button"
               onClick={() => handleSubmitTurn(true)}
               disabled={isSubmittingTurn}
-              className="px-3 py-1 text-xs font-semibold rounded-lg bg-rose-600 hover:bg-rose-500 text-white transition shadow-sm"
+              style={{
+                padding: "6px 14px",
+                fontSize: "12px",
+                fontWeight: 700,
+                borderRadius: "8px",
+                background: "#ff453a",
+                color: "#ffffff",
+                border: "none",
+                cursor: "pointer",
+              }}
             >
               End & Score
             </button>
           )}
         </div>
-      </header>
+      </div>
 
       {/* Main Workspace */}
-      <main className="flex-1 flex flex-col p-3 sm:p-6 max-w-7xl w-full mx-auto">
+      <div className="interview-container">
         {/* Error message alert */}
         {sessionError && (
-          <div className="mb-4 p-3.5 rounded-lg bg-rose-950/70 border border-rose-800/60 text-rose-200 text-xs sm:text-sm flex items-center justify-between">
+          <div
+            style={{
+              marginBottom: "16px",
+              padding: "12px 16px",
+              borderRadius: "12px",
+              background: "rgba(255, 69, 58, 0.12)",
+              border: "1px solid rgba(255, 69, 58, 0.35)",
+              color: "#ff453a",
+              fontSize: "13px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
             <span>{sessionError}</span>
             <button
+              type="button"
               onClick={() => setSessionError("")}
-              className="text-rose-400 hover:text-rose-200 text-xs ml-4"
+              style={{
+                background: "none",
+                border: "none",
+                color: "#ff453a",
+                cursor: "pointer",
+                fontWeight: 700,
+                fontSize: "12px",
+              }}
             >
               Dismiss
             </button>
@@ -480,89 +574,189 @@ export function InterviewStudio({
         {!activeSession && (
           <div className="space-y-8 animate-fadeIn">
             {/* Hero Card */}
-            <div className="rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900 via-slate-900/90 to-slate-950 p-6 sm:p-8 shadow-xl relative overflow-hidden">
-              <div className="absolute top-0 right-0 -mt-12 -mr-12 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-              <div className="max-w-3xl space-y-3 relative z-10">
-                <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  Interactive Voice-Enabled AI Mock Interviewer
+            <div className="interview-hero-banner">
+              <span className="interview-hero-badge">
+                🤖 AI MOCK INTERVIEW ARENA · NIR BENCHMARK
+              </span>
+              <h1 className="interview-hero-title">
+                Master Technical Coding Interviews Against NIR Difficulty Bots
+              </h1>
+              <p className="interview-hero-desc">
+                From supportive NIR 800 (ELO 800) Interns to relentless NIR 2400 (ELO 2400) FAANG Bar Raisers: practice real technical
+                dialogue, defend your time and space invariants, and receive an authoritative 5-dimension hiring scorecard.
+                <strong> Nexus Interview Rating (NIR)</strong> is our structured 800–2400 candidate difficulty rating system calibrated like chess ELO.
+              </p>
+
+              {/* Simulation Mode notice */}
+              <div
+                style={{
+                  marginTop: "16px",
+                  padding: "10px 14px",
+                  borderRadius: "10px",
+                  background: "rgba(255, 159, 10, 0.12)",
+                  border: "1px solid rgba(255, 159, 10, 0.3)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  fontSize: "12px",
+                  color: "#ff9f0a",
+                  lineHeight: 1.5,
+                }}
+              >
+                <span style={{ fontSize: "16px" }}>ℹ️</span>
+                <span>
+                  <strong>Preview Notice:</strong> We do not currently have a live external AI LLM model connected on this deployment.
+                  You can test the initial conversation greeting, constraint validation, and code evaluator. To continue an extended multi-turn deep live conversation with AI models, please add interview credits to your account!
                 </span>
-                <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white">
-                  Grill Your DSA Skills Against Chess-ELO Bots
-                </h1>
-                <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-                  From supportive ELO 800 Interns to relentless ELO 2400 FAANG Bar Raisers: practice real technical
-                  dialogue, defend your time/space invariants, and receive an authoritative 5-dimension hiring scorecard.
-                </p>
-                <div className="pt-2 flex flex-wrap gap-4 text-xs text-slate-400">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-emerald-400">✓</span> Free Daily Passes
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-emerald-400">✓</span> Real-Time Browser Speech TTS & Mic
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-emerald-400">✓</span> Invariant & Edge Case Grilling
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-emerald-400">✓</span> FAANG Scorecard & ELO Rating
-                  </div>
+              </div>
+
+              {/* Feature Pills */}
+              <div className="interview-feature-grid">
+                <div className="interview-feature-pill">
+                  <span style={{ color: "#34c759", fontWeight: 800 }}>✓</span>
+                  <span>5 NIR Rating Tiers (800 to 2400 · ELO)</span>
+                </div>
+                <div className="interview-feature-pill">
+                  <span style={{ color: "#34c759", fontWeight: 800 }}>✓</span>
+                  <span>Real-Time Speech TTS & Mic</span>
+                </div>
+                <div className="interview-feature-pill">
+                  <span style={{ color: "#34c759", fontWeight: 800 }}>✓</span>
+                  <span>Invariant & Edge Case Grilling</span>
+                </div>
+                <div className="interview-feature-pill">
+                  <span style={{ color: "#34c759", fontWeight: 800 }}>✓</span>
+                  <span>FAANG 5-Dimension Scorecard</span>
+                </div>
+                <div className="interview-feature-pill">
+                  <span style={{ color: "#34c759", fontWeight: 800 }}>✓</span>
+                  <span>3 Daily Free Practice Passes</span>
                 </div>
               </div>
             </div>
 
-            {/* Step 1: Select Your Interviewer Bot (Chess ELO Scale) */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                    <span>1. Choose Interviewer Difficulty (Chess ELO)</span>
-                  </h2>
-                  <p className="text-xs text-slate-400">
-                    Select a bot personality. Higher ELO bots will ruthlessly probe suboptimal complexities and counterexamples.
-                  </p>
-                </div>
+            {/* Step 1: Select Your Interviewer Bot (NIR Rating Scale) */}
+            <div>
+              <div className="interview-section-header">
+                <h2 className="interview-section-title">
+                  <span>1. Choose Interviewer Difficulty (NIR · Nexus Interview Rating)</span>
+                </h2>
+                <p className="interview-section-subtitle">
+                  <strong>Nexus Interview Rating (NIR)</strong> difficulty tiers (calibrated like ELO). Higher NIR bots ruthlessly probe suboptimal complexities, edge cases, and invariant proofs.
+                </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+              <div className="interview-grid-5">
                 {bots.map((bot) => {
                   const isSelected = selectedBotId === bot.id;
+                  const getAvatarGradient = (bId: string) => {
+                    switch (bId) {
+                      case "bot-elo-800":
+                        return "linear-gradient(135deg, #10b981, #0d9488)";
+                      case "bot-elo-1200":
+                        return "linear-gradient(135deg, #3b82f6, #4f46e5)";
+                      case "bot-elo-1600":
+                        return "linear-gradient(135deg, #f59e0b, #ea580c)";
+                      case "bot-elo-2000":
+                        return "linear-gradient(135deg, #8b5cf6, #c026d3)";
+                      default:
+                        return "linear-gradient(135deg, #e11d48, #9f1239)";
+                    }
+                  };
+
                   return (
                     <button
                       key={bot.id}
+                      type="button"
                       onClick={() => setSelectedBotId(bot.id)}
-                      className={`text-left p-4 rounded-xl border transition flex flex-col justify-between ${
-                        isSelected
-                          ? "bg-slate-900 border-emerald-500/80 shadow-lg shadow-emerald-500/10 ring-1 ring-emerald-500/40"
-                          : "bg-slate-900/50 border-slate-800 hover:border-slate-700 hover:bg-slate-900"
-                      }`}
+                      className={`interview-card ${isSelected ? "selected" : ""}`}
                     >
                       <div>
-                        <div className="flex items-center justify-between mb-2">
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
                           <span
-                            className={`px-2 py-0.5 rounded text-[11px] font-bold tracking-wide ${
-                              bot.elo >= 2400
-                                ? "bg-rose-950 text-rose-300 border border-rose-800"
-                                : bot.elo >= 2000
-                                ? "bg-purple-950 text-purple-300 border border-purple-800"
-                                : bot.elo >= 1600
-                                ? "bg-amber-950 text-amber-300 border border-amber-800"
-                                : bot.elo >= 1200
-                                ? "bg-blue-950 text-blue-300 border border-blue-800"
-                                : "bg-emerald-950 text-emerald-300 border border-emerald-800"
-                            }`}
+                            className="interview-nir-badge"
+                            style={{
+                              background:
+                                bot.elo >= 2400
+                                  ? "rgba(255, 69, 58, 0.16)"
+                                  : bot.elo >= 2000
+                                  ? "rgba(191, 90, 242, 0.16)"
+                                  : bot.elo >= 1600
+                                  ? "rgba(255, 159, 10, 0.16)"
+                                  : bot.elo >= 1200
+                                  ? "rgba(41, 151, 255, 0.16)"
+                                  : "rgba(52, 199, 89, 0.16)",
+                              color:
+                                bot.elo >= 2400
+                                  ? "#ff453a"
+                                  : bot.elo >= 2000
+                                  ? "#bf5af2"
+                                  : bot.elo >= 1600
+                                  ? "#ff9f0a"
+                                  : bot.elo >= 1200
+                                  ? "#2997ff"
+                                  : "#34c759",
+                              border: `1px solid ${
+                                bot.elo >= 2400
+                                  ? "rgba(255, 69, 58, 0.35)"
+                                  : bot.elo >= 2000
+                                  ? "rgba(191, 90, 242, 0.35)"
+                                  : bot.elo >= 1600
+                                  ? "rgba(255, 159, 10, 0.35)"
+                                  : bot.elo >= 1200
+                                  ? "rgba(41, 151, 255, 0.35)"
+                                  : "rgba(52, 199, 89, 0.35)"
+                              }`,
+                            }}
                           >
-                            ELO {bot.elo}
+                            {`NIR ${bot.elo} (ELO ${bot.elo})`}
                           </span>
-                          <span className="text-xs font-semibold text-slate-400">{bot.tier}</span>
+                          <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-secondary)" }}>
+                            {bot.tier}
+                          </span>
                         </div>
-                        <h3 className="font-bold text-base text-white">{bot.name}</h3>
-                        <p className="text-xs text-emerald-400 font-medium mb-1.5">{bot.companyStyle}</p>
-                        <p className="text-xs text-slate-400 leading-snug">{bot.tagline}</p>
+
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
+                          <div
+                            className="interview-bot-orb"
+                            style={{ background: getAvatarGradient(bot.id) }}
+                          >
+                            {bot.name[0]}
+                          </div>
+                          <div>
+                            <h3 style={{ margin: 0, fontSize: "16px", fontWeight: 800, color: "#ffffff" }}>
+                              {bot.name}
+                            </h3>
+                            <div style={{ fontSize: "11px", color: "#34c759", fontWeight: 600 }}>
+                              {bot.companyStyle}
+                            </div>
+                          </div>
+                        </div>
+
+                        <p style={{ margin: "8px 0 0", fontSize: "12px", color: "var(--text-secondary)", lineHeight: 1.5 }}>
+                          {bot.tagline}
+                        </p>
                       </div>
 
-                      <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
-                        <span>Voice: {bot.personality}</span>
-                        <span className={isSelected ? "text-emerald-400 font-bold" : "text-slate-500"}>
+                      <div
+                        style={{
+                          marginTop: "16px",
+                          paddingTop: "10px",
+                          borderTop: "1px solid var(--border-subtle)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          fontSize: "11px",
+                          color: "var(--text-tertiary)",
+                        }}
+                      >
+                        <span>Style: {bot.personality}</span>
+                        <span
+                          style={{
+                            fontWeight: 700,
+                            color: isSelected ? "#34c759" : "var(--text-tertiary)",
+                          }}
+                        >
                           {isSelected ? "● Selected" : "Select"}
                         </span>
                       </div>
@@ -573,48 +767,88 @@ export function InterviewStudio({
             </div>
 
             {/* Step 2: Select Technical Problem */}
-            <div className="space-y-4">
-              <div>
-                <h2 className="text-lg font-bold text-white">2. Select Problem Topic</h2>
-                <p className="text-xs text-slate-400">
-                  Pick a target problem for your live interview grilling session.
+            <div style={{ marginTop: "32px" }}>
+              <div className="interview-section-header">
+                <h2 className="interview-section-title">2. Select Problem Topic</h2>
+                <p className="interview-section-subtitle">
+                  Pick a target algorithm problem for your live technical interview grilling session.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+              <div className="interview-grid-3">
                 {questions.map((q) => {
                   const isSelected = selectedQuestionId === q.id;
                   return (
                     <button
                       key={q.id}
+                      type="button"
                       onClick={() => setSelectedQuestionId(q.id)}
-                      className={`text-left p-4 rounded-xl border transition ${
-                        isSelected
-                          ? "bg-slate-900 border-teal-500/80 shadow-lg shadow-teal-500/10 ring-1 ring-teal-500/40"
-                          : "bg-slate-900/50 border-slate-800 hover:border-slate-700 hover:bg-slate-900"
-                      }`}
+                      className={`interview-card interview-card-teal ${isSelected ? "selected" : ""}`}
                     >
-                      <div className="flex items-center justify-between mb-1.5">
-                        <span className="text-xs font-bold text-teal-400 uppercase tracking-wider">
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
+                        <span style={{ fontSize: "11px", fontWeight: 800, color: "#2997ff", textTransform: "uppercase", letterSpacing: "0.04em" }}>
                           {q.topic}
                         </span>
                         <span
-                          className={`text-[11px] px-2 py-0.5 rounded font-semibold ${
-                            q.difficulty === "Easy"
-                              ? "bg-emerald-950 text-emerald-400 border border-emerald-800/50"
-                              : q.difficulty === "Medium"
-                              ? "bg-amber-950 text-amber-400 border border-amber-800/50"
-                              : "bg-rose-950 text-rose-400 border border-rose-800/50"
-                          }`}
+                          style={{
+                            fontSize: "11px",
+                            fontWeight: 700,
+                            padding: "2px 8px",
+                            borderRadius: "6px",
+                            background:
+                              q.difficulty === "Easy"
+                                ? "rgba(52, 199, 89, 0.16)"
+                                : q.difficulty === "Medium"
+                                ? "rgba(255, 159, 10, 0.16)"
+                                : "rgba(255, 69, 58, 0.16)",
+                            color:
+                              q.difficulty === "Easy"
+                                ? "#34c759"
+                                : q.difficulty === "Medium"
+                                ? "#ff9f0a"
+                                : "#ff453a",
+                            border: `1px solid ${
+                              q.difficulty === "Easy"
+                                ? "rgba(52, 199, 89, 0.35)"
+                                : q.difficulty === "Medium"
+                                ? "rgba(255, 159, 10, 0.35)"
+                                : "rgba(255, 69, 58, 0.35)"
+                            }`,
+                          }}
                         >
                           {q.difficulty}
                         </span>
                       </div>
-                      <h3 className="font-bold text-sm text-white mb-1">{q.title}</h3>
-                      <p className="text-xs text-slate-400 line-clamp-2 mb-3">{q.prompt}</p>
-                      <div className="text-[11px] text-slate-400 flex items-center justify-between border-t border-slate-800/80 pt-2">
+                      <h3 style={{ margin: "0 0 6px", fontSize: "15px", fontWeight: 800, color: "#ffffff" }}>
+                        {q.title}
+                      </h3>
+                      <p
+                        style={{
+                          margin: "0 0 14px",
+                          fontSize: "12px",
+                          color: "var(--text-secondary)",
+                          lineHeight: 1.5,
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                          overflow: "hidden",
+                        }}
+                      >
+                        {q.prompt}
+                      </p>
+                      <div
+                        style={{
+                          fontSize: "11px",
+                          color: "var(--text-tertiary)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          borderTop: "1px solid var(--border-subtle)",
+                          paddingTop: "10px",
+                        }}
+                      >
                         <span>Target: {q.expectedOptimalTime}</span>
-                        <span className={isSelected ? "text-teal-400 font-bold" : "text-slate-500"}>
+                        <span style={{ fontWeight: 700, color: isSelected ? "#2997ff" : "var(--text-tertiary)" }}>
                           {isSelected ? "● Selected" : "Select"}
                         </span>
                       </div>
@@ -624,24 +858,35 @@ export function InterviewStudio({
               </div>
             </div>
 
-            {/* Start Button */}
-            <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-900/70 p-5 rounded-2xl border border-slate-800">
-              <div className="text-sm">
-                <span className="text-slate-400">Ready to interview with </span>
-                <strong className="text-white">{activeBot.name}</strong>
-                <span className="text-slate-400"> (ELO {activeBot.elo}) on </span>
-                <strong className="text-teal-400">{activeQuestion.title}</strong>
+            {/* Start Button Bar */}
+            <div className="interview-cta-bar">
+              <div style={{ fontSize: "14px" }}>
+                <span style={{ color: "var(--text-secondary)" }}>Ready to interview with </span>
+                <strong style={{ color: "#ffffff" }}>{activeBot.name}</strong>
+                <span style={{ color: "var(--text-secondary)" }}> (NIR {activeBot.elo} · ELO {activeBot.elo}) on </span>
+                <strong style={{ color: "#2997ff" }}>{activeQuestion.title}</strong>
               </div>
 
-              <div className="flex items-center gap-3 w-full sm:w-auto">
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                 <button
+                  type="button"
                   onClick={handleStartSession}
                   disabled={isStartingSession || totalSlotsAvailable <= 0}
-                  className={`w-full sm:w-auto px-6 py-2.5 rounded-xl font-bold text-sm transition shadow-lg ${
-                    totalSlotsAvailable > 0
-                      ? "bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950"
-                      : "bg-slate-800 text-slate-500 cursor-not-allowed"
-                  }`}
+                  style={{
+                    padding: "10px 22px",
+                    borderRadius: "12px",
+                    fontWeight: 800,
+                    fontSize: "13.5px",
+                    transition: "all 0.2s",
+                    cursor: totalSlotsAvailable > 0 && !isStartingSession ? "pointer" : "not-allowed",
+                    border: "none",
+                    background:
+                      totalSlotsAvailable > 0
+                        ? "linear-gradient(135deg, #34c759, #10b981)"
+                        : "var(--bg-pill)",
+                    color: totalSlotsAvailable > 0 ? "#000000" : "var(--text-tertiary)",
+                    boxShadow: totalSlotsAvailable > 0 ? "0 8px 20px rgba(52, 199, 89, 0.3)" : "none",
+                  }}
                 >
                   {isStartingSession
                     ? "Initializing Interview..."
@@ -654,47 +899,53 @@ export function InterviewStudio({
 
             {/* Past Interview History */}
             {sessions.length > 0 && (
-              <div className="space-y-3 pt-4">
-                <h3 className="text-base font-bold text-white">Your Past Mock Interviews</h3>
-                <div className="overflow-x-auto rounded-xl border border-slate-800">
-                  <table className="w-full text-left text-xs">
-                    <thead className="bg-slate-900 border-b border-slate-800 text-slate-400">
+              <div style={{ marginTop: "36px" }}>
+                <h3 style={{ fontSize: "16px", fontWeight: 800, color: "#ffffff", marginBottom: "12px" }}>
+                  Your Past Mock Interviews
+                </h3>
+                <div style={{ overflowX: "auto", borderRadius: "14px", border: "1px solid var(--border-normal)" }}>
+                  <table style={{ width: "100%", textAlign: "left", fontSize: "12px", borderCollapse: "collapse" }}>
+                    <thead style={{ background: "rgba(255, 255, 255, 0.03)", borderBottom: "1px solid var(--border-normal)", color: "var(--text-secondary)" }}>
                       <tr>
-                        <th className="p-3">Date</th>
-                        <th className="p-3">Interviewer</th>
-                        <th className="p-3">Problem</th>
-                        <th className="p-3">Status</th>
-                        <th className="p-3">Score</th>
-                        <th className="p-3">Recommendation</th>
-                        <th className="p-3 text-right">Action</th>
+                        <th style={{ padding: "12px 16px" }}>Date</th>
+                        <th style={{ padding: "12px 16px" }}>Interviewer</th>
+                        <th style={{ padding: "12px 16px" }}>Problem</th>
+                        <th style={{ padding: "12px 16px" }}>Status</th>
+                        <th style={{ padding: "12px 16px" }}>Score</th>
+                        <th style={{ padding: "12px 16px" }}>Recommendation</th>
+                        <th style={{ padding: "12px 16px", textAlign: "right" }}>Action</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-800/80 bg-slate-950">
+                    <tbody style={{ background: "var(--bg-card)" }}>
                       {sessions.map((s) => {
                         const bot = bots.find((b) => b.id === s.botId) || bots[0];
                         const q = questions.find((item) => item.id === s.questionId) || questions[0];
                         return (
-                          <tr key={s.id} className="hover:bg-slate-900/40">
-                            <td className="p-3 text-slate-400">{s.createdAt.slice(0, 10)}</td>
-                            <td className="p-3 font-semibold text-white">
-                              {bot.name} <span className="text-slate-400 text-[11px]">(ELO {s.botElo})</span>
+                          <tr key={s.id} style={{ borderBottom: "1px solid var(--border-subtle)" }}>
+                            <td style={{ padding: "12px 16px", color: "var(--text-secondary)" }}>{s.createdAt.slice(0, 10)}</td>
+                            <td style={{ padding: "12px 16px", fontWeight: 700, color: "#ffffff" }}>
+                              {bot.name} <span style={{ color: "var(--text-tertiary)", fontSize: "11px" }}>(NIR {s.botElo} · ELO {s.botElo})</span>
                             </td>
-                            <td className="p-3 text-slate-300">{q.title}</td>
-                            <td className="p-3">
+                            <td style={{ padding: "12px 16px", color: "var(--text-primary)" }}>{q.title}</td>
+                            <td style={{ padding: "12px 16px" }}>
                               <span
-                                className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
-                                  s.status === "concluded"
-                                    ? "bg-slate-800 text-slate-300"
-                                    : "bg-emerald-950 text-emerald-400 border border-emerald-800"
-                                }`}
+                                style={{
+                                  padding: "2px 8px",
+                                  borderRadius: "6px",
+                                  fontSize: "10px",
+                                  fontWeight: 700,
+                                  background: s.status === "concluded" ? "rgba(255, 255, 255, 0.06)" : "rgba(52, 199, 89, 0.16)",
+                                  color: s.status === "concluded" ? "var(--text-secondary)" : "#34c759",
+                                  border: `1px solid ${s.status === "concluded" ? "var(--border-subtle)" : "rgba(52, 199, 89, 0.35)"}`,
+                                }}
                               >
                                 {s.status.toUpperCase()}
                               </span>
                             </td>
-                            <td className="p-3 font-bold text-emerald-400">
+                            <td style={{ padding: "12px 16px", fontWeight: 800, color: "#34c759" }}>
                               {s.feedback ? `${s.feedback.overallScore}/100` : "—"}
                             </td>
-                            <td className="p-3">
+                            <td style={{ padding: "12px 16px" }}>
                               {s.feedback ? (
                                 <span
                                   className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${getRecommendationBadge(
@@ -707,22 +958,24 @@ export function InterviewStudio({
                                 "In Progress"
                               )}
                             </td>
-                            <td className="p-3 text-right">
+                            <td style={{ padding: "12px 16px", textAlign: "right" }}>
                               {s.feedback ? (
                                 <button
+                                  type="button"
                                   onClick={() => setInspectedFeedback(s.feedback)}
-                                  className="text-xs text-sky-400 hover:text-sky-300 font-semibold"
+                                  style={{ background: "none", border: "none", color: "#2997ff", fontWeight: 700, cursor: "pointer", fontSize: "12px" }}
                                 >
                                   View Scorecard
                                 </button>
                               ) : (
                                 <button
+                                  type="button"
                                   onClick={() => {
                                     setActiveSession(s);
                                     setCodeDraft(s.code || "");
                                     setSelectedLanguage(s.language || "python");
                                   }}
-                                  className="text-xs text-emerald-400 hover:text-emerald-300 font-semibold"
+                                  style={{ background: "none", border: "none", color: "#34c759", fontWeight: 700, cursor: "pointer", fontSize: "12px" }}
                                 >
                                   Resume
                                 </button>
@@ -739,64 +992,106 @@ export function InterviewStudio({
           </div>
         )}
 
-        {/* VIEW 2: ACTIVE INTERVIEW STUDIO (Split Screen) */}
+        {/* VIEW 2: ACTIVE INTERVIEW STUDIO (Split Screen Cockpit) */}
         {activeSession && (
-          <div className="flex-1 flex flex-col space-y-4 animate-fadeIn">
+          <div style={{ display: "flex", flexDirection: "column", gap: "14px" }} className="animate-fadeIn">
             {/* Top Cockpit Header */}
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-3 sm:p-4 flex flex-wrap items-center justify-between gap-3">
+            <div
+              style={{
+                background: "var(--bg-card)",
+                border: "1px solid var(--border-normal)",
+                borderRadius: "16px",
+                padding: "14px 18px",
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: "12px",
+              }}
+            >
               {/* Bot Info */}
-              <div className="flex items-center gap-3">
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                 <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-sm bg-gradient-to-tr ${activeBot.avatarColor} text-white shadow-md relative`}
+                  className="interview-bot-orb"
+                  style={{
+                    background:
+                      activeBot.id === "bot-elo-800"
+                        ? "linear-gradient(135deg, #10b981, #0d9488)"
+                        : activeBot.id === "bot-elo-1200"
+                        ? "linear-gradient(135deg, #3b82f6, #4f46e5)"
+                        : activeBot.id === "bot-elo-1600"
+                        ? "linear-gradient(135deg, #f59e0b, #ea580c)"
+                        : activeBot.id === "bot-elo-2000"
+                        ? "linear-gradient(135deg, #8b5cf6, #c026d3)"
+                        : "linear-gradient(135deg, #e11d48, #9f1239)",
+                    position: "relative",
+                  }}
                 >
                   {activeBot.name[0]}
                   {isBotSpeaking && (
-                    <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-                    </span>
+                    <span
+                      style={{
+                        position: "absolute",
+                        top: -2,
+                        right: -2,
+                        width: "12px",
+                        height: "12px",
+                        borderRadius: "50%",
+                        background: "#34c759",
+                        boxShadow: "0 0 10px #34c759",
+                      }}
+                    />
                   )}
                 </div>
                 <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-white text-sm sm:text-base">{activeBot.name}</span>
-                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700">
-                      ELO {activeBot.elo}
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span style={{ fontWeight: 800, color: "#ffffff", fontSize: "15px" }}>{activeBot.name}</span>
+                    <span
+                      className="interview-nir-badge"
+                      style={{ background: "rgba(255, 255, 255, 0.08)", color: "#f5f5f7", border: "1px solid var(--border-normal)" }}
+                    >
+                      NIR {activeBot.elo} (ELO {activeBot.elo})
                     </span>
-                    <span className="text-xs text-emerald-400 hidden sm:inline">{activeBot.title}</span>
+                    <span style={{ fontSize: "12px", color: "#34c759", fontWeight: 600 }}>{activeBot.title}</span>
                   </div>
-                  <p className="text-[11px] text-slate-400">{activeBot.tagline}</p>
+                  <p style={{ margin: "2px 0 0", fontSize: "11px", color: "var(--text-secondary)" }}>{activeBot.tagline}</p>
                 </div>
               </div>
 
               {/* Stage Tracker */}
-              <div className="hidden lg:flex items-center gap-1 text-[11px]">
+              <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", flexWrap: "wrap" }}>
                 {STAGES_ORDER.map((stg, idx) => {
                   const isActive = activeSession.stage === stg;
                   const isPast =
                     STAGES_ORDER.indexOf(activeSession.stage) > idx || activeSession.stage === "CONCLUDED";
                   return (
-                    <div key={stg} className="flex items-center">
+                    <div key={stg} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                       <span
-                        className={`px-2 py-0.5 rounded font-semibold ${
-                          isActive
-                            ? "bg-emerald-500 text-slate-950 font-bold shadow"
+                        style={{
+                          padding: "3px 9px",
+                          borderRadius: "6px",
+                          fontWeight: 700,
+                          background: isActive
+                            ? "#34c759"
                             : isPast
-                            ? "bg-slate-800 text-slate-300"
-                            : "bg-slate-950/60 text-slate-600"
-                        }`}
+                            ? "rgba(255, 255, 255, 0.08)"
+                            : "rgba(255, 255, 255, 0.02)",
+                          color: isActive ? "#000000" : isPast ? "var(--text-primary)" : "var(--text-tertiary)",
+                          border: `1px solid ${isActive ? "#34c759" : "var(--border-subtle)"}`,
+                        }}
                       >
                         {stg}
                       </span>
-                      {idx < STAGES_ORDER.length - 1 && <span className="text-slate-700 mx-1">&rarr;</span>}
+                      {idx < STAGES_ORDER.length - 1 && <span style={{ color: "var(--border-normal)" }}>&rarr;</span>}
                     </div>
                   );
                 })}
               </div>
 
               {/* Cockpit Actions */}
-              <div className="flex items-center gap-2">
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                 <button
+                  type="button"
                   onClick={() => {
                     if (activeSession.feedback) {
                       setInspectedFeedback(activeSession.feedback);
@@ -805,13 +1100,32 @@ export function InterviewStudio({
                     }
                   }}
                   disabled={isSubmittingTurn}
-                  className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition shadow-sm"
+                  style={{
+                    padding: "7px 14px",
+                    borderRadius: "8px",
+                    fontSize: "12px",
+                    fontWeight: 700,
+                    background: "#34c759",
+                    color: "#000000",
+                    border: "none",
+                    cursor: "pointer",
+                  }}
                 >
                   {activeSession.status === "concluded" ? "View Scorecard" : "Conclude & Score"}
                 </button>
                 <button
+                  type="button"
                   onClick={() => setActiveSession(null)}
-                  className="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+                  style={{
+                    padding: "7px 12px",
+                    borderRadius: "8px",
+                    fontSize: "12px",
+                    fontWeight: 600,
+                    background: "rgba(255, 255, 255, 0.06)",
+                    color: "var(--text-secondary)",
+                    border: "1px solid var(--border-normal)",
+                    cursor: "pointer",
+                  }}
                 >
                   Exit Lobby
                 </button>
@@ -819,83 +1133,150 @@ export function InterviewStudio({
             </div>
 
             {/* Split Screen Container */}
-            <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4">
+            <div className="interview-split-screen">
               {/* LEFT PANE: Conversational Chat & Voice (7 columns) */}
-              <div className="lg:col-span-7 flex flex-col bg-slate-900/70 border border-slate-800 rounded-2xl overflow-hidden h-[620px]">
+              <div className="interview-pane">
+                {/* Notice banner about model paused & adding credits */}
+                <div
+                  style={{
+                    padding: "10px 16px",
+                    background: "rgba(255, 159, 10, 0.1)",
+                    borderBottom: "1px solid rgba(255, 159, 10, 0.25)",
+                    fontSize: "11.5px",
+                    color: "#ff9f0a",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                  }}
+                >
+                  <span style={{ fontSize: "14px" }}>ℹ️</span>
+                  <span>
+                    <strong>Model Status:</strong> External AI model is not connected on this preview deployment. Test your initial greeting or problem constraints. To chat continuously, add credits via <strong>+ Recharge</strong>!
+                  </span>
+                </div>
+
                 {/* Audio Waveform Banner when Bot Speaks */}
                 {isBotSpeaking && (
-                  <div className="bg-emerald-950/60 border-b border-emerald-800/40 px-4 py-2 flex items-center justify-between text-xs text-emerald-300 animate-pulse">
-                    <div className="flex items-center gap-2">
-                      <span className="text-base">🎙️</span>
-                      <span>{activeBot.name} is speaking...</span>
+                  <div
+                    style={{
+                      background: "rgba(52, 199, 89, 0.12)",
+                      borderBottom: "1px solid rgba(52, 199, 89, 0.3)",
+                      padding: "8px 16px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      fontSize: "12px",
+                      color: "#34c759",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <span style={{ fontSize: "16px" }}>🎙️</span>
+                      <span style={{ fontWeight: 700 }}>{activeBot.name} is speaking...</span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <span className="w-1.5 h-3 bg-emerald-400 rounded-full animate-bounce"></span>
-                      <span className="w-1.5 h-5 bg-emerald-400 rounded-full animate-bounce delay-100"></span>
-                      <span className="w-1.5 h-2 bg-emerald-400 rounded-full animate-bounce delay-200"></span>
+                    <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                      <span style={{ width: "6px", height: "12px", background: "#34c759", borderRadius: "99px" }} />
+                      <span style={{ width: "6px", height: "18px", background: "#34c759", borderRadius: "99px" }} />
+                      <span style={{ width: "6px", height: "10px", background: "#34c759", borderRadius: "99px" }} />
                     </div>
                   </div>
                 )}
 
                 {/* Messages Transcript Scroll Area */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                <div className="interview-chat-scroll">
                   {activeSession.messages.map((msg) => {
                     const isBot = msg.sender === "bot";
                     return (
                       <div
                         key={msg.id}
-                        className={`flex gap-3 text-xs sm:text-sm ${
-                          isBot ? "justify-start" : "justify-end"
-                        }`}
+                        className={`interview-msg ${isBot ? "bot" : "user"}`}
                       >
                         {isBot && (
                           <div
-                            className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center font-bold text-xs bg-gradient-to-tr ${activeBot.avatarColor} text-white mt-0.5`}
+                            className="interview-bot-orb"
+                            style={{
+                              width: "34px",
+                              height: "34px",
+                              fontSize: "13px",
+                              background:
+                                activeBot.id === "bot-elo-800"
+                                  ? "linear-gradient(135deg, #10b981, #0d9488)"
+                                  : activeBot.id === "bot-elo-1200"
+                                  ? "linear-gradient(135deg, #3b82f6, #4f46e5)"
+                                  : activeBot.id === "bot-elo-1600"
+                                  ? "linear-gradient(135deg, #f59e0b, #ea580c)"
+                                  : activeBot.id === "bot-elo-2000"
+                                  ? "linear-gradient(135deg, #8b5cf6, #c026d3)"
+                                  : "linear-gradient(135deg, #e11d48, #9f1239)",
+                            }}
                           >
                             {activeBot.name[0]}
                           </div>
                         )}
 
-                        <div
-                          className={`max-w-[85%] rounded-2xl p-3.5 space-y-1.5 ${
-                            isBot
-                              ? "bg-slate-800/90 text-slate-100 rounded-tl-none border border-slate-700/60"
-                              : "bg-emerald-600/90 text-slate-950 rounded-tr-none font-medium shadow-md"
-                          }`}
-                        >
-                          <div className="flex items-center justify-between gap-2 text-[10px] opacity-75">
-                            <span className="font-semibold">
+                        <div className={isBot ? "interview-bubble-bot" : "interview-bubble-user"}>
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                              gap: "8px",
+                              fontSize: "10.5px",
+                              opacity: 0.8,
+                              marginBottom: "4px",
+                            }}
+                          >
+                            <span style={{ fontWeight: 700 }}>
                               {isBot ? `${activeBot.name} (${msg.stage})` : "You (Candidate)"}
                             </span>
                             <span>{msg.timestamp ? msg.timestamp.slice(11, 16) : ""}</span>
                           </div>
 
-                          <div className="whitespace-pre-wrap leading-relaxed">{msg.text}</div>
+                          <div style={{ whiteSpace: "pre-wrap", lineHeight: 1.6 }}>{msg.text}</div>
 
                           {/* Code Snippet attachment if candidate submitted code */}
                           {msg.codeSnippet && (
-                            <div className="mt-2 p-2 rounded bg-slate-950/90 text-emerald-400 font-mono text-[11px] overflow-x-auto max-h-36 border border-slate-800">
-                              <pre>{msg.codeSnippet}</pre>
+                            <div
+                              style={{
+                                marginTop: "8px",
+                                padding: "8px 12px",
+                                borderRadius: "8px",
+                                background: "#000000",
+                                color: "#34c759",
+                                fontFamily: "monospace",
+                                fontSize: "11px",
+                                overflowX: "auto",
+                                maxHeight: "140px",
+                                border: "1px solid var(--border-normal)",
+                              }}
+                            >
+                              <pre style={{ margin: 0 }}>{msg.codeSnippet}</pre>
                             </div>
                           )}
 
                           {isBot && msg.audioScript && (
                             <button
+                              type="button"
                               onClick={() =>
                                 speakText(msg.audioScript || msg.text, activeBot.speechPitch, activeBot.speechRate)
                               }
-                              className="text-[10px] text-emerald-400 hover:text-emerald-300 font-semibold flex items-center gap-1 pt-1 opacity-90"
+                              style={{
+                                background: "none",
+                                border: "none",
+                                color: "#34c759",
+                                fontSize: "11px",
+                                fontWeight: 700,
+                                cursor: "pointer",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "4px",
+                                paddingTop: "6px",
+                                paddingLeft: 0,
+                              }}
                             >
                               <span>🔊 Replay Voice</span>
                             </button>
                           )}
                         </div>
-
-                        {!isBot && (
-                          <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center font-bold text-xs bg-slate-700 text-slate-200 mt-0.5">
-                            U
-                          </div>
-                        )}
                       </div>
                     );
                   })}
@@ -903,27 +1284,34 @@ export function InterviewStudio({
                 </div>
 
                 {/* Bottom Input & Voice Cockpit */}
-                <div className="p-3 bg-slate-900 border-t border-slate-800 space-y-2">
+                <div className="interview-bottom-input-bar">
                   {micStatusText && (
-                    <div className="text-[11px] text-teal-400 flex items-center gap-1.5 px-2">
-                      <span className="w-2 h-2 rounded-full bg-teal-400 animate-ping"></span>
-                      <span>{micStatusText}</span>
+                    <div style={{ fontSize: "11px", color: "#2997ff", display: "flex", alignItems: "center", gap: "6px" }}>
+                      <span>🎙️ {micStatusText}</span>
                     </div>
                   )}
 
-                  <div className="flex gap-2 items-center">
+                  <div style={{ display: "flex", gap: "8px", alignItems: "center", width: "100%" }}>
                     {/* Microphone Toggle Button */}
                     <button
                       type="button"
                       onClick={isRecordingMic ? stopMicRecording : startMicRecording}
-                      className={`px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition ${
-                        isRecordingMic
-                          ? "bg-rose-600 text-white animate-pulse"
-                          : "bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700"
-                      }`}
+                      style={{
+                        padding: "10px 14px",
+                        borderRadius: "10px",
+                        fontSize: "12px",
+                        fontWeight: 700,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        border: "1px solid var(--border-normal)",
+                        background: isRecordingMic ? "#ff453a" : "rgba(255, 255, 255, 0.06)",
+                        color: "#ffffff",
+                        cursor: "pointer",
+                      }}
                       title={isRecordingMic ? "Click to stop mic recording" : "Click to speak aloud with mic"}
                     >
-                      <span>{isRecordingMic ? "⏹️ Stop Mic" : "🎙️ Speak"}</span>
+                      <span>{isRecordingMic ? "⏹️ Stop" : "🎙️ Speak"}</span>
                     </button>
 
                     {/* Text Input Field */}
@@ -937,9 +1325,20 @@ export function InterviewStudio({
                           handleSubmitTurn(false);
                         }
                       }}
-                      placeholder="Type your clarification, algorithm approach, or complexity..."
+                      placeholder="Say hello, good evening, ask clarifying questions, or explain your approach..."
                       disabled={isSubmittingTurn || activeSession.status === "concluded"}
-                      className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition resize-none"
+                      style={{
+                        flex: 1,
+                        background: "#000000",
+                        border: "1px solid var(--border-normal)",
+                        borderRadius: "10px",
+                        padding: "10px 12px",
+                        fontSize: "13px",
+                        color: "var(--text-primary)",
+                        outline: "none",
+                        resize: "none",
+                        fontFamily: "var(--font-sans)",
+                      }}
                     />
 
                     {/* Send Button */}
@@ -951,7 +1350,17 @@ export function InterviewStudio({
                         (!candidateInput.trim() && codeDraft === activeSession.code) ||
                         activeSession.status === "concluded"
                       }
-                      className="px-4 py-2.5 rounded-xl font-bold text-xs bg-emerald-500 hover:bg-emerald-400 text-slate-950 disabled:bg-slate-800 disabled:text-slate-600 transition shadow-sm h-full"
+                      style={{
+                        padding: "10px 18px",
+                        borderRadius: "10px",
+                        fontWeight: 800,
+                        fontSize: "12.5px",
+                        background: "#34c759",
+                        color: "#000000",
+                        border: "none",
+                        cursor: "pointer",
+                        height: "100%",
+                      }}
                     >
                       {isSubmittingTurn ? "Evaluating..." : "Send"}
                     </button>
@@ -960,23 +1369,50 @@ export function InterviewStudio({
               </div>
 
               {/* RIGHT PANE: Problem Description & Code Editor (5 columns) */}
-              <div className="lg:col-span-5 flex flex-col bg-slate-900/70 border border-slate-800 rounded-2xl overflow-hidden h-[620px]">
+              <div className="interview-pane">
                 {/* Right Tabs Header */}
-                <div className="p-3 border-b border-slate-800 flex items-center justify-between bg-slate-900">
-                  <div>
-                    <h3 className="font-bold text-sm text-white flex items-center gap-2">
-                      <span>{activeQuestion.title}</span>
-                      <span className="text-[10px] px-2 py-0.5 rounded font-semibold bg-teal-950 text-teal-300 border border-teal-800">
-                        {activeQuestion.difficulty}
-                      </span>
+                <div
+                  style={{
+                    padding: "12px 16px",
+                    borderBottom: "1px solid var(--border-normal)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    background: "rgba(255, 255, 255, 0.02)",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <h3 style={{ margin: 0, fontWeight: 800, fontSize: "14px", color: "#ffffff" }}>
+                      {activeQuestion.title}
                     </h3>
+                    <span
+                      style={{
+                        fontSize: "10px",
+                        fontWeight: 700,
+                        padding: "2px 7px",
+                        borderRadius: "4px",
+                        background: "rgba(41, 151, 255, 0.16)",
+                        color: "#2997ff",
+                        border: "1px solid rgba(41, 151, 255, 0.35)",
+                      }}
+                    >
+                      {activeQuestion.difficulty}
+                    </span>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div>
                     <select
                       value={selectedLanguage}
                       onChange={(e) => setSelectedLanguage(e.target.value)}
-                      className="bg-slate-950 border border-slate-800 rounded px-2 py-1 text-xs text-slate-300 focus:outline-none"
+                      style={{
+                        background: "#000000",
+                        border: "1px solid var(--border-normal)",
+                        color: "var(--text-primary)",
+                        borderRadius: "6px",
+                        padding: "4px 8px",
+                        fontSize: "12px",
+                        outline: "none",
+                      }}
                     >
                       <option value="python">Python 3</option>
                       <option value="javascript">JavaScript</option>
@@ -987,11 +1423,22 @@ export function InterviewStudio({
                 </div>
 
                 {/* Problem Specs Accordion */}
-                <div className="p-3.5 border-b border-slate-800/80 bg-slate-950/40 text-xs space-y-2 max-h-48 overflow-y-auto">
-                  <p className="text-slate-300 leading-relaxed whitespace-pre-wrap">{activeQuestion.prompt}</p>
-                  <div className="pt-1 space-y-1">
-                    <span className="font-semibold text-slate-400 text-[11px]">Constraints:</span>
-                    <ul className="list-disc list-inside text-slate-400 space-y-0.5">
+                <div
+                  style={{
+                    padding: "14px 16px",
+                    borderBottom: "1px solid var(--border-subtle)",
+                    fontSize: "12px",
+                    maxHeight: "180px",
+                    overflowY: "auto",
+                    background: "rgba(0, 0, 0, 0.2)",
+                  }}
+                >
+                  <p style={{ margin: "0 0 10px", color: "var(--text-secondary)", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>
+                    {activeQuestion.prompt}
+                  </p>
+                  <div style={{ marginTop: "6px" }}>
+                    <strong style={{ color: "var(--text-primary)", fontSize: "11px" }}>Constraints:</strong>
+                    <ul style={{ margin: "4px 0 0", paddingLeft: "18px", color: "var(--text-secondary)", lineHeight: 1.5 }}>
                       {activeQuestion.constraints.map((c, i) => (
                         <li key={i}>{c}</li>
                       ))}
@@ -1000,8 +1447,8 @@ export function InterviewStudio({
                 </div>
 
                 {/* Code Scratchpad */}
-                <div className="flex-1 flex flex-col p-3 bg-slate-950 font-mono text-xs">
-                  <div className="flex items-center justify-between pb-1.5 text-[11px] text-slate-400">
+                <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: "14px", background: "#05070c", fontFamily: "monospace", fontSize: "12px" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingBottom: "8px", fontSize: "11px", color: "var(--text-tertiary)" }}>
                     <span>Solution Editor ({selectedLanguage})</span>
                     <span>Target: {activeQuestion.expectedOptimalTime}</span>
                   </div>
@@ -1009,12 +1456,26 @@ export function InterviewStudio({
                   <textarea
                     value={codeDraft}
                     onChange={(e) => setCodeDraft(e.target.value)}
-                    placeholder="// Write your code here and submit to interviewer..."
-                    className="flex-1 w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-slate-100 font-mono text-xs leading-relaxed focus:outline-none focus:border-teal-500 resize-none"
+                    placeholder="// Write your code solution here and submit to interviewer..."
+                    style={{
+                      flex: 1,
+                      width: "100%",
+                      background: "rgba(22, 22, 23, 0.8)",
+                      border: "1px solid var(--border-normal)",
+                      borderRadius: "10px",
+                      padding: "12px",
+                      color: "var(--text-primary)",
+                      fontFamily: "monospace",
+                      fontSize: "12px",
+                      lineHeight: 1.6,
+                      outline: "none",
+                      resize: "none",
+                    }}
                   />
 
-                  <div className="pt-2 flex items-center justify-between">
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: "10px" }}>
                     <button
+                      type="button"
                       onClick={() => {
                         const starter =
                           activeQuestion.starterCode[
@@ -1022,15 +1483,25 @@ export function InterviewStudio({
                           ] || activeQuestion.starterCode.python;
                         setCodeDraft(starter);
                       }}
-                      className="text-[11px] text-slate-400 hover:text-slate-200"
+                      style={{ background: "none", border: "none", color: "var(--text-secondary)", fontSize: "11px", cursor: "pointer" }}
                     >
                       Reset Starter Code
                     </button>
 
                     <button
+                      type="button"
                       onClick={() => handleSubmitTurn(false)}
                       disabled={isSubmittingTurn || activeSession.status === "concluded"}
-                      className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-teal-500 hover:bg-teal-400 text-slate-950 transition"
+                      style={{
+                        padding: "8px 18px",
+                        borderRadius: "8px",
+                        fontSize: "12px",
+                        fontWeight: 800,
+                        background: "#2997ff",
+                        color: "#ffffff",
+                        border: "none",
+                        cursor: "pointer",
+                      }}
                     >
                       Submit Code to {activeBot.name}
                     </button>
@@ -1043,25 +1514,36 @@ export function InterviewStudio({
 
         {/* VIEW 3: DETAILED SCORECARD MODAL / OVERLAY */}
         {inspectedFeedback && (
-          <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-fadeIn">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-3xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative my-8">
+          <div className="interview-modal-backdrop animate-fadeIn">
+            <div className="interview-modal-content">
               {/* Close Button */}
               <button
+                type="button"
                 onClick={() => setInspectedFeedback(null)}
-                className="absolute top-4 right-4 text-slate-400 hover:text-slate-200 text-sm font-bold p-2"
+                style={{
+                  position: "absolute",
+                  top: "16px",
+                  right: "16px",
+                  background: "none",
+                  border: "none",
+                  color: "var(--text-secondary)",
+                  fontSize: "16px",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
               >
                 ✕ Close
               </button>
 
               {/* Scorecard Header */}
-              <div className="text-center space-y-2 border-b border-slate-800 pb-5">
-                <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  Official Technical Assessment Scorecard
+              <div style={{ textAlign: "center", borderBottom: "1px solid var(--border-normal)", paddingBottom: "18px", marginBottom: "20px" }}>
+                <span className="interview-hero-badge" style={{ marginBottom: "8px" }}>
+                  OFFICIAL TECHNICAL ASSESSMENT SCORECARD
                 </span>
-                <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
+                <h2 style={{ fontSize: "24px", fontWeight: 900, color: "#ffffff", margin: "0 0 10px" }}>
                   Mock Interview Evaluation
                 </h2>
-                <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "center", gap: "10px" }}>
                   <span
                     className={`px-3 py-1 rounded-lg text-xs font-extrabold border ${getRecommendationBadge(
                       inspectedFeedback.recommendation,
@@ -1069,19 +1551,21 @@ export function InterviewStudio({
                   >
                     Hiring Verdict: {inspectedFeedback.recommendation}
                   </span>
-                  <span className="px-3 py-1 rounded-lg text-xs font-bold bg-slate-800 text-emerald-400 border border-slate-700">
-                    Candidate Rating: ELO {inspectedFeedback.candidateElo}
+                  <span style={{ padding: "4px 10px", borderRadius: "8px", fontSize: "12px", fontWeight: 700, background: "rgba(255, 255, 255, 0.06)", color: "#34c759", border: "1px solid var(--border-normal)" }}>
+                    Candidate NIR: {inspectedFeedback.candidateElo} (ELO {inspectedFeedback.candidateElo})
                   </span>
-                  <span className="px-3 py-1 rounded-lg text-xs font-bold bg-slate-800 text-slate-200 border border-slate-700">
+                  <span style={{ padding: "4px 10px", borderRadius: "8px", fontSize: "12px", fontWeight: 700, background: "rgba(255, 255, 255, 0.06)", color: "var(--text-primary)", border: "1px solid var(--border-normal)" }}>
                     Composite Score: {inspectedFeedback.overallScore} / 100
                   </span>
                 </div>
               </div>
 
               {/* Rubric Breakdown (5 Dimensions) */}
-              <div className="space-y-3">
-                <h3 className="text-sm font-bold text-slate-300">FAANG 5-Dimension Competency Matrix</h3>
-                <div className="space-y-3">
+              <div style={{ marginBottom: "20px" }}>
+                <h3 style={{ fontSize: "14px", fontWeight: 800, color: "#ffffff", margin: "0 0 12px" }}>
+                  FAANG 5-Dimension Competency Matrix
+                </h3>
+                <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                   {[
                     { title: "Problem Solving & Algorithmic Strategy", item: inspectedFeedback.rubric.problemSolving },
                     { title: "Algorithm & Code Correctness", item: inspectedFeedback.rubric.algorithmCorrectness },
@@ -1089,70 +1573,67 @@ export function InterviewStudio({
                     { title: "Edge Case Handling & Grilling Defense", item: inspectedFeedback.rubric.grillingDefense },
                     { title: "Technical Communication & Articulation", item: inspectedFeedback.rubric.communicationClarity },
                   ].map((dim, idx) => (
-                    <div key={idx} className="bg-slate-950/60 p-3 rounded-xl border border-slate-800/80 space-y-1.5">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="font-semibold text-slate-200">{dim.title}</span>
-                        <span className="font-bold text-emerald-400">
+                    <div key={idx} style={{ background: "rgba(0, 0, 0, 0.4)", padding: "12px 14px", borderRadius: "12px", border: "1px solid var(--border-subtle)" }}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "12px", marginBottom: "6px" }}>
+                        <span style={{ fontWeight: 700, color: "var(--text-primary)" }}>{dim.title}</span>
+                        <span style={{ fontWeight: 800, color: "#34c759" }}>
                           {dim.item.score} / {dim.item.max}
                         </span>
                       </div>
-                      <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                      <div style={{ width: "100%", background: "var(--bg-pill)", height: "6px", borderRadius: "99px", overflow: "hidden", marginBottom: "6px" }}>
                         <div
-                          className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all"
-                          style={{ width: `${(dim.item.score / dim.item.max) * 100}%` }}
+                          style={{
+                            background: "linear-gradient(90deg, #34c759, #2997ff)",
+                            height: "100%",
+                            width: `${(dim.item.score / dim.item.max) * 100}%`,
+                          }}
                         />
                       </div>
-                      <p className="text-[11px] text-slate-400 leading-snug">{dim.item.feedback}</p>
+                      <p style={{ margin: 0, fontSize: "11px", color: "var(--text-secondary)", lineHeight: 1.5 }}>
+                        {dim.item.feedback}
+                      </p>
                     </div>
                   ))}
                 </div>
               </div>
 
               {/* Strengths & Improvements */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                <div className="bg-emerald-950/30 border border-emerald-800/40 p-4 rounded-xl space-y-2">
-                  <h4 className="font-bold text-emerald-300 flex items-center gap-1.5">
-                    <span>✓</span> Observed Strengths
-                  </h4>
-                  <ul className="space-y-1.5 text-slate-300">
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "14px", fontSize: "12px", marginBottom: "20px" }}>
+                <div style={{ background: "rgba(52, 199, 89, 0.08)", border: "1px solid rgba(52, 199, 89, 0.25)", padding: "14px", borderRadius: "12px" }}>
+                  <h4 style={{ margin: "0 0 8px", fontWeight: 800, color: "#34c759" }}>✓ Observed Strengths</h4>
+                  <ul style={{ margin: 0, paddingLeft: "16px", color: "var(--text-secondary)", lineHeight: 1.6 }}>
                     {inspectedFeedback.strengths.map((str, i) => (
-                      <li key={i} className="flex items-start gap-1.5">
-                        <span className="text-emerald-400 font-bold">•</span>
-                        <span>{str}</span>
-                      </li>
+                      <li key={i}>{str}</li>
                     ))}
                   </ul>
                 </div>
 
-                <div className="bg-amber-950/30 border border-amber-800/40 p-4 rounded-xl space-y-2">
-                  <h4 className="font-bold text-amber-300 flex items-center gap-1.5">
-                    <span>⚡</span> Priority Action Items
-                  </h4>
-                  <ul className="space-y-1.5 text-slate-300">
+                <div style={{ background: "rgba(255, 159, 10, 0.08)", border: "1px solid rgba(255, 159, 10, 0.25)", padding: "14px", borderRadius: "12px" }}>
+                  <h4 style={{ margin: "0 0 8px", fontWeight: 800, color: "#ff9f0a" }}>⚡ Priority Action Items</h4>
+                  <ul style={{ margin: 0, paddingLeft: "16px", color: "var(--text-secondary)", lineHeight: 1.6 }}>
                     {inspectedFeedback.improvements.map((imp, i) => (
-                      <li key={i} className="flex items-start gap-1.5">
-                        <span className="text-amber-400 font-bold">•</span>
-                        <span>{imp}</span>
-                      </li>
+                      <li key={i}>{imp}</li>
                     ))}
                   </ul>
                 </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "10px", borderTop: "1px solid var(--border-normal)", paddingTop: "14px" }}>
                 <button
+                  type="button"
                   onClick={() => setInspectedFeedback(null)}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 transition"
+                  style={{ padding: "8px 16px", borderRadius: "8px", fontSize: "12px", fontWeight: 600, background: "rgba(255, 255, 255, 0.06)", color: "var(--text-primary)", border: "1px solid var(--border-normal)", cursor: "pointer" }}
                 >
                   Close Scorecard
                 </button>
                 <button
+                  type="button"
                   onClick={() => {
                     setInspectedFeedback(null);
                     setActiveSession(null);
                   }}
-                  className="px-5 py-2 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition"
+                  style={{ padding: "8px 18px", borderRadius: "8px", fontSize: "12px", fontWeight: 800, background: "#34c759", color: "#000000", border: "none", cursor: "pointer" }}
                 >
                   New Interview Loop
                 </button>
@@ -1163,56 +1644,79 @@ export function InterviewStudio({
 
         {/* VIEW 4: TOP-UP & CREDITS MODAL */}
         {showTopUpModal && (
-          <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl relative">
+          <div className="interview-modal-backdrop">
+            <div className="interview-modal-content" style={{ maxWidth: "460px" }}>
               <button
+                type="button"
                 onClick={() => setShowTopUpModal(false)}
-                className="absolute top-4 right-4 text-slate-400 hover:text-slate-200 text-sm font-bold"
+                style={{ position: "absolute", top: "16px", right: "16px", background: "none", border: "none", color: "var(--text-secondary)", fontSize: "16px", fontWeight: 700, cursor: "pointer" }}
               >
                 ✕
               </button>
 
-              <div className="space-y-1">
-                <h3 className="text-lg font-bold text-white">Interview Passes & Credits</h3>
-                <p className="text-xs text-slate-400">
-                  Every student receives 3 complimentary passes each day. You can also simulate topping up additional mock interview passes.
+              <div style={{ marginBottom: "16px" }}>
+                <h3 style={{ fontSize: "18px", fontWeight: 800, color: "#ffffff", margin: "0 0 4px" }}>
+                  Interview Passes &amp; Credits
+                </h3>
+                <p style={{ fontSize: "12px", color: "var(--text-secondary)", margin: 0 }}>
+                  Every student receives 3 free passes each day. You can also simulate topping up additional mock interview passes to practice unlimited sessions.
                 </p>
               </div>
 
-              <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs space-y-1.5">
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Free Daily Passes:</span>
-                  <span className="font-bold text-emerald-400">{credits.freeSlots} / 3</span>
+              <div style={{ background: "rgba(0, 0, 0, 0.4)", padding: "14px", borderRadius: "12px", border: "1px solid var(--border-normal)", fontSize: "12px", marginBottom: "16px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
+                  <span style={{ color: "var(--text-secondary)" }}>Free Daily Passes:</span>
+                  <span style={{ fontWeight: 800, color: "#34c759" }}>{credits.freeSlots} / 3</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Purchased Passes:</span>
-                  <span className="font-bold text-sky-400">{credits.purchasedSlots}</span>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
+                  <span style={{ color: "var(--text-secondary)" }}>Purchased Passes:</span>
+                  <span style={{ fontWeight: 800, color: "#2997ff" }}>{credits.purchasedSlots}</span>
                 </div>
-                <div className="flex justify-between border-t border-slate-800 pt-1.5">
-                  <span className="text-slate-200 font-semibold">Total Available:</span>
-                  <span className="font-bold text-white text-sm">{totalSlotsAvailable}</span>
+                <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid var(--border-subtle)", paddingTop: "8px" }}>
+                  <span style={{ color: "#ffffff", fontWeight: 700 }}>Total Available:</span>
+                  <span style={{ fontWeight: 900, color: "#ffffff", fontSize: "14px" }}>{totalSlotsAvailable}</span>
                 </div>
               </div>
 
               {topUpMessage && (
-                <div className="p-3 rounded-lg bg-teal-950/80 border border-teal-800/80 text-teal-300 text-xs">
+                <div style={{ padding: "10px 12px", borderRadius: "8px", background: "rgba(52, 199, 89, 0.12)", border: "1px solid rgba(52, 199, 89, 0.3)", color: "#34c759", fontSize: "12px", marginBottom: "14px" }}>
                   {topUpMessage}
                 </div>
               )}
 
-              <div className="space-y-2.5 pt-1">
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                 <button
+                  type="button"
                   onClick={handleClaimDailySlot}
                   disabled={topUpLoading}
-                  className="w-full py-2.5 px-4 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-slate-700 transition"
+                  style={{
+                    padding: "10px 16px",
+                    borderRadius: "10px",
+                    fontSize: "12px",
+                    fontWeight: 700,
+                    background: "rgba(255, 255, 255, 0.06)",
+                    color: "#34c759",
+                    border: "1px solid var(--border-normal)",
+                    cursor: "pointer",
+                  }}
                 >
                   {topUpLoading ? "Refreshing..." : "Claim Daily Free Pass Refill (3 Slots)"}
                 </button>
 
                 <button
+                  type="button"
                   onClick={() => handleTopUpPasses(5)}
                   disabled={topUpLoading}
-                  className="w-full py-2.5 px-4 rounded-xl text-xs font-bold bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 transition shadow-md"
+                  style={{
+                    padding: "10px 16px",
+                    borderRadius: "10px",
+                    fontSize: "12px",
+                    fontWeight: 800,
+                    background: "linear-gradient(135deg, #34c759, #2997ff)",
+                    color: "#000000",
+                    border: "none",
+                    cursor: "pointer",
+                  }}
                 >
                   {topUpLoading ? "Processing..." : "Add 5 Mock Interview Passes (Simulation)"}
                 </button>
@@ -1220,7 +1724,7 @@ export function InterviewStudio({
             </div>
           </div>
         )}
-      </main>
+      </div>
     </div>
   );
 }

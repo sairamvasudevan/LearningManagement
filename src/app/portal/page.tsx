@@ -500,7 +500,7 @@ export default async function StudentPortalPage() {
                     🤖 AI MOCK INTERVIEW ARENA
                   </span>
                   <span style={{ fontSize: "12px", color: "#a7f3d0", fontWeight: 600 }}>
-                    Chess ELO Scale (800 to 2400) · Real-Time Voice Grilling · FAANG Scorecards
+                    NIR Scale (800 to 2400 · Nexus Interview Rating) · Real-Time Voice Grilling · FAANG Scorecards
                   </span>
                 </div>
                 <h3 style={{ margin: "0 0 4px", fontSize: "18px", color: "#f8fafc" }}>

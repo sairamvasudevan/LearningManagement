@@ -1,3 +1,4 @@
+import { SiteHeader } from "@/components/site-header";
 import { InterviewStudio } from "@/components/interview-studio";
 import { getCurrentIdentity } from "@/lib/auth";
 import { getUserInterviewCredits, listUserInterviewSessions } from "@/lib/db";
@@ -10,15 +11,18 @@ export default async function InterviewPage() {
   const credits = identity ? getUserInterviewCredits(identity.id) : null;
   const sessions = identity ? listUserInterviewSessions(identity.id) : [];
 
-  // InterviewStudio renders its own full-page layout (header + main).
-  // Do NOT wrap in SiteHeader or <main> — it would create a double header.
   return (
-    <InterviewStudio
-      initialBots={INTERVIEW_BOTS}
-      initialQuestions={INTERVIEW_QUESTIONS}
-      initialCredits={credits}
-      initialSessions={sessions}
-      signedIn={Boolean(identity)}
-    />
+    <>
+      <SiteHeader signedIn={Boolean(identity)} admin={identity?.role === "admin"} />
+      <main className="interview-page-shell">
+        <InterviewStudio
+          initialBots={INTERVIEW_BOTS}
+          initialQuestions={INTERVIEW_QUESTIONS}
+          initialCredits={credits}
+          initialSessions={sessions}
+          signedIn={Boolean(identity)}
+        />
+      </main>
+    </>
   );
 }

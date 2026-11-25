@@ -137,6 +137,8 @@ export function evaluateCandidateTurn(params: {
     nextStage = session.turnCount >= 5 ? "GRILL" : "GRILL";
   }
 
+  const hasExplicitCodeSubmission = Boolean(code && code !== session.code && code.trim().length > 30);
+
   // Generate bot conversational dialogue & speech
   const botReply = synthesizeBotResponse({
     bot,
@@ -144,6 +146,7 @@ export function evaluateCandidateTurn(params: {
     stage: nextStage,
     candidateText: cleanText,
     code: currentCode,
+    hasExplicitCodeSubmission,
     turnCount: session.turnCount,
     previousMessages: messages,
   });
@@ -186,13 +189,75 @@ function synthesizeBotResponse(params: {
   stage: InterviewStage;
   candidateText: string;
   code: string;
+  hasExplicitCodeSubmission: boolean;
   turnCount: number;
   previousMessages: InterviewMessage[];
 }): BotResponsePayload {
-  const { bot, question, stage, candidateText, code, turnCount } = params;
+  const { bot, question, stage, candidateText, code, hasExplicitCodeSubmission, turnCount } = params;
   const lower = candidateText.toLowerCase();
 
-  // 1. Check for specific question clarifications
+  const isGreeting =
+    lower.includes("hello") ||
+    lower.includes("hi ") ||
+    lower === "hi" ||
+    lower.includes("hey") ||
+    lower.includes("good evening") ||
+    lower.includes("good morning") ||
+    lower.includes("good afternoon") ||
+    lower.includes("how are you") ||
+    lower.includes("greetings") ||
+    lower.includes("nice to meet");
+
+  const isCasualChat =
+    lower.includes("chat") ||
+    lower.includes("talk") ||
+    lower.includes("joke") ||
+    lower.includes("who are you") ||
+    lower.includes("what can you do") ||
+    lower.includes("model");
+
+  const hasTechnicalContent =
+    Object.keys(question.clarificationAnswers).some((k) => lower.includes(k)) ||
+    question.grillProbes.some((p) => p.triggerKeywords.some((kw) => lower.includes(kw))) ||
+    lower.includes("sort") ||
+    lower.includes("duplicate") ||
+    lower.includes("negative") ||
+    lower.includes("o(") ||
+    lower.includes("complexity") ||
+    lower.includes("approach") ||
+    lower.includes("brute force") ||
+    lower.includes("hash") ||
+    lower.includes("linear") ||
+    lower.includes("pointer") ||
+    lower.includes("stack") ||
+    hasExplicitCodeSubmission;
+
+  // 1. Natural greeting exchange & credit notification when model is not connected
+  if ((isGreeting || isCasualChat) && !hasTechnicalContent) {
+    return {
+      text: `Hello! Good evening! Great to meet you. Welcome to your technical interview session!
+
+⚠️ **Model Status & Credit Notice**: We do not currently have a live external AI LLM model connected on this deployment. To continue an extended multi-turn deep live conversation with AI models, please add interview credits to your account (you can top up passes anytime via the '+ Recharge' button above).
+
+For now, you can test our algorithmic interview flow: ask about problem constraints (such as whether the array is sorted), explain your Big-O approach, or write and submit your solution in the code editor on the right!`,
+      audio: `Hello! Good evening! Great to meet you. Welcome to your technical interview session. Please note that an external AI model is not connected at this moment. Please add interview credits to your account to continue full AI chatting when models are live. For now, you can ask about constraints, explain your approach, or submit your code in the editor!`,
+    };
+  }
+
+  // 2. Casual non-technical follow-up prompts candidate to add credits or proceed to problem
+  if (!hasTechnicalContent && turnCount >= 1 && stage === "CLARIFICATION") {
+    return {
+      text: `Good evening! As a reminder, live conversational AI chatting is currently paused because an external model is not connected. Please add credits to your account to enable full AI model chatting once live.
+
+To continue your mock interview on **${question.title}**:
+1. Clarify constraints (e.g., "is the array sorted?", "can numbers be negative?")
+2. Propose your algorithmic approach and time/space complexity (e.g., O(N) with Hash Map)
+3. Or write and submit your code in the solution editor on the right!`,
+      audio: `Good evening. Live conversational chatting is paused because an external model is not connected. Please add credits to continue chatting. You can clarify constraints, propose your approach, or submit your code in the editor.`,
+    };
+  }
+
+  // 3. Check for specific question clarifications
   for (const [key, answer] of Object.entries(question.clarificationAnswers)) {
     if (lower.includes(key)) {
       if (bot.personality === "supportive") {

@@ -412,7 +412,7 @@ export default async function HomePage() {
 
               <h3 className="training-card-title">Live AI Interview Bot: Real-Time Voice Grilling &amp; FAANG Scorecards</h3>
               <div className="training-card-subtitle">
-                Chess ELO Tiers (800 to 2400) · Web Speech Synthesis &amp; Microphone · Invariant Defense · 5-Dimension Matrix
+                NIR Tiers (800 to 2400 · Nexus Interview Rating) · Web Speech Synthesis &amp; Microphone · Invariant Defense · 5-Dimension Matrix
               </div>
               <p className="training-card-desc">
                 Engage in full-loop technical interviews against five distinct bots: from gentle ELO 800 Intern Sam to ruthless ELO 2400 FAANG Bar Raiser Magnus. Speak naturally using live speech recognition, code in the scratchpad, and defend your algorithms under adversarial edge-case grilling.

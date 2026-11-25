@@ -15,7 +15,7 @@ export const INTERVIEW_BOTS: InterviewBot[] = [
     speechRate: 0.95,
     defaultLanguage: "python",
     introGreeting:
-      "Hey there! I'm Sam. Don't stress out at all — we're just here to talk through some code together. Let's take it step by step. Feel free to ask any clarifying questions before you write a single line!",
+      "Hello! Good evening! I'm Sam. Welcome to your technical interview session! Don't stress out at all — we're just here to talk through some code together. Feel free to say hi or ask any clarifying questions before you write a single line!",
   },
   {
     id: "bot-elo-1200",
@@ -31,7 +31,7 @@ export const INTERVIEW_BOTS: InterviewBot[] = [
     speechRate: 1.0,
     defaultLanguage: "python",
     introGreeting:
-      "Hello! I'm Maya from the engineering team. In this interview, I'll be looking at how clearly you communicate your approach, validate constraints, and structure clean, readable code. Let's jump into the problem.",
+      "Hello! Good evening! I'm Maya from the engineering team. Welcome to your technical interview. In this session, I'll be looking at how clearly you communicate your approach, validate constraints, and structure clean, readable code. Let's start with a quick greeting and jump into the problem.",
   },
   {
     id: "bot-elo-1600",
@@ -47,7 +47,7 @@ export const INTERVIEW_BOTS: InterviewBot[] = [
     speechRate: 1.05,
     defaultLanguage: "python",
     introGreeting:
-      "Hi candidate. I'm Vikram. We build high-throughput microservices here, so I care deeply about asymptotic efficiency. Brute force won't cut it — I want to hear your time and space complexity upfront before you implement. Ready?",
+      "Hello, good evening candidate. I'm Vikram. We build high-throughput microservices here, so I care deeply about asymptotic efficiency. Brute force won't cut it — I want to hear your time and space complexity upfront before you implement. Ready?",
   },
   {
     id: "bot-elo-2000",
@@ -63,7 +63,7 @@ export const INTERVIEW_BOTS: InterviewBot[] = [
     speechRate: 1.05,
     defaultLanguage: "python",
     introGreeting:
-      "Greetings. I am Priya, Staff Architect. Beyond just passing sample test cases, I want to understand how your solution behaves under extreme scale, what invariants guarantee correctness, and your trade-offs between memory overhead and CPU cycles.",
+      "Greetings and good evening. I am Priya, Staff Architect. Beyond just passing sample test cases, I want to understand how your solution behaves under extreme scale, what invariants guarantee correctness, and your trade-offs between memory overhead and CPU cycles.",
   },
   {
     id: "bot-elo-2400",
@@ -79,7 +79,7 @@ export const INTERVIEW_BOTS: InterviewBot[] = [
     speechRate: 1.1,
     defaultLanguage: "python",
     introGreeting:
-      "I am Magnus. As the Bar Raiser for this loop, my role is to stress-test your problem-solving under adversarial conditions. Hand-waving and vague assumptions will not pass. State your invariants clearly, defend your complexity, and prepare to be grilled.",
+      "Good evening. I am Magnus. As the Bar Raiser for this loop, my role is to stress-test your problem-solving under adversarial conditions. Hand-waving and vague assumptions will not pass. State your invariants clearly, defend your complexity, and prepare to be grilled.",
   },
 ];
 

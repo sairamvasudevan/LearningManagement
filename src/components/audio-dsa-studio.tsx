@@ -188,6 +188,7 @@ export function AudioDsaStudio({
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [selectedVoiceUri, setSelectedVoiceUri] = useState<string>("");
   const [ttsAvailable, setTtsAvailable] = useState<boolean>(false);
+  const [voiceEngine, setVoiceEngine] = useState<"natural-hd" | "browser">("natural-hd");
 
   // Quiz & reflection state
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
@@ -225,6 +226,8 @@ export function AudioDsaStudio({
   const voiceUriRef = useRef(selectedVoiceUri);
   const autoAdvanceRef = useRef(autoAdvance);
   const sfxRef = useRef(sfxEnabled);
+  const voiceEngineRef = useRef(voiceEngine);
+  const audioElemRef = useRef<HTMLAudioElement | null>(null);
   const fallbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const speakSegmentRef = useRef<(ep: AudioDsaEpisode, idx: number) => void>(() => {});
 
@@ -243,6 +246,9 @@ export function AudioDsaStudio({
   useEffect(() => {
     sfxRef.current = sfxEnabled;
   }, [sfxEnabled]);
+  useEffect(() => {
+    voiceEngineRef.current = voiceEngine;
+  }, [voiceEngine]);
 
   // Discover built-in English Web Speech voices offline
   useEffect(() => {
@@ -294,6 +300,11 @@ export function AudioDsaStudio({
   }, [playbackStatus, playbackRate, activeEpisode.estimatedSeconds]);
 
   const stopAudioEngine = useCallback(() => {
+    if (audioElemRef.current) {
+      audioElemRef.current.pause();
+      audioElemRef.current.src = "";
+      audioElemRef.current = null;
+    }
     if (fallbackTimerRef.current) {
       clearTimeout(fallbackTimerRef.current);
       fallbackTimerRef.current = null;
@@ -327,6 +338,11 @@ export function AudioDsaStudio({
 
   const speakSegment = useCallback(
     (episode: AudioDsaEpisode, idx: number) => {
+      if (audioElemRef.current) {
+        audioElemRef.current.pause();
+        audioElemRef.current.src = "";
+        audioElemRef.current = null;
+      }
       if (fallbackTimerRef.current) {
         clearTimeout(fallbackTimerRef.current);
         fallbackTimerRef.current = null;
@@ -360,27 +376,8 @@ export function AudioDsaStudio({
       );
       setElapsedSec(segBase);
 
-      const hasSpeechApi =
-        typeof window !== "undefined" &&
-        "speechSynthesis" in window &&
-        window.speechSynthesis.getVoices().length > 0;
-
-      if (!hasSpeechApi) {
-        // Offline caption-paced timed fallback when headless or no voice pack is installed
-        const words = segment.text.split(/\s+/).length;
-        const durationMs = Math.max(
-          2200,
-          Math.round(((words / 2.4) * 1000) / Math.max(0.5, rateRef.current)),
-        );
-        fallbackTimerRef.current = setTimeout(() => {
-          if (statusRef.current !== "playing") return;
-          speakSegmentRef.current(episode, idx + 1);
-        }, durationMs);
-        return;
-      }
-
-      window.speechSynthesis.cancel();
       const speakerProfile = SPEAKER_BADGES[segment.speaker];
+
       const launchUtterance = () => {
         if (statusRef.current !== "playing") return;
         const spokenText = cleanTextForAudioSpeech(segment.text);
@@ -412,13 +409,45 @@ export function AudioDsaStudio({
         window.speechSynthesis.speak(utterance);
       };
 
+      const playWithNaturalVoice = () => {
+        if (statusRef.current !== "playing") return;
+        try {
+          const streamUrl = `/api/audio-dsa/voice?text=${encodeURIComponent(
+            segment.text,
+          )}&speaker=${encodeURIComponent(segment.speaker)}`;
+          const audio = new Audio(streamUrl);
+          audio.playbackRate = rateRef.current;
+          audioElemRef.current = audio;
+
+          audio.onended = () => {
+            if (statusRef.current !== "playing") return;
+            speakSegmentRef.current(episode, idx + 1);
+          };
+
+          audio.onerror = () => {
+            // Gracefully fall back to enhanced browser utterance if network stream fails
+            launchUtterance();
+          };
+
+          audio.play().catch(() => {
+            launchUtterance();
+          });
+        } catch {
+          launchUtterance();
+        }
+      };
+
       const beatPauseMs = segment.pauseBeforeMs
         ? Math.round(segment.pauseBeforeMs / Math.max(0.6, rateRef.current))
         : 0;
+
+      const triggerVoice =
+        voiceEngineRef.current === "natural-hd" ? playWithNaturalVoice : launchUtterance;
+
       if (beatPauseMs > 0) {
-        fallbackTimerRef.current = setTimeout(launchUtterance, beatPauseMs);
+        fallbackTimerRef.current = setTimeout(triggerVoice, beatPauseMs);
       } else {
-        launchUtterance();
+        triggerVoice();
       }
     },
     [selectEpisode, stopAudioEngine],
@@ -430,6 +459,9 @@ export function AudioDsaStudio({
 
   const handlePlayToggle = () => {
     if (playbackStatus === "playing") {
+      if (audioElemRef.current) {
+        audioElemRef.current.pause();
+      }
       if (fallbackTimerRef.current) {
         clearTimeout(fallbackTimerRef.current);
         fallbackTimerRef.current = null;
@@ -443,6 +475,12 @@ export function AudioDsaStudio({
     }
 
     if (playbackStatus === "paused") {
+      if (audioElemRef.current && audioElemRef.current.paused) {
+        audioElemRef.current.play().catch(() => {});
+        setPlaybackStatus("playing");
+        statusRef.current = "playing";
+        return;
+      }
       if (
         typeof window !== "undefined" &&
         "speechSynthesis" in window &&
@@ -453,9 +491,11 @@ export function AudioDsaStudio({
         statusRef.current = "playing";
         return;
       }
+      speakSegment(activeEpisode, activeSegmentIdx);
+      return;
     }
 
-    speakSegment(activeEpisode, activeSegmentIdx);
+    speakSegment(activeEpisode, 0);
   };
 
   const handleReadQuizAloud = () => {
@@ -1044,7 +1084,28 @@ export function AudioDsaStudio({
                     <option value={1.5}>1.5x Fast</option>
                   </select>
 
-                  {voices.length > 0 && (
+                  <select
+                    aria-label="Voice audio engine"
+                    value={voiceEngine}
+                    onChange={(e) => {
+                      stopAudioEngine();
+                      setVoiceEngine(e.target.value as "natural-hd" | "browser");
+                    }}
+                    style={{
+                      background: voiceEngine === "natural-hd" ? "rgba(52, 211, 153, 0.12)" : "#0f172a",
+                      color: voiceEngine === "natural-hd" ? "#34d399" : "#e2e8f0",
+                      border: `1px solid ${voiceEngine === "natural-hd" ? "rgba(52, 211, 153, 0.4)" : "#334155"}`,
+                      borderRadius: "8px",
+                      padding: "6px 10px",
+                      fontSize: "12px",
+                      fontWeight: 700,
+                    }}
+                  >
+                    <option value="natural-hd">🎙️ Natural Online HD (Lively & Humane)</option>
+                    <option value="browser">🔊 Browser Speech (Offline)</option>
+                  </select>
+
+                  {voiceEngine === "browser" && voices.length > 0 && (
                     <select
                       aria-label="English speaker voice"
                       value={selectedVoiceUri}

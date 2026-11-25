@@ -242,7 +242,7 @@ export function SiteHeader({
                     <div>
                       <div className="flyout-title">
                         <b>AI Mock Interviewer</b>
-                        <span className="flyout-badge-cyan">Chess ELO</span>
+                        <span className="flyout-badge-cyan">NIR Rating</span>
                       </div>
                       <div className="flyout-desc">Voice-enabled technical mock interviews with live grilling and FAANG scorecards.</div>
                     </div>
@@ -488,7 +488,7 @@ export function SiteHeader({
             onClick={() => setMobileMenuOpen(false)}
           >
             <span>🤖 AI Mock Interview</span>
-            <span className="drawer-badge">Chess ELO</span>
+            <span className="drawer-badge">NIR Rating</span>
           </Link>
           <Link
             href="/ide"
