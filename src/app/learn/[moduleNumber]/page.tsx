@@ -2,7 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { requireIdentity, getRole } from "@/lib/auth";
 import { ModulePlayer } from "@/components/module-player";
 import { MODULES_CURRICULUM } from "@/lib/curriculum-data";
-import { getUserProgress } from "@/lib/db";
+import { getUserProgress, getPracticeSubmissions } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
@@ -37,11 +37,15 @@ export default async function LearnModulePage({ params }: PageProps) {
     }
   }
 
+  const existingSubmissions = getPracticeSubmissions(identity.id, moduleNumber);
+  const initialPracticeSubmission = existingSubmissions[0]?.submission || "";
+
   return (
     <ModulePlayer
       key={moduleNumber}
       curriculum={curriculum}
       isAdmin={isAdmin}
+      initialPracticeSubmission={initialPracticeSubmission}
       currentUser={{
         id: identity.id,
         name: identity.fullName || identity.email.split("@")[0],

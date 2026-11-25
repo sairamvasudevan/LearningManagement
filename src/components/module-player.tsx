@@ -19,10 +19,12 @@ type Review = {
 export function ModulePlayer({
   curriculum,
   isAdmin = false,
+  initialPracticeSubmission = "",
   currentUser,
 }: {
   curriculum: ModuleCurriculum;
   isAdmin?: boolean;
+  initialPracticeSubmission?: string;
   currentUser?: {
     id: string;
     name: string;
@@ -58,10 +60,14 @@ export function ModulePlayer({
   const audioChunks = useMemo(() => moduleCurriculumToAudioChunks(curriculum), [curriculum]);
 
   // Hands-on practice task state
-  const [taskInput, setTaskInput] = useState(practiceTask.starterTemplate);
+  const [taskInput, setTaskInput] = useState(
+    initialPracticeSubmission || practiceTask.starterTemplate,
+  );
   const [taskSubmitting, setTaskSubmitting] = useState(false);
-  const [taskSubmitted, setTaskSubmitted] = useState(false);
-  const [taskSavedMsg, setTaskSavedMsg] = useState("");
+  const [taskSubmitted, setTaskSubmitted] = useState(Boolean(initialPracticeSubmission));
+  const [taskSavedMsg, setTaskSavedMsg] = useState(
+    initialPracticeSubmission ? "✓ Loaded your saved solution from your academic profile." : "",
+  );
 
   const [result, setResult] = useState<{
     score: number;
@@ -127,7 +133,7 @@ export function ModulePlayer({
 
     try {
       // Persist progress to SQLite database via /api/auth/session
-      await fetch("/api/auth/session", {
+      const res = await fetch("/api/auth/session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -139,8 +145,12 @@ export function ModulePlayer({
           answers: selected,
         }),
       });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        setError(errData.error || "Warning: checkpoint score calculated locally, but could not sync to your student record.");
+      }
     } catch {
-      // non-fatal network error
+      setError("Network warning: checkpoint completed locally, but progress sync failed.");
     } finally {
       setMode("result");
       setBusy(false);
@@ -321,14 +331,13 @@ export function ModulePlayer({
                   <label
                     key={chIdx}
                     className={`checklist-item ${activeChecklist[chIdx] ? "checked" : ""}`}
-                    onClick={() =>
-                      setActiveChecklist((prev) => ({ ...prev, [chIdx]: !prev[chIdx] }))
-                    }
                   >
                     <input
                       type="checkbox"
                       checked={Boolean(activeChecklist[chIdx])}
-                      onChange={() => { }}
+                      onChange={() =>
+                        setActiveChecklist((prev) => ({ ...prev, [chIdx]: !prev[chIdx] }))
+                      }
                     />
                     <div>
                       <b>{item}</b>
@@ -472,7 +481,7 @@ export function ModulePlayer({
           {result.pass_percent}%.
         </p>
         <div className="result-actions">
-          {result.passed && nextMod <= 10 && (
+          {result.passed && nextMod <= 100 && (
             <Link className="button button-cn-primary" href={`/learn/${nextMod}`}>
               Proceed to Module {String(nextMod).padStart(2, "0")} →
             </Link>

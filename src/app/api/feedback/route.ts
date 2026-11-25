@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getCurrentIdentity } from "@/lib/auth";
+import { hasSameOrigin } from "@/lib/security";
 import {
   upsertModuleFeedback,
   getModuleFeedbackForUser,
@@ -10,6 +11,9 @@ import {
 export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
+  if (!hasSameOrigin(request)) {
+    return NextResponse.json({ error: "Cross-origin request rejected." }, { status: 403 });
+  }
   try {
     const identity = await getCurrentIdentity();
     if (!identity) {

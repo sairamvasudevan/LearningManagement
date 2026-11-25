@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import Link from "next/link";
 import { SupportedLanguage } from "@/lib/compiler";
 
 type IdeMode = "compiler" | "web";
@@ -311,7 +310,7 @@ export function StandaloneIde() {
   const [showStdinBox, setShowStdinBox] = useState<boolean>(true);
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [result, setResult] = useState<ExecutionResult | null>(null);
-  const [activeConsoleTab, setActiveConsoleTab] = useState<"output" | "stdin">("output");
+  const [, setActiveConsoleTab] = useState<"output" | "stdin">("output");
 
   // Web mode state
   const [webTab, setWebTab] = useState<"html" | "css" | "js">("html");
@@ -323,22 +322,33 @@ export function StandaloneIde() {
 
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const presetRef = useRef<string>(selectedPreset);
+
+  useEffect(() => {
+    presetRef.current = selectedPreset;
+  }, [selectedPreset]);
 
   // Initialize or restore code on language change
   useEffect(() => {
-    if (mode === "compiler") {
+    if (mode !== "compiler") return;
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (cancelled) return;
       try {
         const saved = localStorage.getItem(`nexus_ide_code_${language}`);
         if (saved) {
           setCode(saved);
         } else {
-          setCode(STARTER_TEMPLATES[language][selectedPreset] || STARTER_TEMPLATES[language].hello);
+          setCode(STARTER_TEMPLATES[language][presetRef.current] || STARTER_TEMPLATES[language].hello);
         }
       } catch {
-        setCode(STARTER_TEMPLATES[language][selectedPreset] || STARTER_TEMPLATES[language].hello);
+        setCode(STARTER_TEMPLATES[language][presetRef.current] || STARTER_TEMPLATES[language].hello);
       }
       setResult(null);
-    }
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [language, mode]);
 
   // Persist compiler code changes
@@ -385,18 +395,27 @@ export function StandaloneIde() {
           status: "error",
         });
       } else {
+        const rawStatus = String(data.status || "SUCCESS").toUpperCase();
+        const mappedStatus: ExecutionResult["status"] =
+          rawStatus === "SUCCESS" || rawStatus === "ACCEPTED"
+            ? "success"
+            : rawStatus === "COMPILE_ERROR"
+            ? "compilation_error"
+            : rawStatus === "TIME_LIMIT_EXCEEDED"
+            ? "timeout"
+            : "error";
         setResult({
           stdout: data.stdout || "",
           stderr: data.stderr || "",
-          compilationError: data.compilationError,
+          compilationError: data.compileOutput || data.compilationError || undefined,
           executionTimeMs: data.executionTimeMs || 0,
-          status: data.status || "success",
+          status: mappedStatus,
         });
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       setResult({
         stdout: "",
-        stderr: err?.message || "Network error connecting to execution engine",
+        stderr: err instanceof Error ? err.message : "Network error connecting to execution engine",
         executionTimeMs: 0,
         status: "error",
       });
@@ -1006,7 +1025,7 @@ export function StandaloneIde() {
                   ) : !result ? (
                     <div style={{ color: "#475569", padding: "40px 10px", textAlign: "center" }}>
                       <div style={{ fontSize: "28px", marginBottom: "8px" }}>▶</div>
-                      <div style={{ fontSize: "13px", color: "#94a3b8", marginBottom: "4px" }}>Click "Run" to execute code</div>
+                      <div style={{ fontSize: "13px", color: "#94a3b8", marginBottom: "4px" }}>Click &ldquo;Run&rdquo; to execute code</div>
                       <p style={{ margin: 0, fontSize: "11px" }}>Supports standard input, dynamic memory, and algorithms.</p>
                     </div>
                   ) : (
@@ -1060,7 +1079,7 @@ export function StandaloneIde() {
                                   cursor: "pointer",
                                 }}
                               >
-                                Insert Sample Input ("Alex Rivera\n21")
+                                Insert Sample Input (&ldquo;Alex Rivera\n21&rdquo;)
                               </button>
                             </div>
                           </div>

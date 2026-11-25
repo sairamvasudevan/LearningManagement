@@ -26,3 +26,13 @@ export function hasSameOrigin(request: NextRequest): boolean {
     return false;
   }
 }
+
+/** Prevent open redirects by allowing only local relative application paths. */
+export function sanitizeRedirectPath(rawPath: string | null | undefined, fallback = "/portal"): string {
+  if (!rawPath) return fallback;
+  const trimmed = rawPath.trim();
+  if (!trimmed.startsWith("/") || trimmed.startsWith("//") || trimmed.includes("\\")) {
+    return fallback;
+  }
+  return trimmed;
+}

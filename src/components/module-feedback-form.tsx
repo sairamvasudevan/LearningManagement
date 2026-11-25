@@ -44,7 +44,6 @@ export function ModuleFeedbackForm({
   const [feedbackText, setFeedbackText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [initialLoaded, setInitialLoaded] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [hoveredHelpfulness, setHoveredHelpfulness] = useState<number | null>(null);
   const [hoveredEase, setHoveredEase] = useState<number | null>(null);
@@ -77,8 +76,6 @@ export function ModuleFeedbackForm({
         }
       } catch {
         // non-fatal
-      } finally {
-        if (!cancelled) setInitialLoaded(true);
       }
     }
     loadExisting();
@@ -305,7 +302,6 @@ export function ModuleFeedbackForm({
                 </div>
                 <div className="ease-chips-row">
                   {[1, 2, 3, 4, 5].map((level) => {
-                    const activeVal = hoveredEase ?? easeOfUse;
                     const isSelected = easeOfUse === level;
                     return (
                       <button

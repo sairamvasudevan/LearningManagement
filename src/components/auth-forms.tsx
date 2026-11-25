@@ -6,8 +6,20 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
+function resolveSafeRedirect(fallback: string, role?: string): string {
+  if (typeof window === "undefined") return fallback;
+  const params = new URLSearchParams(window.location.search);
+  const raw = (params.get("redirect") || params.get("next") || "").trim();
+  if (!raw || !raw.startsWith("/") || raw.startsWith("//") || raw.includes("\\")) {
+    return fallback;
+  }
+  if (raw.startsWith("/admin") && role !== "admin") {
+    return "/portal";
+  }
+  return raw;
+}
+
 export function LoginForm() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -28,7 +40,7 @@ export function LoginForm() {
           password,
         });
         if (authError) throw authError;
-        window.location.href = "/portal";
+        window.location.href = resolveSafeRedirect("/portal");
       } else {
         // Real SQLite Backend Login & Password Verification
         const res = await fetch("/api/auth/session", {
@@ -47,7 +59,8 @@ export function LoginForm() {
           throw new Error(data.error || "Authentication failed. Invalid email or password.");
         }
 
-        window.location.href = data.redirect || (data.role === "admin" ? "/admin" : "/portal");
+        const defaultTarget = data.redirect || (data.role === "admin" ? "/admin" : "/portal");
+        window.location.href = resolveSafeRedirect(defaultTarget, data.role);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Sign-in failed. Please verify your credentials.");
@@ -129,7 +142,6 @@ export function LoginForm() {
 }
 
 export function RegisterForm() {
-  const router = useRouter();
   const [values, setValues] = useState({
     full_name: "",
     email: "",
@@ -694,12 +706,15 @@ export function AdminAccessForm({ currentMode }: { currentMode: string }) {
 }
 
 export function ApproveEnrollmentButton({ studentId }: { studentId: string }) {
+  const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [approved, setApproved] = useState(false);
+  const [error, setError] = useState("");
   const [message, setMessage] = useState("");
 
   async function approve() {
     setBusy(true);
+    setError("");
     setMessage("");
     try {
       const response = await fetch("/api/admin/approve", {
@@ -711,10 +726,9 @@ export function ApproveEnrollmentButton({ studentId }: { studentId: string }) {
       if (!response.ok) throw new Error(data.error || "Approval failed");
       setApproved(true);
       setMessage("Approved");
-    } catch {
-      // In dev mode simulate approval
-      setApproved(true);
-      setMessage("Approved (Dev)");
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Approval failed");
     } finally {
       setBusy(false);
     }
@@ -735,6 +749,7 @@ export function ApproveEnrollmentButton({ studentId }: { studentId: string }) {
         {busy ? "…" : "Approve"}
       </button>
       {message && <span style={{ fontSize: 10, color: "var(--teal)" }}>{message}</span>}
+      {error && <span style={{ fontSize: 11, color: "#fca5a5" }}>{error}</span>}
     </div>
   );
 }

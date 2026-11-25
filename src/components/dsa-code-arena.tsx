@@ -2,9 +2,38 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { DsaProblem, DSA_PROBLEMS } from "@/lib/dsa-problems";
+import { DsaProblem } from "@/lib/dsa-problems";
 import { SupportedLanguage } from "@/lib/compiler";
-import { getDsaMockComment, DsaMockFeedback } from "@/lib/dsa-mocking";
+import { getDsaMockComment, type DsaMockFeedback } from "@/lib/dsa-mocking";
+
+interface DsaTestCaseResult {
+  id?: string;
+  passed: boolean;
+  input: string;
+  expected: string;
+  actual?: string;
+  error?: string;
+  timeMs?: number;
+}
+
+interface DsaExecutionResult {
+  status?: string;
+  stdout?: string;
+  stderr?: string;
+  compileOutput?: string;
+  executionTimeMs?: number;
+  results?: DsaTestCaseResult[];
+}
+
+interface DsaSubmissionResult {
+  status: string;
+  testCasesPassed?: number;
+  totalTestCases?: number;
+  executionTimeMs?: number;
+  compileOutput?: string;
+  results?: DsaTestCaseResult[];
+  mockComment?: DsaMockFeedback;
+}
 
 interface DsaCodeArenaProps {
   initialProblem: DsaProblem;
@@ -20,41 +49,58 @@ export function DsaCodeArena({
   const [problem, setProblem] = useState<DsaProblem>(initialProblem);
   const [language, setLanguage] = useState<SupportedLanguage>("cpp");
   const [codePerLang, setCodePerLang] = useState<Record<string, Record<SupportedLanguage, string>>>({});
-  const [code, setCode] = useState<string>("");
+  const [code, setCode] = useState<string>(initialProblem.starterTemplates["cpp"] || "");
   const [activeLeftTab, setActiveLeftTab] = useState<"description" | "submissions">("description");
 
   // Console state
   const [activeConsoleTab, setActiveConsoleTab] = useState<"samples" | "custom" | "output">("samples");
   const [selectedSampleIndex, setSelectedSampleIndex] = useState<number>(0);
-  const [customStdin, setCustomStdin] = useState<string>("");
+  const [customStdin, setCustomStdin] = useState<string>(initialProblem.sampleTestCases[0]?.input || "");
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   // Results state
-  const [executionResult, setExecutionResult] = useState<any>(null);
-  const [submissionResult, setSubmissionResult] = useState<any>(null);
+  const [executionResult, setExecutionResult] = useState<DsaExecutionResult | null>(null);
+  const [submissionResult, setSubmissionResult] = useState<DsaSubmissionResult | null>(null);
   const [solvedSet, setSolvedSet] = useState<Set<string>>(new Set(solvedProblemIds));
+
+  const codePerLangRef = useRef(codePerLang);
+  const lastInputModeRef = useRef<"samples" | "custom">("samples");
+
+  useEffect(() => {
+    codePerLangRef.current = codePerLang;
+  }, [codePerLang]);
 
   // Initialize code for current problem & language
   useEffect(() => {
-    const saved = codePerLang[problem.id]?.[language];
-    if (saved) {
-      setCode(saved);
-    } else {
-      const template = problem.starterTemplates[language] || "";
-      setCode(template);
-      setCodePerLang((prev) => ({
-        ...prev,
-        [problem.id]: {
-          ...(prev[problem.id] || {}),
-          [language]: template,
-        },
-      }));
-    }
-    setCustomStdin(problem.sampleTestCases[0]?.input || "");
-    setExecutionResult(null);
-    setSubmissionResult(null);
-  }, [problem.id, language]);
+    let cancelled = false;
+    const saved = codePerLangRef.current[problem.id]?.[language];
+    const template = problem.starterTemplates[language] || "";
+    const defaultInput = problem.sampleTestCases[0]?.input || "";
+
+    queueMicrotask(() => {
+      if (cancelled) return;
+      if (saved !== undefined) {
+        setCode(saved);
+      } else {
+        setCode(template);
+        setCodePerLang((prev) => ({
+          ...prev,
+          [problem.id]: {
+            ...(prev[problem.id] || {}),
+            [language]: template,
+          },
+        }));
+      }
+      setCustomStdin(defaultInput);
+      setExecutionResult(null);
+      setSubmissionResult(null);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [problem.id, language, problem.starterTemplates, problem.sampleTestCases]);
 
   const handleCodeChange = (newCode: string) => {
     setCode(newCode);
@@ -83,6 +129,15 @@ export function DsaCodeArena({
 
   // Run against sample or custom input
   const handleRunCode = async () => {
+    const modeToRun =
+      activeConsoleTab === "samples" || activeConsoleTab === "custom"
+        ? activeConsoleTab
+        : lastInputModeRef.current;
+
+    if (activeConsoleTab === "samples" || activeConsoleTab === "custom") {
+      lastInputModeRef.current = activeConsoleTab;
+    }
+
     setIsRunning(true);
     setActiveConsoleTab("output");
     setExecutionResult(null);
@@ -90,7 +145,7 @@ export function DsaCodeArena({
 
     try {
       const testCases =
-        activeConsoleTab === "samples"
+        modeToRun === "samples"
           ? [
               {
                 id: `Sample ${selectedSampleIndex + 1}`,
@@ -106,17 +161,17 @@ export function DsaCodeArena({
         body: JSON.stringify({
           language,
           code,
-          stdin: activeConsoleTab === "custom" ? customStdin : undefined,
+          stdin: modeToRun === "custom" ? customStdin : undefined,
           testCases,
         }),
       });
 
       const data = await res.json();
       setExecutionResult(data);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setExecutionResult({
         status: "RUNTIME_ERROR",
-        stderr: err?.message || "Failed to execute code",
+        stderr: err instanceof Error ? err.message : "Failed to execute code",
       });
     } finally {
       setIsRunning(false);
@@ -146,10 +201,10 @@ export function DsaCodeArena({
       if (data.status === "ACCEPTED") {
         setSolvedSet((prev) => new Set([...prev, problem.id]));
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       setSubmissionResult({
         status: "RUNTIME_ERROR",
-        compileOutput: err?.message || "Submission failed",
+        compileOutput: err instanceof Error ? err.message : "Submission failed",
       });
     } finally {
       setIsSubmitting(false);
@@ -192,7 +247,15 @@ export function DsaCodeArena({
               value={problem.id}
               onChange={(e) => {
                 const found = allProblems.find((p) => p.id === e.target.value);
-                if (found) setProblem(found);
+                if (found) {
+                  setProblem(found);
+                  setSelectedSampleIndex(0);
+                  lastInputModeRef.current = "samples";
+                  setActiveConsoleTab("samples");
+                  if (typeof window !== "undefined") {
+                    window.history.replaceState(null, "", `/dsa/${found.id}`);
+                  }
+                }
               }}
               className="dsa-select"
             >
@@ -376,14 +439,20 @@ export function DsaCodeArena({
               <button
                 type="button"
                 className={`dsa-console-tab-btn ${activeConsoleTab === "samples" ? "active" : ""}`}
-                onClick={() => setActiveConsoleTab("samples")}
+                onClick={() => {
+                  lastInputModeRef.current = "samples";
+                  setActiveConsoleTab("samples");
+                }}
               >
                 Sample Testcases
               </button>
               <button
                 type="button"
                 className={`dsa-console-tab-btn ${activeConsoleTab === "custom" ? "active" : ""}`}
-                onClick={() => setActiveConsoleTab("custom")}
+                onClick={() => {
+                  lastInputModeRef.current = "custom";
+                  setActiveConsoleTab("custom");
+                }}
               >
                 Custom STDIN
               </button>
@@ -516,7 +585,7 @@ export function DsaCodeArena({
 
                           {submissionResult.results && submissionResult.results.length > 0 && (
                             <div className="dsa-tc-results-list">
-                              {submissionResult.results.map((r: any, idx: number) => (
+                              {submissionResult.results.map((r: DsaTestCaseResult, idx: number) => (
                                 <div
                                   key={idx}
                                   className={`dsa-tc-item ${r.passed ? "tc-passed" : "tc-failed"}`}
@@ -559,7 +628,7 @@ export function DsaCodeArena({
                           executionResult.status ||
                           (executionResult.stderr
                             ? "RUNTIME_ERROR"
-                            : executionResult.results?.some((r: any) => !r.passed)
+                            : executionResult.results?.some((r: DsaTestCaseResult) => !r.passed)
                             ? "FAILED"
                             : "SUCCESS"),
                         code,
@@ -624,14 +693,16 @@ export function DsaCodeArena({
                             </div>
                           )}
 
-                          <div className="dsa-stdout-box">
-                            <b>Standard Output:</b>
-                            <pre>{executionResult.stdout || "(No output produced)"}</pre>
-                          </div>
+                          {!executionResult.results && (
+                            <div className="dsa-stdout-box">
+                              <b>Standard Output:</b>
+                              <pre>{executionResult.stdout || "(No output produced)"}</pre>
+                            </div>
+                          )}
 
                           {executionResult.results && (
                             <div className="dsa-tc-results-list">
-                              {executionResult.results.map((r: any, idx: number) => (
+                              {executionResult.results.map((r: DsaTestCaseResult, idx: number) => (
                                 <div
                                   key={idx}
                                   className={`dsa-tc-item ${r.passed ? "tc-passed" : "tc-failed"}`}

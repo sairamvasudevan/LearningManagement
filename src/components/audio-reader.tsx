@@ -185,7 +185,6 @@ export function AudioReader({
   chunks,
   badgeLabel = "Audio Narrator",
   className = "",
-  autoScroll = true,
 }: AudioReaderProps) {
   const [supported, setSupported] = useState(true);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
@@ -198,6 +197,7 @@ export function AudioReader({
   const [minimized, setMinimized] = useState(false);
 
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const speakChunkRef = useRef<(index: number) => void>(() => {});
   const isPlayingRef = useRef(false);
   const currentIndexRef = useRef(0);
   const rateRef = useRef(rate);
@@ -218,42 +218,47 @@ export function AudioReader({
 
   // Check browser support and load voices
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      if (!("speechSynthesis" in window)) {
-        setSupported(false);
-        return;
-      }
-      setSupported(true);
+    if (typeof window === "undefined") return;
+    let cancelled = false;
 
-      const updateVoices = () => {
-        const available = window.speechSynthesis.getVoices();
-        // Prioritize natural English voices
-        const englishVoices = available.filter(
-          (v) => v.lang.startsWith("en") || v.lang.startsWith("en-US") || v.lang.startsWith("en-GB")
-        );
-        const voiceList = englishVoices.length > 0 ? englishVoices : available;
-        setVoices(voiceList);
-
-        // Pick preferred default voice: Google or Apple or Microsoft natural
-        if (!voiceURIRef.current && voiceList.length > 0) {
-          const preferred =
-            voiceList.find((v) => v.name.includes("Natural") || v.name.includes("Google") || v.name.includes("Samantha") || v.name.includes("Daniel")) ||
-            voiceList.find((v) => v.lang === "en-US") ||
-            voiceList[0];
-          setSelectedVoiceURI(preferred.voiceURI);
-        }
-      };
-
-      updateVoices();
-      window.speechSynthesis.onvoiceschanged = updateVoices;
-
+    if (!("speechSynthesis" in window)) {
+      queueMicrotask(() => {
+        if (!cancelled) setSupported(false);
+      });
       return () => {
-        window.speechSynthesis.onvoiceschanged = null;
-        if (window.speechSynthesis.speaking) {
-          window.speechSynthesis.cancel();
-        }
+        cancelled = true;
       };
     }
+
+    const updateVoices = () => {
+      if (cancelled) return;
+      setSupported(true);
+      const available = window.speechSynthesis.getVoices();
+      const englishVoices = available.filter(
+        (v) => v.lang.startsWith("en") || v.lang.startsWith("en-US") || v.lang.startsWith("en-GB")
+      );
+      const voiceList = englishVoices.length > 0 ? englishVoices : available;
+      setVoices(voiceList);
+
+      if (!voiceURIRef.current && voiceList.length > 0) {
+        const preferred =
+          voiceList.find((v) => v.name.includes("Natural") || v.name.includes("Google") || v.name.includes("Samantha") || v.name.includes("Daniel")) ||
+          voiceList.find((v) => v.lang === "en-US") ||
+          voiceList[0];
+        setSelectedVoiceURI(preferred.voiceURI);
+      }
+    };
+
+    queueMicrotask(updateVoices);
+    window.speechSynthesis.onvoiceschanged = updateVoices;
+
+    return () => {
+      cancelled = true;
+      window.speechSynthesis.onvoiceschanged = null;
+      if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel();
+      }
+    };
   }, []);
 
   // Clean narration text: format math/code symbols into speech-friendly words
@@ -297,7 +302,7 @@ export function AudioReader({
       if (!speechText) {
         // Skip empty chunk
         if (index + 1 < chunks.length) {
-          speakChunk(index + 1);
+          speakChunkRef.current(index + 1);
         } else {
           setStatus("idle");
           isPlayingRef.current = false;
@@ -324,7 +329,7 @@ export function AudioReader({
       utterance.onend = () => {
         if (!isPlayingRef.current) return;
         if (index + 1 < chunks.length) {
-          speakChunk(index + 1);
+          speakChunkRef.current(index + 1);
         } else {
           setStatus("idle");
           isPlayingRef.current = false;
@@ -336,7 +341,7 @@ export function AudioReader({
         // If canceled explicitly, ignore
         if (e.error === "canceled" || e.error === "interrupted") return;
         if (index + 1 < chunks.length) {
-          speakChunk(index + 1);
+          speakChunkRef.current(index + 1);
         } else {
           setStatus("idle");
           isPlayingRef.current = false;
@@ -348,6 +353,10 @@ export function AudioReader({
     },
     [chunks, cleanForSpeech]
   );
+
+  useEffect(() => {
+    speakChunkRef.current = speakChunk;
+  }, [speakChunk]);
 
   // Play / Resume
   const handlePlay = useCallback(() => {

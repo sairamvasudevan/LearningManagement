@@ -69,37 +69,52 @@ export function WebDevPlayground({ lesson, allLessons }: WebDevPlaygroundProps) 
   // Iframe ref
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const editorTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const completedIdsRef = useRef<Set<string>>(completedLessonIds);
+  const activeTestRunIdRef = useRef<number>(0);
+
+  useEffect(() => {
+    completedIdsRef.current = completedLessonIds;
+  }, [completedLessonIds]);
+  const pendingTestRunRef = useRef<{ runId: number; requirements: { id: string; description: string; testCode: string }[] } | null>(null);
+  const validationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Load saved code & completion state from localStorage on lesson change
   useEffect(() => {
-    try {
-      const savedCompleted = localStorage.getItem("nexus_webdev_completed");
-      if (savedCompleted) {
-        setCompletedLessonIds(new Set(JSON.parse(savedCompleted)));
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (cancelled) return;
+      try {
+        const savedCompleted = localStorage.getItem("nexus_webdev_completed");
+        if (savedCompleted) {
+          setCompletedLessonIds(new Set(JSON.parse(savedCompleted)));
+        }
+
+        const savedHtml = localStorage.getItem(`nexus_webdev_${lesson.id}_html`);
+        const savedCss = localStorage.getItem(`nexus_webdev_${lesson.id}_css`);
+        const savedJs = localStorage.getItem(`nexus_webdev_${lesson.id}_js`);
+
+        setHtmlCode(savedHtml !== null ? savedHtml : lesson.starterHtml);
+        setCssCode(savedCss !== null ? savedCss : lesson.starterCss);
+        setJsCode(savedJs !== null ? savedJs : lesson.starterJs);
+
+        setConsoleMessages([]);
+        setTestResults([]);
+        setHasRunTests(false);
+        setAllPassed(false);
+        setActiveEditorTab("html");
+        setActiveRightTab("preview");
+        setSelectedQuizOption(null);
+        setQuizSubmitted(false);
+        setQuizIsCorrect(false);
+      } catch {
+        setHtmlCode(lesson.starterHtml);
+        setCssCode(lesson.starterCss);
+        setJsCode(lesson.starterJs);
       }
-
-      const savedHtml = localStorage.getItem(`nexus_webdev_${lesson.id}_html`);
-      const savedCss = localStorage.getItem(`nexus_webdev_${lesson.id}_css`);
-      const savedJs = localStorage.getItem(`nexus_webdev_${lesson.id}_js`);
-
-      setHtmlCode(savedHtml !== null ? savedHtml : lesson.starterHtml);
-      setCssCode(savedCss !== null ? savedCss : lesson.starterCss);
-      setJsCode(savedJs !== null ? savedJs : lesson.starterJs);
-
-      setConsoleMessages([]);
-      setTestResults([]);
-      setHasRunTests(false);
-      setAllPassed(false);
-      setActiveEditorTab("html");
-      setActiveRightTab("preview");
-      setSelectedQuizOption(null);
-      setQuizSubmitted(false);
-      setQuizIsCorrect(false);
-    } catch {
-      setHtmlCode(lesson.starterHtml);
-      setCssCode(lesson.starterCss);
-      setJsCode(lesson.starterJs);
-    }
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [lesson.id, lesson.starterHtml, lesson.starterCss, lesson.starterJs]);
 
   // Persist code changes
@@ -184,13 +199,45 @@ ${htmlCode}
     console.error(err.message);
   }
 </script>
+<script>
+  window.addEventListener("message", function(ev) {
+    if (!ev.data || ev.data.type !== "WEBDEV_RUN_TESTS") return;
+    if (ev.source !== window.parent) return;
+    var reqs = Array.isArray(ev.data.requirements) ? ev.data.requirements : [];
+    var results = reqs.map(function(req) {
+      try {
+        var testFn = new Function("document", "window", "try { return (" + req.testCode + "); } catch (e) { return false; }");
+        return {
+          id: req.id,
+          description: req.description,
+          passed: Boolean(testFn(document, window)),
+        };
+      } catch (err) {
+        return {
+          id: req.id,
+          description: req.description,
+          passed: false,
+          error: err && err.message ? err.message : "Evaluation failed",
+        };
+      }
+    });
+    window.parent.postMessage({
+      type: "WEBDEV_TEST_RESULTS",
+      runId: ev.data.runId,
+      results: results,
+    }, "*");
+  });
+</script>
 </body>
 </html>`;
   }, [htmlCode, cssCode, jsCode]);
 
-  // Console listener
+  // Console & sandboxed test runner listener
   useEffect(() => {
     const handleMessage = (e: MessageEvent) => {
+      if (iframeRef.current?.contentWindow && e.source !== iframeRef.current.contentWindow) {
+        return;
+      }
       if (e.data && e.data.type === "WEBDEV_CONSOLE") {
         setConsoleMessages((prev) => [
           ...prev.slice(-99),
@@ -201,11 +248,54 @@ ${htmlCode}
             timestamp: e.data.timestamp,
           },
         ]);
+      } else if (e.data && e.data.type === "WEBDEV_TEST_RESULTS") {
+        if (e.data.runId !== activeTestRunIdRef.current) return;
+        if (validationTimeoutRef.current) {
+          clearTimeout(validationTimeoutRef.current);
+          validationTimeoutRef.current = null;
+        }
+        const incoming: TestResult[] = Array.isArray(e.data.results) ? e.data.results : [];
+        const allOk =
+          incoming.length === lesson.requirements.length &&
+          incoming.every((r) => Boolean(r.passed));
+
+        setTestResults(incoming);
+        setHasRunTests(true);
+        setAllPassed(allOk);
+        setIsValidating(false);
+
+        if (allOk) {
+          try {
+            const updated = new Set(completedIdsRef.current);
+            updated.add(lesson.id);
+            setCompletedLessonIds(updated);
+            localStorage.setItem("nexus_webdev_completed", JSON.stringify(Array.from(updated)));
+          } catch {}
+        }
       }
     };
     window.addEventListener("message", handleMessage);
-    return () => window.removeEventListener("message", handleMessage);
-  }, []);
+    return () => {
+      window.removeEventListener("message", handleMessage);
+      if (validationTimeoutRef.current) {
+        clearTimeout(validationTimeoutRef.current);
+      }
+    };
+  }, [lesson.id, lesson.requirements.length]);
+
+  const handleIframeLoad = () => {
+    const pending = pendingTestRunRef.current;
+    if (!pending || !iframeRef.current?.contentWindow) return;
+    pendingTestRunRef.current = null;
+    iframeRef.current.contentWindow.postMessage(
+      {
+        type: "WEBDEV_RUN_TESTS",
+        runId: pending.runId,
+        requirements: pending.requirements,
+      },
+      "*",
+    );
+  };
 
   // Auto-run trigger
   useEffect(() => {
@@ -224,72 +314,44 @@ ${htmlCode}
     }
   };
 
-  // Automated solution test runner (GUVI WebKata style)
+  // Automated solution test runner (GUVI WebKata style) via sandbox postMessage bridge
   const handleTestSolution = () => {
     setIsValidating(true);
     setActiveRightTab("tests");
 
+    const nextRunId = activeTestRunIdRef.current + 1;
+    activeTestRunIdRef.current = nextRunId;
+    pendingTestRunRef.current = {
+      runId: nextRunId,
+      requirements: lesson.requirements.map((r) => ({
+        id: r.id,
+        description: r.description,
+        testCode: r.testCode,
+      })),
+    };
+
+    if (validationTimeoutRef.current) {
+      clearTimeout(validationTimeoutRef.current);
+    }
+    validationTimeoutRef.current = setTimeout(() => {
+      if (activeTestRunIdRef.current !== nextRunId) return;
+      pendingTestRunRef.current = null;
+      setTestResults(
+        lesson.requirements.map((req) => ({
+          id: req.id,
+          description: req.description,
+          passed: false,
+          error: "Sandbox execution timed out before test verification completed.",
+        })),
+      );
+      setHasRunTests(true);
+      setAllPassed(false);
+      setIsValidating(false);
+    }, 3000);
+
     if (iframeRef.current) {
       iframeRef.current.srcdoc = compileSrcDoc();
     }
-
-    setTimeout(() => {
-      if (!iframeRef.current || !iframeRef.current.contentDocument) {
-        setIsValidating(false);
-        return;
-      }
-
-      const doc = iframeRef.current.contentDocument;
-      const win = iframeRef.current.contentWindow;
-
-      const results: TestResult[] = [];
-      let passedCount = 0;
-
-      for (const req of lesson.requirements) {
-        try {
-          const testFn = new Function(
-            "document",
-            "window",
-            `
-            try {
-              return (${req.testCode});
-            } catch (e) {
-              return false;
-            }
-          `,
-          );
-          const passed = Boolean(testFn(doc, win));
-          if (passed) passedCount++;
-          results.push({
-            id: req.id,
-            description: req.description,
-            passed,
-          });
-        } catch (err: any) {
-          results.push({
-            id: req.id,
-            description: req.description,
-            passed: false,
-            error: err.message,
-          });
-        }
-      }
-
-      const allOk = passedCount === lesson.requirements.length;
-      setTestResults(results);
-      setHasRunTests(true);
-      setAllPassed(allOk);
-      setIsValidating(false);
-
-      if (allOk) {
-        try {
-          const updated = new Set(completedLessonIds);
-          updated.add(lesson.id);
-          setCompletedLessonIds(updated);
-          localStorage.setItem("nexus_webdev_completed", JSON.stringify(Array.from(updated)));
-        } catch {}
-      }
-    }, 450);
   };
 
   // Reset to starter template
@@ -1256,6 +1318,7 @@ ${htmlCode}
             <div style={{ flex: 1, display: activeRightTab === "preview" ? "flex" : "none", background: "#ffffff" }}>
               <iframe
                 ref={iframeRef}
+                onLoad={handleIframeLoad}
                 title="Live Sandbox Preview"
                 sandbox="allow-scripts allow-modals"
                 style={{ width: "100%", height: "100%", border: "none", background: "#ffffff" }}
@@ -1347,7 +1410,7 @@ ${htmlCode}
                       No tests executed yet
                     </div>
                     <p style={{ fontSize: "12px", maxWidth: "300px", margin: "0 auto" }}>
-                      Click <b>"Submit &amp; Run Tests"</b> to check your code against all requirement conditions.
+                      Click <b>&ldquo;Submit &amp; Run Tests&rdquo;</b> to check your code against all requirement conditions.
                     </p>
                   </div>
                 ) : (

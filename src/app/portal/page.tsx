@@ -6,7 +6,7 @@ import { getUserProgress, getUserAttempts, getUserById } from "@/lib/db";
 import { COURSE_PACKAGES } from "@/lib/courses";
 import { MODULES_CURRICULUM } from "@/lib/curriculum-data";
 import catalog from "@/lib/course-catalog.json";
-import { PortalStageExplorer } from "@/components/portal-stage-explorer";
+import { PortalStageExplorer, type ModuleInfo } from "@/components/portal-stage-explorer";
 import { checkCourseAccess } from "@/lib/course-prerequisites";
 
 export const dynamic = "force-dynamic";
@@ -55,7 +55,7 @@ export default async function StudentPortalPage() {
 
   return (
     <>
-      <SiteHeader signedIn />
+      <SiteHeader signedIn admin={identity.role === "admin"} />
       <main className="portal-container">
         {/* Welcome Header */}
         <section className="portal-welcome-card">
@@ -376,7 +376,7 @@ export default async function StudentPortalPage() {
                 <span className="metric-icon">🏆</span>
                 <div>
                   <div className="metric-val">
-                    {totalPossibleMarks > 0 ? `${totalBestScore} / ${totalPossibleMarks}` : "0 / 12"}
+                    {totalPossibleMarks > 0 ? `${totalBestScore} / ${totalPossibleMarks}` : "0 / 36"}
                   </div>
                   <div className="metric-label">Cumulative Score</div>
                 </div>
@@ -442,7 +442,7 @@ export default async function StudentPortalPage() {
             {/* Interactive 10-Stage 100-Module Curriculum Explorer */}
             <PortalStageExplorer
               stages={catalog.stages}
-              modules={catalog.modules as any}
+              modules={catalog.modules as ModuleInfo[]}
               progressMap={JSON.parse(JSON.stringify(Object.fromEntries(progressMap)))}
               completedSet={Array.from(completedSet)}
               nextModule={nextModule}

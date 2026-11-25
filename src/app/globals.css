@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
-
 /* ==========================================================================
    1. APPLE OBSIDIAN DESIGN SYSTEM - TOKENS & ROOTS
    ========================================================================== */
@@ -2517,68 +2515,6 @@ td small {
 /* ==========================================================================
    19. DSA ARENA (`/dsa`) - DARK SYSTEM ARCHITECTURE
    ========================================================================== */
-.dsa-arena-layout {
-  display: flex;
-  flex-direction: column;
-  height: calc(100vh - 60px);
-  background: #000000;
-  overflow: hidden;
-}
-
-.dsa-topbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 20px;
-  background: #161617;
-  border-bottom: 1px solid var(--border-normal);
-  flex-shrink: 0;
-}
-
-.dsa-topbar-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.dsa-back-link {
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  padding: 5px 10px;
-  border-radius: 6px;
-  background: var(--bg-subtle);
-}
-
-.dsa-back-link:hover {
-  color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.dsa-select {
-  padding: 6px 12px;
-  font-size: 12.5px;
-  border-radius: 8px;
-  border: 1px solid var(--border-normal);
-  background: var(--bg-subtle);
-  color: var(--text-primary);
-  cursor: pointer;
-  width: auto !important;
-}
-
-.dsa-diff-pill {
-  font-size: 10.5px;
-  font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 980px;
-  text-transform: uppercase;
-}
-
-.diff-easy { background: var(--apple-green-subtle); color: var(--apple-green); }
-.diff-medium { background: var(--apple-amber-subtle); color: var(--apple-amber); }
-.diff-hard { background: var(--apple-red-subtle); color: var(--apple-red); }
-
 .dsa-main-split {
   display: grid;
   grid-template-columns: 45% 55%;
@@ -5211,12 +5147,20 @@ td small {
 }
 
 .assessment-progress {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--apple-blue-accent);
+  width: 100%;
+  height: 6px;
+  background: #1c1c1e;
+  border-radius: 99px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.assessment-progress span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--apple-blue), #60a5fa);
+  border-radius: 99px;
+  transition: width 0.25s ease;
 }
 
 .assessment-score {
@@ -5399,11 +5343,12 @@ td small {
 .dsa-editor-wrap {
   position: relative;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   flex: 1;
   background: #0b0d11;
   border-right: 1px solid var(--border-normal);
-  min-height: 0;
+  min-height: 260px;
+  overflow: hidden;
 }
 
 .dsa-editor-header {
@@ -5447,9 +5392,11 @@ td small {
   outline: none;
   resize: none;
   tab-size: 2;
+  overflow: auto;
 }
 
 .dsa-line-gutter {
+  min-width: 42px;
   padding: 16px 8px;
   background: #08090c;
   color: var(--text-tertiary);
@@ -5459,6 +5406,7 @@ td small {
   text-align: right;
   user-select: none;
   border-right: 1px solid var(--border-subtle);
+  overflow: hidden;
 }
 
 .dsa-right-pane {
@@ -5475,14 +5423,42 @@ td small {
   background: #161617;
   display: flex;
   flex-direction: column;
+  max-height: 44%;
+  min-height: 200px;
 }
 
 .dsa-console-tabs {
   display: flex;
-  gap: 4px;
+  gap: 6px;
   padding: 8px 12px;
   background: #111;
   border-bottom: 1px solid var(--border-subtle);
+}
+
+.dsa-console-tab-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  padding: 5px 12px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.dsa-console-tab-btn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.dsa-console-tab-btn.active {
+  background: #1c1c1e;
+  color: var(--text-primary);
+  border-color: var(--border-normal);
 }
 
 .dsa-console-body {
@@ -5490,6 +5466,62 @@ td small {
   overflow-y: auto;
   font-family: var(--font-mono);
   font-size: 12.5px;
+}
+
+.dsa-status-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 14px;
+  border: 1px solid var(--border-normal);
+}
+
+.dsa-status-banner.banner-accepted {
+  background: rgba(48, 209, 88, 0.12);
+  border-color: rgba(48, 209, 88, 0.45);
+  color: var(--apple-green);
+}
+
+.dsa-status-banner.banner-failed {
+  background: rgba(255, 69, 58, 0.12);
+  border-color: rgba(255, 69, 58, 0.45);
+  color: #fca5a5;
+}
+
+.banner-icon {
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.banner-status-title {
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.banner-stats {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.dsa-tc-item {
+  border-radius: 10px;
+  padding: 10px 14px;
+  border: 1px solid var(--border-normal);
+  background: #111;
+}
+
+.dsa-tc-item.tc-passed {
+  border-color: rgba(48, 209, 88, 0.35);
+  background: rgba(48, 209, 88, 0.06);
+}
+
+.dsa-tc-item.tc-failed {
+  border-color: rgba(255, 69, 58, 0.35);
+  background: rgba(255, 69, 58, 0.06);
 }
 
 .dsa-accepted-banner {
@@ -5625,7 +5657,24 @@ td small {
 .dsa-sample-nav-pills {
   display: flex;
   gap: 8px;
-  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.dsa-sample-pill {
+  padding: 5px 12px;
+  border-radius: 99px;
+  background: #1c1c1e;
+  border: 1px solid var(--border-normal);
+  color: var(--text-secondary);
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.dsa-sample-pill.active {
+  background: rgba(0, 113, 227, 0.2);
+  border-color: var(--apple-blue);
+  color: #60a5fa;
 }
 
 .dsa-sample-details {
@@ -5635,9 +5684,19 @@ td small {
   padding: 12px 14px;
 }
 
+.dsa-sample-details pre {
+  margin: 4px 0 10px;
+  padding: 8px 10px;
+  background: #0b0d11;
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 12px;
+}
+
 .dsa-sample-selector {
   display: flex;
-  gap: 6px;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .dsa-custom-stdin-wrap {
@@ -6226,6 +6285,13 @@ td small {
 }
 
 .mini-progress-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 110px;
+}
+
+.mini-progress-bar {
   width: 100%;
   height: 6px;
   background: #1c1c1e;
@@ -6233,7 +6299,9 @@ td small {
   overflow: hidden;
 }
 
-.mini-progress-bar {
+.mini-progress-bar > span,
+.mini-progress-bar > div {
+  display: block;
   height: 100%;
   background: var(--apple-blue);
   border-radius: 99px;
@@ -6354,7 +6422,166 @@ td small {
 
 .feedback-header-left {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
 }
+
+/* ==========================================================================
+   32. UTILITY COMPONENTS (RESULT ORB, CALLOUTS, CHECKLIST, CONSENT)
+   ========================================================================== */
+.result-orb {
+  width: 128px;
+  height: 128px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 16px auto 20px;
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 800;
+  border: 3px solid var(--border-normal);
+  background: #1c1c1e;
+  color: var(--text-primary);
+}
+
+.result-orb small {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.result-orb.success {
+  border-color: var(--apple-green);
+  background: rgba(48, 209, 88, 0.12);
+  color: var(--apple-green);
+}
+
+.result-orb.failure {
+  border-color: var(--apple-red);
+  background: rgba(255, 69, 58, 0.12);
+  color: #fca5a5;
+}
+
+.callout-box {
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border-normal);
+  background: #1c1c1e;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.callout-box strong,
+.callout-box b {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--text-primary);
+}
+
+.callout-box.warning-callout {
+  border-left: 3px solid var(--apple-amber);
+  background: rgba(255, 159, 10, 0.08);
+}
+
+.callout-box.tip-callout {
+  border-left: 3px solid var(--apple-green);
+  background: rgba(48, 209, 88, 0.08);
+}
+
+.callout-box.rule-callout {
+  border-left: 3px solid var(--apple-blue);
+  background: rgba(0, 113, 227, 0.08);
+}
+
+.checklist-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  background: #1c1c1e;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.checklist-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: var(--apple-blue);
+  flex-shrink: 0;
+}
+
+.checklist-item b {
+  display: block;
+  font-size: 13.5px;
+  color: var(--text-primary);
+}
+
+.checklist-item small {
+  display: block;
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+  margin-top: 2px;
+}
+
+.checklist-item.checked {
+  border-color: rgba(48, 209, 88, 0.45);
+  background: rgba(48, 209, 88, 0.07);
+}
+
+.consent-control {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border-normal);
+  background: #1c1c1e;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.consent-control input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  margin-top: 2px;
+  flex-shrink: 0;
+  accent-color: var(--apple-blue);
+}
+
+.consent-control.consent-invalid {
+  border-color: var(--apple-red);
+  background: rgba(255, 69, 58, 0.08);
+}
+
+.dsa-prose p {
+  color: var(--text-secondary);
+  line-height: 1.68;
+  margin: 0 0 14px;
+}
+
+.dsa-prose ul {
+  padding-left: 20px;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+
+.dsa-prose code {
+  background: #1c1c1e;
+  padding: 2px 6px;
+  border-radius: 5px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: #93c5fd;
+}
+
 

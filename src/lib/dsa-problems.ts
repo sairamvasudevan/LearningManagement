@@ -60,7 +60,7 @@ export const DSA_PROBLEMS: DsaProblem[] = [
     ],
     hiddenTestCases: [
       {
-        input: "5 10\n1 2 3 7 9",
+        input: "5 10\n1 4 3 7 8",
         expectedOutput: "2 3",
       },
       {
@@ -384,7 +384,7 @@ if __name__ == "__main__":
         expectedOutput: "-1",
       },
       {
-        input: "6\n-2 -3 4 -1 -2 1 5 -3",
+        input: "8\n-2 -3 4 -1 -2 1 5 -3",
         expectedOutput: "7",
       },
     ],
@@ -1001,6 +1001,568 @@ def main():
                 dp[i] = min(dp[i], dp[i - c] + 1)
 
     print(-1 if dp[amount] > amount else dp[amount])
+
+if __name__ == "__main__":
+    main()
+`,
+    },
+  },
+  {
+    id: "best-time-to-buy-and-sell-stock",
+    title: "Best Time to Buy & Sell Stock",
+    difficulty: "Easy",
+    topic: "Greedy & Prefix Minimum",
+    description:
+      "You are given an array `prices` where `prices[i]` is the price of a given stock on the `i`-th day.\n\nYou want to maximize your profit by choosing a single day to buy one stock and choosing a different day in the future to sell that stock. Return the maximum profit you can achieve from this transaction. If you cannot achieve any profit, return `0`.",
+    inputFormat: "First line contains N.\nSecond line contains N space-separated integers representing prices.",
+    outputFormat: "Print the maximum profit achievable (or 0).",
+    constraints: ["1 <= N <= 10^5", "0 <= prices[i] <= 10^4"],
+    sampleTestCases: [
+      {
+        input: "6\n7 1 5 3 6 4",
+        expectedOutput: "5",
+        explanation: "Buy on day 2 (price = 1) and sell on day 5 (price = 6), profit = 6 - 1 = 5.",
+      },
+      {
+        input: "5\n7 6 4 3 1",
+        expectedOutput: "0",
+        explanation: "Prices decline strictly; no profitable transaction is possible.",
+      },
+    ],
+    hiddenTestCases: [
+      {
+        input: "1\n10",
+        expectedOutput: "0",
+      },
+      {
+        input: "6\n2 4 1 7 5 9",
+        expectedOutput: "8",
+      },
+    ],
+    starterTemplates: {
+      c: `#include <stdio.h>
+
+int main() {
+    int n;
+    if (scanf("%d", &n) != 1 || n <= 0) return 0;
+
+    long long minPrice = 1000000000LL;
+    long long maxProfit = 0;
+
+    for (int i = 0; i < n; i++) {
+        long long p;
+        scanf("%lld", &p);
+        if (p < minPrice) minPrice = p;
+        else if (p - minPrice > maxProfit) maxProfit = p - minPrice;
+    }
+
+    printf("%lld\\n", maxProfit);
+    return 0;
+}
+`,
+      cpp: `#include <iostream>
+#include <algorithm>
+#include <climits>
+
+using namespace std;
+
+int main() {
+    int n;
+    if (!(cin >> n)) return 0;
+
+    long long minPrice = LLONG_MAX;
+    long long maxProfit = 0;
+
+    for (int i = 0; i < n; i++) {
+        long long p;
+        cin >> p;
+        minPrice = min(minPrice, p);
+        maxProfit = max(maxProfit, p - minPrice);
+    }
+
+    cout << maxProfit << "\\n";
+    return 0;
+}
+`,
+      java: `import java.util.Scanner;
+
+public class Solution {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        if (!sc.hasNextInt()) return;
+
+        int n = sc.nextInt();
+        long minPrice = Long.MAX_VALUE;
+        long maxProfit = 0;
+
+        for (int i = 0; i < n; i++) {
+            long p = sc.nextLong();
+            if (p < minPrice) minPrice = p;
+            else maxProfit = Math.max(maxProfit, p - minPrice);
+        }
+
+        System.out.println(maxProfit);
+    }
+}
+`,
+      python: `import sys
+
+def main():
+    tokens = sys.stdin.read().split()
+    if not tokens:
+        return
+    n = int(tokens[0])
+    prices = [int(x) for x in tokens[1:1 + n]]
+
+    min_price = float("inf")
+    max_profit = 0
+    for p in prices:
+        if p < min_price:
+            min_price = p
+        else:
+            max_profit = max(max_profit, p - min_price)
+
+    print(max_profit)
+
+if __name__ == "__main__":
+    main()
+`,
+    },
+  },
+  {
+    id: "contains-duplicate",
+    title: "Contains Duplicate",
+    difficulty: "Easy",
+    topic: "Arrays & Hash Set",
+    description:
+      "Given an integer array `nums`, print `true` if any value appears at least twice in the array, and print `false` if every element is distinct.",
+    inputFormat: "First line contains N.\nSecond line contains N space-separated integers.",
+    outputFormat: "Print 'true' or 'false'.",
+    constraints: ["1 <= N <= 10^5", "-10^9 <= nums[i] <= 10^9"],
+    sampleTestCases: [
+      {
+        input: "4\n1 2 3 1",
+        expectedOutput: "true",
+        explanation: "The value 1 appears at indices 0 and 3.",
+      },
+      {
+        input: "4\n1 2 3 4",
+        expectedOutput: "false",
+        explanation: "All elements are distinct.",
+      },
+    ],
+    hiddenTestCases: [
+      {
+        input: "1\n42",
+        expectedOutput: "false",
+      },
+      {
+        input: "10\n1 1 1 3 3 4 3 2 4 2",
+        expectedOutput: "true",
+      },
+    ],
+    starterTemplates: {
+      c: `#include <stdio.h>
+#include <stdlib.h>
+
+int cmpLL(const void* a, const void* b) {
+    long long x = *(const long long*)a;
+    long long y = *(const long long*)b;
+    return (x > y) - (x < y);
+}
+
+int main() {
+    int n;
+    if (scanf("%d", &n) != 1 || n <= 0) return 0;
+
+    long long* nums = (long long*)malloc(sizeof(long long) * n);
+    for (int i = 0; i < n; i++) scanf("%lld", &nums[i]);
+
+    qsort(nums, n, sizeof(long long), cmpLL);
+    int dup = 0;
+    for (int i = 1; i < n; i++) {
+        if (nums[i] == nums[i - 1]) {
+            dup = 1;
+            break;
+        }
+    }
+
+    printf("%s\\n", dup ? "true" : "false");
+    free(nums);
+    return 0;
+}
+`,
+      cpp: `#include <iostream>
+#include <unordered_set>
+
+using namespace std;
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+
+    int n;
+    if (!(cin >> n)) return 0;
+
+    unordered_set<long long> seen;
+    bool dup = false;
+    for (int i = 0; i < n; i++) {
+        long long x;
+        cin >> x;
+        if (!seen.insert(x).second) {
+            dup = true;
+        }
+    }
+
+    cout << (dup ? "true" : "false") << "\\n";
+    return 0;
+}
+`,
+      java: `import java.util.HashSet;
+import java.util.Scanner;
+
+public class Solution {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        if (!sc.hasNextInt()) return;
+
+        int n = sc.nextInt();
+        HashSet<Long> seen = new HashSet<>();
+        boolean dup = false;
+
+        for (int i = 0; i < n; i++) {
+            long x = sc.nextLong();
+            if (!seen.add(x)) {
+                dup = true;
+            }
+        }
+
+        System.out.println(dup ? "true" : "false");
+    }
+}
+`,
+      python: `import sys
+
+def main():
+    tokens = sys.stdin.read().split()
+    if not tokens:
+        return
+    n = int(tokens[0])
+    nums = tokens[1:1 + n]
+    print("true" if len(set(nums)) < len(nums) else "false")
+
+if __name__ == "__main__":
+    main()
+`,
+    },
+  },
+  {
+    id: "binary-search",
+    title: "Binary Search (Sorted Array Lookup)",
+    difficulty: "Easy",
+    topic: "Binary Search & Divide-and-Conquer",
+    description:
+      "Given an array of integers `nums` sorted in ascending order, and an integer `target`, write a function to search `target` in `nums`. If `target` exists, print its 0-based index. Otherwise, print `-1`.\n\nYou must write an algorithm with O(log N) runtime complexity.",
+    inputFormat: "First line contains N and target.\nSecond line contains N sorted space-separated integers.",
+    outputFormat: "Print the 0-based index of target, or -1 if absent.",
+    constraints: ["1 <= N <= 10^5", "-10^9 <= nums[i], target <= 10^9", "All elements in nums are unique and sorted ascending."],
+    sampleTestCases: [
+      {
+        input: "6 9\n-1 0 3 5 9 12",
+        expectedOutput: "4",
+        explanation: "9 exists in nums and its 0-based index is 4.",
+      },
+      {
+        input: "6 2\n-1 0 3 5 9 12",
+        expectedOutput: "-1",
+        explanation: "2 does not exist in nums so return -1.",
+      },
+    ],
+    hiddenTestCases: [
+      {
+        input: "1 5\n5",
+        expectedOutput: "0",
+      },
+      {
+        input: "5 -3\n-5 -3 0 4 10",
+        expectedOutput: "1",
+      },
+    ],
+    starterTemplates: {
+      c: `#include <stdio.h>
+#include <stdlib.h>
+
+int main() {
+    int n;
+    long long target;
+    if (scanf("%d %lld", &n, &target) != 2) return 0;
+
+    long long* nums = (long long*)malloc(sizeof(long long) * n);
+    for (int i = 0; i < n; i++) scanf("%lld", &nums[i]);
+
+    int left = 0, right = n - 1, ans = -1;
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
+        if (nums[mid] == target) {
+            ans = mid;
+            break;
+        } else if (nums[mid] < target) {
+            left = mid + 1;
+        } else {
+            right = mid - 1;
+        }
+    }
+
+    printf("%d\\n", ans);
+    free(nums);
+    return 0;
+}
+`,
+      cpp: `#include <iostream>
+#include <vector>
+
+using namespace std;
+
+int main() {
+    int n;
+    long long target;
+    if (!(cin >> n >> target)) return 0;
+
+    vector<long long> nums(n);
+    for (int i = 0; i < n; i++) cin >> nums[i];
+
+    int left = 0, right = n - 1, ans = -1;
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
+        if (nums[mid] == target) {
+            ans = mid;
+            break;
+        } else if (nums[mid] < target) {
+            left = mid + 1;
+        } else {
+            right = mid - 1;
+        }
+    }
+
+    cout << ans << "\\n";
+    return 0;
+}
+`,
+      java: `import java.util.Scanner;
+
+public class Solution {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        if (!sc.hasNextInt()) return;
+
+        int n = sc.nextInt();
+        long target = sc.nextLong();
+        long[] nums = new long[n];
+        for (int i = 0; i < n; i++) nums[i] = sc.nextLong();
+
+        int left = 0, right = n - 1, ans = -1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] == target) {
+                ans = mid;
+                break;
+            } else if (nums[mid] < target) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+
+        System.out.println(ans);
+    }
+}
+`,
+      python: `import sys
+
+def main():
+    tokens = sys.stdin.read().split()
+    if not tokens:
+        return
+    n = int(tokens[0])
+    target = int(tokens[1])
+    nums = [int(x) for x in tokens[2:2 + n]]
+
+    left, right = 0, n - 1
+    ans = -1
+    while left <= right:
+        mid = left + (right - left) // 2
+        if nums[mid] == target:
+            ans = mid
+            break
+        elif nums[mid] < target:
+            left = mid + 1
+        else:
+            right = mid - 1
+
+    print(ans)
+
+if __name__ == "__main__":
+    main()
+`,
+    },
+  },
+  {
+    id: "merge-sorted-array",
+    title: "Merge Two Sorted Arrays",
+    difficulty: "Easy",
+    topic: "Two Pointers",
+    description:
+      "You are given two sorted integer arrays `nums1` of size `M` and `nums2` of size `N`, each sorted in non-decreasing order.\n\nMerge `nums1` and `nums2` into a single array sorted in non-decreasing order in O(M + N) linear time using Two Pointers, and print the merged elements separated by spaces.",
+    inputFormat:
+      "First line contains M and N.\nSecond line contains M sorted integers for nums1.\nThird line contains N sorted integers for nums2.",
+    outputFormat: "Print the M + N merged elements in non-decreasing order separated by spaces.",
+    constraints: ["0 <= M, N <= 10^5", "M + N >= 1", "-10^9 <= nums1[i], nums2[j] <= 10^9"],
+    sampleTestCases: [
+      {
+        input: "3 3\n1 2 3\n2 5 6",
+        expectedOutput: "1 2 2 3 5 6",
+        explanation: "Merging [1,2,3] and [2,5,6] produces [1,2,2,3,5,6].",
+      },
+      {
+        input: "1 0\n1\n",
+        expectedOutput: "1",
+        explanation: "Second array is empty; output is 1.",
+      },
+    ],
+    hiddenTestCases: [
+      {
+        input: "0 2\n\n-5 10",
+        expectedOutput: "-5 10",
+      },
+      {
+        input: "4 4\n-4 0 3 9\n-2 1 3 12",
+        expectedOutput: "-4 -2 0 1 3 3 9 12",
+      },
+    ],
+    starterTemplates: {
+      c: `#include <stdio.h>
+#include <stdlib.h>
+
+int main() {
+    int m, n;
+    if (scanf("%d %d", &m, &n) != 2) return 0;
+
+    long long* a = (long long*)malloc(sizeof(long long) * (m > 0 ? m : 1));
+    long long* b = (long long*)malloc(sizeof(long long) * (n > 0 ? n : 1));
+
+    for (int i = 0; i < m; i++) scanf("%lld", &a[i]);
+    for (int j = 0; j < n; j++) scanf("%lld", &b[j]);
+
+    int i = 0, j = 0, first = 1;
+    while (i < m && j < n) {
+        long long val = (a[i] <= b[j]) ? a[i++] : b[j++];
+        printf("%s%lld", first ? "" : " ", val);
+        first = 0;
+    }
+    while (i < m) {
+        printf("%s%lld", first ? "" : " ", a[i++]);
+        first = 0;
+    }
+    while (j < n) {
+        printf("%s%lld", first ? "" : " ", b[j++]);
+        first = 0;
+    }
+    printf("\\n");
+
+    free(a);
+    free(b);
+    return 0;
+}
+`,
+      cpp: `#include <iostream>
+#include <vector>
+
+using namespace std;
+
+int main() {
+    int m, n;
+    if (!(cin >> m >> n)) return 0;
+
+    vector<long long> a(m), b(n);
+    for (int i = 0; i < m; i++) cin >> a[i];
+    for (int j = 0; j < n; j++) cin >> b[j];
+
+    vector<long long> merged;
+    merged.reserve(m + n);
+    int i = 0, j = 0;
+    while (i < m && j < n) {
+        if (a[i] <= b[j]) merged.push_back(a[i++]);
+        else merged.push_back(b[j++]);
+    }
+    while (i < m) merged.push_back(a[i++]);
+    while (j < n) merged.push_back(b[j++]);
+
+    for (size_t k = 0; k < merged.size(); k++) {
+        cout << merged[k] << (k + 1 < merged.size() ? " " : "\\n");
+    }
+    return 0;
+}
+`,
+      java: `import java.util.Scanner;
+
+public class Solution {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        if (!sc.hasNextInt()) return;
+
+        int m = sc.nextInt();
+        int n = sc.nextInt();
+        long[] a = new long[m];
+        long[] b = new long[n];
+        for (int i = 0; i < m; i++) a[i] = sc.nextLong();
+        for (int j = 0; j < n; j++) b[j] = sc.nextLong();
+
+        StringBuilder sb = new StringBuilder();
+        int i = 0, j = 0;
+        while (i < m && j < n) {
+            if (sb.length() > 0) sb.append(" ");
+            sb.append(a[i] <= b[j] ? a[i++] : b[j++]);
+        }
+        while (i < m) {
+            if (sb.length() > 0) sb.append(" ");
+            sb.append(a[i++]);
+        }
+        while (j < n) {
+            if (sb.length() > 0) sb.append(" ");
+            sb.append(b[j++]);
+        }
+        System.out.println(sb.toString());
+    }
+}
+`,
+      python: `import sys
+
+def main():
+    tokens = sys.stdin.read().split()
+    if not tokens:
+        return
+    m = int(tokens[0])
+    n = int(tokens[1])
+    a = [int(x) for x in tokens[2:2 + m]]
+    b = [int(x) for x in tokens[2 + m:2 + m + n]]
+
+    i = j = 0
+    merged = []
+    while i < m and j < n:
+        if a[i] <= b[j]:
+            merged.append(str(a[i]))
+            i += 1
+        else:
+            merged.append(str(b[j]))
+            j += 1
+    while i < m:
+        merged.append(str(a[i]))
+        i += 1
+    while j < n:
+        merged.append(str(b[j]))
+        j += 1
+
+    print(" ".join(merged))
 
 if __name__ == "__main__":
     main()

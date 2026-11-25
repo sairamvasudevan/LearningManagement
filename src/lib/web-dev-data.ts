@@ -268,14 +268,14 @@ The \`<figure>\` tag specifies self-contained content, like illustrations, diagr
 
 \`\`\`html
 <figure>
-  <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400" alt="Laptop on wooden desk displaying source code" width="400" height="260">
+  <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='260' viewBox='0 0 400 260'><rect width='400' height='260' rx='12' fill='%230f172a'/><rect x='24' y='24' width='352' height='212' rx='8' fill='%231e293b' stroke='%23334155'/><circle cx='44' cy='42' r='5' fill='%23ef4444'/><circle cx='60' cy='42' r='5' fill='%23f59e0b'/><circle cx='76' cy='42' r='5' fill='%2310b981'/><rect x='44' y='70' width='180' height='10' rx='4' fill='%2338bdf8'/><rect x='44' y='92' width='260' height='10' rx='4' fill='%2394a3b8'/><rect x='44' y='114' width='220' height='10' rx='4' fill='%23818cf8'/><rect x='44' y='136' width='140' height='10' rx='4' fill='%2334d399'/><text x='44' y='205' fill='%23cbd5e1' font-family='monospace' font-size='14'>Nexus Offline Workstation</text></svg>" alt="Laptop on wooden desk displaying source code" width="400" height="260">
   <figcaption>Figure 1.1: Modern software engineering workspace.</figcaption>
 </figure>
 \`\`\``,
     tryItExample: {
       title: "W3Schools Try-It: Images & Captions",
       description: "Experiment with image dimensions and figure captions.",
-      html: `<figure>\n  <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=300" alt="Developer coding" width="300" height="200" style="border-radius: 8px;">\n  <figcaption style="font-size: 13px; color: #64748b; margin-top: 6px;">Developer building full-stack web applications.</figcaption>\n</figure>`,
+      html: `<figure>\n  <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='200' viewBox='0 0 300 200'><rect width='300' height='200' rx='10' fill='%230f172a'/><rect x='18' y='18' width='264' height='164' rx='6' fill='%231e293b' stroke='%2338bdf8'/><text x='150' y='105' text-anchor='middle' fill='%23f8fafc' font-family='sans-serif' font-size='16' font-weight='bold'>HTML5 Figure Lab</text></svg>" alt="Developer coding" width="300" height="200" style="border-radius: 8px;">\n  <figcaption style="font-size: 13px; color: #64748b; margin-top: 6px;">Developer building full-stack web applications.</figcaption>\n</figure>`,
       css: `body { font-family: sans-serif; padding: 20px; }`,
       js: ``,
     },
@@ -316,7 +316,7 @@ The \`<figure>\` tag specifies self-contained content, like illustrations, diagr
     starterHtml: `<!-- Chapter 4: Images & Figures -->\n<!-- TODO: Add <figure> with <img> and <figcaption> -->\n`,
     starterCss: `body { font-family: sans-serif; padding: 20px; }\nfigure { margin: 0; padding: 12px; background: #f1f5f9; border-radius: 8px; display: inline-block; }\nimg { border-radius: 6px; max-width: 100%; height: auto; display: block; }\nfigcaption { margin-top: 8px; font-size: 13px; color: #475569; }`,
     starterJs: ``,
-    solutionHtml: `<figure>\n  <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400" alt="Student workstation setup with code editor" width="400" height="260">\n  <figcaption>Figure 1: Full-stack developer workstation setup.</figcaption>\n</figure>`,
+    solutionHtml: `<figure>\n  <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='260' viewBox='0 0 400 260'><rect width='400' height='260' rx='12' fill='%230f172a'/><rect x='24' y='24' width='352' height='212' rx='8' fill='%231e293b' stroke='%2338bdf8'/><text x='200' y='135' text-anchor='middle' fill='%23f8fafc' font-family='sans-serif' font-size='18' font-weight='bold'>Workstation Setup</text></svg>" alt="Student workstation setup with code editor" width="400" height="260">\n  <figcaption>Figure 1: Full-stack developer workstation setup.</figcaption>\n</figure>`,
     solutionCss: `body { font-family: sans-serif; padding: 20px; }\nfigure { margin: 0; padding: 12px; background: #f1f5f9; border-radius: 8px; display: inline-block; }\nimg { border-radius: 6px; max-width: 100%; height: auto; display: block; }\nfigcaption { margin-top: 8px; font-size: 13px; color: #475569; }`,
     solutionJs: ``,
   },

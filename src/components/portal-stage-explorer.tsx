@@ -89,9 +89,9 @@ export function PortalStageExplorer({
                   gap: "8px",
                   padding: "8px 14px",
                   borderRadius: "8px",
-                  border: isSelected ? "2px solid #ff6a00" : "1px solid #e2e8f0",
-                  background: isSelected ? "#fff7ed" : "#ffffff",
-                  color: isSelected ? "#c2410c" : "#334155",
+                  border: isSelected ? "1.5px solid var(--apple-blue)" : "1px solid var(--border-normal)",
+                  background: isSelected ? "rgba(0, 113, 227, 0.16)" : "#1c1c1e",
+                  color: isSelected ? "#60a5fa" : "#e5e5ea",
                   fontWeight: isSelected ? 700 : 500,
                   fontSize: "13px",
                   cursor: "pointer",
@@ -100,8 +100,8 @@ export function PortalStageExplorer({
               >
                 <span
                   style={{
-                    background: isSelected ? "#ff6a00" : isAllDone ? "#10b981" : "#f1f5f9",
-                    color: isSelected || isAllDone ? "#ffffff" : "#64748b",
+                    background: isSelected ? "var(--apple-blue)" : isAllDone ? "var(--apple-green)" : "#2c2c2e",
+                    color: "#ffffff",
                     padding: "2px 6px",
                     borderRadius: "4px",
                     fontSize: "11px",
@@ -114,7 +114,7 @@ export function PortalStageExplorer({
                 <span
                   style={{
                     fontSize: "11px",
-                    color: isAllDone ? "#10b981" : done > 0 ? "#f97316" : "#94a3b8",
+                    color: isAllDone ? "#30d158" : done > 0 ? "#60a5fa" : "#86868b",
                     fontWeight: 700,
                   }}
                 >
@@ -222,7 +222,7 @@ export function PortalStageExplorer({
                     <span className="tag-pill">22 Mins</span>
                     <span className="tag-pill">2 Case Studies</span>
                     <span className="tag-pill">Hands-on Task</span>
-                    <span className="tag-pill">6 Questions</span>
+                    <span className="tag-pill">{mNum === 1 ? "12 Questions (36 Marks)" : "6 Questions (18 Marks)"}</span>
                     <span className="tag-pill" style={{ color: "var(--apple-blue-accent)", background: "var(--apple-blue-subtle)" }}>
                       {m.focus.split(";")[0]}
                     </span>

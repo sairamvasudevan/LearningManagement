@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getCurrentIdentity } from "@/lib/auth";
 import { getDatabaseHealth, getAdminMetrics } from "@/lib/db";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { MODULES_CURRICULUM } from "@/lib/curriculum-data";
@@ -7,6 +8,14 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
+    const identity = await getCurrentIdentity();
+    if (!identity) {
+      return NextResponse.json({ error: "Authentication required." }, { status: 401 });
+    }
+    if (identity.role !== "admin") {
+      return NextResponse.json({ error: "Administrator access required." }, { status: 403 });
+    }
+
     const memory = process.memoryUsage();
     const dbHealth = getDatabaseHealth();
     const adminMetrics = getAdminMetrics();

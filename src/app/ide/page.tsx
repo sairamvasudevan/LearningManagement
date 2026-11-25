@@ -9,7 +9,7 @@ export default async function IdePage() {
 
   return (
     <>
-      <SiteHeader signedIn={!!identity} />
+      <SiteHeader signedIn={!!identity} admin={identity?.role === "admin"} />
       <main style={{ height: "calc(100vh - 64px)", overflow: "hidden" }}>
         <StandaloneIde />
       </main>

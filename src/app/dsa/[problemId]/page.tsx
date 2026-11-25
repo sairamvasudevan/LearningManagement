@@ -20,7 +20,7 @@ export default async function DsaProblemDetailPage({ params }: PageProps) {
 
   return (
     <>
-      <SiteHeader signedIn={!!identity} />
+      <SiteHeader signedIn={!!identity} admin={identity?.role === "admin"} />
       <main style={{ minHeight: "calc(100vh - 64px)", background: "#f8fafc" }}>
         <DsaCodeArena
           initialProblem={problem}

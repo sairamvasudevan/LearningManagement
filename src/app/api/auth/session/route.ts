@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentIdentity } from "@/lib/auth";
+import { hasSameOrigin } from "@/lib/security";
 import {
   createUser,
   getUserByEmail,
@@ -11,62 +12,21 @@ import {
   savePracticeTask,
   getUserBySessionToken,
   validateUserCredentials,
+  getRegistrationMode,
+  isEmailInvited,
+  markInviteAccepted,
 } from "@/lib/db";
 
 export async function POST(request: NextRequest) {
+  if (!hasSameOrigin(request)) {
+    return NextResponse.json({ error: "Cross-origin request rejected." }, { status: 403 });
+  }
+
   try {
     const body = await request.json();
     const action = body.action as string;
 
     const response = NextResponse.json({ ok: true });
-
-    if (action === "demo_student") {
-      let user = getUserByEmail("student@learninghub.edu");
-      if (!user) {
-        user = createUser({
-          email: "student@learninghub.edu",
-          role: "student",
-          full_name: "Aditya Sharma",
-          college: "National Institute of Technology, Trichy",
-          register_number: "NITT-2024-CS-0842",
-          department: "Computer Science and Engineering",
-          degree: "B.Tech Computer Science",
-          graduation_year: 2026,
-        });
-      }
-      const token = createSession(user.id);
-      response.cookies.set("psl_session", token, {
-        path: "/",
-        httpOnly: true,
-        sameSite: "lax",
-        maxAge: 60 * 60 * 24 * 7,
-      });
-      return response;
-    }
-
-    if (action === "demo_admin") {
-      let user = getUserByEmail("admin@learninghub.edu");
-      if (!user) {
-        user = createUser({
-          email: "admin@learninghub.edu",
-          role: "admin",
-          full_name: "Prof. Sairam Vasudevan",
-          college: "Learning Management System Admin",
-          register_number: "ADMIN-FACULTY-01",
-          department: "Academic & Placement Affairs",
-          degree: "Head of Technical Learning",
-          graduation_year: 2020,
-        });
-      }
-      const token = createSession(user.id);
-      response.cookies.set("psl_session", token, {
-        path: "/",
-        httpOnly: true,
-        sameSite: "lax",
-        maxAge: 60 * 60 * 24 * 7,
-      });
-      return response;
-    }
 
     if (action === "register" || action === "dev_register") {
       const email = String(body.email || "").toLowerCase().trim();
@@ -83,7 +43,6 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "Full name must be at least 3 characters." }, { status: 400 });
       }
 
-      // Check if user already exists
       const existing = getUserByEmail(email);
       if (existing) {
         return NextResponse.json(
@@ -92,10 +51,27 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Create new verified user in database with full profile & hashed password
+      const mode = getRegistrationMode();
+      const invited = isEmailInvited(email);
+
+      if (mode === "invite_only" && !invited) {
+        return NextResponse.json(
+          {
+            error:
+              "Registration is currently Invite-Only. Please contact your institution administrator to be invited.",
+          },
+          { status: 403 },
+        );
+      }
+
+      const initialStatus: "approved" | "pending" =
+        mode === "approval" && !invited ? "pending" : "approved";
+
+      // Create new user in database with full profile & PBKDF2 password hashing
       const user = createUser({
         email,
         role: "student",
+        enrollment_status: initialStatus,
         full_name: fullName,
         phone: String(body.phone || "").trim(),
         college: String(body.college || "Engineering College").trim(),
@@ -106,10 +82,15 @@ export async function POST(request: NextRequest) {
         password,
       });
 
+      if (invited) {
+        markInviteAccepted(email);
+      }
+
       const token = createSession(user.id);
       const res = NextResponse.json({
         ok: true,
         role: user.role,
+        enrollmentStatus: user.enrollment_status,
         redirect: "/portal",
         user: {
           id: user.id,
@@ -140,7 +121,6 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "Password is required." }, { status: 400 });
       }
 
-      // Verify credentials against database
       const validation = validateUserCredentials(email, password);
       if (validation.error || !validation.user) {
         return NextResponse.json(
@@ -177,18 +157,24 @@ export async function POST(request: NextRequest) {
       const identity = await getCurrentIdentity();
       const sessionToken = request.cookies.get("psl_session")?.value;
       const user = sessionToken ? getUserBySessionToken(sessionToken) : null;
-      const userId = identity?.id || user?.id || (process.env.NODE_ENV === "development" ? "00000000-0000-4000-a000-000000000001" : null);
+      const userId = identity?.id || user?.id;
 
       if (!userId) {
-        return NextResponse.json({ error: "Authentication required to update learning records." }, { status: 401 });
+        return NextResponse.json(
+          { error: "Authentication required to update learning records." },
+          { status: 401 },
+        );
       }
 
       const modNum = Number(body.moduleNumber || 1);
-      const score = Number(body.score || 0);
-      const totalMarks = Number(body.totalMarks || 12);
+      if (!Number.isInteger(modNum) || modNum < 1 || modNum > 100) {
+        return NextResponse.json({ error: "Invalid module number." }, { status: 400 });
+      }
+
+      const score = Math.max(0, Number(body.score || 0));
+      const totalMarks = Math.max(1, Number(body.totalMarks || 12));
       const passed = Boolean(body.passed);
 
-      // Record in SQLite database permanently
       recordAssessmentAttempt({
         userId,
         moduleNumber: modNum,
@@ -205,18 +191,26 @@ export async function POST(request: NextRequest) {
       const identity = await getCurrentIdentity();
       const sessionToken = request.cookies.get("psl_session")?.value;
       const user = sessionToken ? getUserBySessionToken(sessionToken) : null;
-      const userId = identity?.id || user?.id || (process.env.NODE_ENV === "development" ? "00000000-0000-4000-a000-000000000001" : null);
+      const userId = identity?.id || user?.id;
 
       if (!userId) {
-        return NextResponse.json({ error: "Authentication required to submit practice tasks." }, { status: 401 });
+        return NextResponse.json(
+          { error: "Authentication required to submit practice tasks." },
+          { status: 401 },
+        );
+      }
+
+      const modNum = Number(body.moduleNumber || 1);
+      if (!Number.isInteger(modNum) || modNum < 1 || modNum > 100) {
+        return NextResponse.json({ error: "Invalid module number." }, { status: 400 });
       }
 
       const submission = savePracticeTask({
         userId,
-        moduleNumber: Number(body.moduleNumber || 1),
-        taskId: String(body.taskId || "task-01"),
-        taskPrompt: String(body.taskPrompt || ""),
-        submission: String(body.submission || "").trim(),
+        moduleNumber: modNum,
+        taskId: String(body.taskId || "task-01").slice(0, 64),
+        taskPrompt: String(body.taskPrompt || "").slice(0, 1000),
+        submission: String(body.submission || "").trim().slice(0, 20000),
       });
 
       return NextResponse.json({ ok: true, submissionId: submission.id });

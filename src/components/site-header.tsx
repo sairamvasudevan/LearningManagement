@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { PLATFORM_NAME, PLATFORM_SUBTITLE, COURSE_PACKAGES } from "@/lib/courses";
+import { PLATFORM_NAME, COURSE_PACKAGES } from "@/lib/courses";
 import catalog from "@/lib/course-catalog.json";
 
 export function SiteHeader({

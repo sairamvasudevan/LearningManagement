@@ -4,10 +4,17 @@ import { DSA_PROBLEMS } from "@/lib/dsa-problems";
 import { recordDsaSubmission } from "@/lib/db";
 import { getCurrentIdentity } from "@/lib/auth";
 import { getDsaMockComment } from "@/lib/dsa-mocking";
+import { hasSameOrigin } from "@/lib/security";
 
 export const dynamic = "force-dynamic";
 
+const MAX_CODE_BYTES = 65_536;
+
 export async function POST(req: NextRequest) {
+  if (!hasSameOrigin(req)) {
+    return NextResponse.json({ error: "Cross-origin request rejected." }, { status: 403 });
+  }
+
   try {
     const body = await req.json();
     const { problemId, language, code } = body as {
@@ -16,10 +23,24 @@ export async function POST(req: NextRequest) {
       code: string;
     };
 
-    if (!problemId || !language || !code) {
+    if (!problemId || !language || !code || typeof code !== "string") {
       return NextResponse.json(
         { error: "problemId, language, and code are required." },
         { status: 400 },
+      );
+    }
+
+    if (!["c", "cpp", "java", "python"].includes(language)) {
+      return NextResponse.json(
+        { error: "Unsupported language. Must be c, cpp, java, or python." },
+        { status: 400 },
+      );
+    }
+
+    if (code.length > MAX_CODE_BYTES) {
+      return NextResponse.json(
+        { error: `Submission code exceeds maximum size (${MAX_CODE_BYTES} bytes).` },
+        { status: 413 },
       );
     }
 
@@ -46,10 +67,8 @@ export async function POST(req: NextRequest) {
 
     const evaluation = await evaluateTestCases(language, code, allTestCases);
 
-    // Get current user if signed in
     const userId = identity?.id;
 
-    // Record submission in SQLite database if user is authenticated
     let submissionId: string | null = null;
     if (userId) {
       try {
@@ -85,9 +104,9 @@ export async function POST(req: NextRequest) {
       mockComment,
       ...evaluation,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     return NextResponse.json(
-      { error: err?.message || "Evaluation engine error" },
+      { error: err instanceof Error ? err.message : "Evaluation engine error" },
       { status: 500 },
     );
   }

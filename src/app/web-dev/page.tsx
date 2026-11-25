@@ -51,7 +51,7 @@ export default async function WebDevCoursePage() {
 
   return (
     <>
-      <SiteHeader signedIn={!!identity} />
+      <SiteHeader signedIn={!!identity} admin={identity?.role === "admin"} />
       <main className="portal-container" style={{ maxWidth: "1280px", margin: "0 auto", padding: "32px 20px" }}>
         {/* Course Banner */}
         <div
@@ -114,7 +114,7 @@ export default async function WebDevCoursePage() {
             </h1>
             <p style={{ fontSize: "16px", color: "#cbd5e1", lineHeight: 1.6, margin: "0 0 24px" }}>
               Engineered following the world-class learning patterns of <b>W3Schools</b> and <b>GUVI</b>: step-by-step
-              conceptual tutorials, instant <b>"Try it Yourself"</b> live sandbox experiments, chapter self-tests, and
+              conceptual tutorials, instant <b>&ldquo;Try it Yourself&rdquo;</b> live sandbox experiments, chapter self-tests, and
               hands-on <b>coding challenges</b> with automated DOM test suites.
             </p>
 

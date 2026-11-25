@@ -2,30 +2,16 @@ import { requireAdmin } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { AdminAccessForm } from "@/components/auth-forms";
+import { getRegistrationMode, getAllCourseInvites } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
 type InvitationRow = { id: string; email: string; status: string; created_at: string };
 
-const DEV_MOCK_INVITES: InvitationRow[] = [
-  {
-    id: "inv-001",
-    email: "cohort-a.lead@nitt.edu",
-    status: "accepted",
-    created_at: "2026-11-17T08:00:00Z",
-  },
-  {
-    id: "inv-002",
-    email: "placement.rep@psgtech.ac.in",
-    status: "pending",
-    created_at: "2026-11-18T09:30:00Z",
-  },
-];
-
 export default async function AdminAccessPage() {
   await requireAdmin();
-  let currentMode = "approval";
-  let inviteRows: InvitationRow[] = DEV_MOCK_INVITES;
+  let currentMode: string = getRegistrationMode();
+  let inviteRows: InvitationRow[] = getAllCourseInvites();
 
   if (isSupabaseConfigured()) {
     try {
@@ -45,7 +31,7 @@ export default async function AdminAccessPage() {
       if (settings?.registration_mode) currentMode = settings.registration_mode;
       if (invites) inviteRows = invites as InvitationRow[];
     } catch {
-      // Dev mock retained
+      // Fall back to SQLite records
     }
   }
 
@@ -59,12 +45,13 @@ export default async function AdminAccessPage() {
         </div>
       </div>
       <AdminAccessForm currentMode={currentMode} />
-      <section className="surface-card table-card">
+      <section className="surface-card table-card" style={{ marginTop: 20 }}>
         <div className="table-heading">
           <div>
             <h2>Invitation records</h2>
             <p>Invited students can register using the email address listed here.</p>
           </div>
+          <span className="count-chip">{inviteRows.length} Invites</span>
         </div>
         <div className="table-scroll">
           <table>

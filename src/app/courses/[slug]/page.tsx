@@ -168,24 +168,28 @@ export default async function CourseDetailPage({ params }: PageProps) {
               <>
                 <Link
                   className="button button-cn-primary button-full"
-                  href={`/courses/${course.slug}`}
+                  href={course.slug === "dsa-mastery-lab" ? "/dsa" : course.slug === "web-dev-mern-lab" ? "/web-dev" : "/register?course=problem-solving-lab"}
                 >
-                  👁️ Open Track Preview →
+                  {course.slug === "dsa-mastery-lab"
+                    ? "Open DSA CodeStudio →"
+                    : course.slug === "web-dev-mern-lab"
+                    ? "Open Web Dev & MERN Sandbox →"
+                    : "Start Curriculum Overview →"}
                 </Link>
                 <Link
                   className="button button-quiet button-full"
                   href="/register?course=problem-solving-lab"
                   style={{ marginTop: 9, borderColor: "#4338ca", color: "#c7d2fe" }}
                 >
-                  👉 Enroll in 100-Hour Lab to Unlock
+                  Create Free Student Account
                 </Link>
               </>
             )}
 
             <p className="field-note">
               {isFlagship
-                ? "Module 01 is currently published and live. Modules 02–100 unlock sequentially upon passing each 80% checkpoint."
-                : "Complete all 100 modules of Problem Solving Lab to unlock full interactive submissions and certifications for this track."}
+                ? "All 100 curriculum modules across 10 stages are published. Pass each 80% checkpoint sequentially to advance."
+                : "Open for direct practice with interactive browser/compiler sandboxes and tracked student records."}
             </p>
           </aside>
         </section>

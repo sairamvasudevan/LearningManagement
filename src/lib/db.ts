@@ -200,7 +200,30 @@ export function getDatabase(): DatabaseSync {
     );
     CREATE INDEX IF NOT EXISTS idx_mod_feedback_module ON module_feedback(module_number);
     CREATE INDEX IF NOT EXISTS idx_mod_feedback_user ON module_feedback(user_id);
+
+    CREATE TABLE IF NOT EXISTS course_settings (
+      id INTEGER PRIMARY KEY CHECK (id = 1),
+      registration_mode TEXT NOT NULL DEFAULT 'open',
+      updated_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS course_invites (
+      id TEXT PRIMARY KEY,
+      email TEXT UNIQUE NOT NULL,
+      status TEXT NOT NULL DEFAULT 'pending',
+      created_at TEXT NOT NULL
+    );
   `);
+
+  // Seed default course_settings row if missing
+  try {
+    const settingsRow = db.prepare("SELECT registration_mode FROM course_settings WHERE id = 1").get() as { registration_mode: string } | undefined;
+    if (!settingsRow) {
+      db.prepare("INSERT INTO course_settings (id, registration_mode, updated_at) VALUES (1, 'open', ?)").run(
+        new Date().toISOString(),
+      );
+    }
+  } catch {}
 
   // Schema migration for password_hash and password_salt
   try {
@@ -350,6 +373,7 @@ export function verifyPassword(password: string, hash: string, salt: string): bo
 export function createUser(data: {
   email: string;
   role?: "student" | "admin";
+  enrollment_status?: "approved" | "pending";
   full_name: string;
   phone?: string;
   college?: string;
@@ -363,7 +387,8 @@ export function createUser(data: {
   const id = crypto.randomUUID();
   const now = new Date().toISOString();
   const email = data.email.toLowerCase().trim();
-  const role = data.role || (email.includes("admin") ? "admin" : "student");
+  const role: "student" | "admin" = data.role === "admin" ? "admin" : "student";
+  const enrollmentStatus = data.enrollment_status === "pending" ? "pending" : "approved";
 
   let pHash = "";
   let pSalt = "";
@@ -375,7 +400,7 @@ export function createUser(data: {
 
   db.prepare(`
     INSERT INTO users (id, email, role, full_name, phone, college, register_number, department, degree, graduation_year, enrollment_status, password_hash, password_salt, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'approved', ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
     id,
     email,
@@ -387,6 +412,7 @@ export function createUser(data: {
     (data.department || "").trim(),
     (data.degree || "").trim(),
     data.graduation_year ?? 2026,
+    enrollmentStatus,
     pHash,
     pSalt,
     now,
@@ -431,12 +457,16 @@ export function createSession(userId: string): string {
   const db = getDatabase();
   const token = crypto.randomBytes(32).toString("hex");
   const now = new Date();
+  const nowIso = now.toISOString();
   const expiresAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
+
+  // Garbage-collect expired sessions
+  db.prepare("DELETE FROM sessions WHERE expires_at < ?").run(nowIso);
 
   db.prepare(`
     INSERT INTO sessions (token, user_id, created_at, expires_at)
     VALUES (?, ?, ?, ?)
-  `).run(token, userId, now.toISOString(), expiresAt);
+  `).run(token, userId, nowIso, expiresAt);
 
   return token;
 }
@@ -673,7 +703,70 @@ export function getAdminMetrics() {
 
 export function approveStudentEnrollment(studentId: string) {
   const db = getDatabase();
-  db.prepare("UPDATE users SET enrollment_status = 'approved' WHERE id = ?").run(studentId);
+  db.prepare("UPDATE users SET enrollment_status = 'approved' WHERE id = ? AND role = 'student'").run(studentId);
+}
+
+export function getRegistrationMode(): "open" | "approval" | "invite_only" {
+  const db = getDatabase();
+  const row = db.prepare("SELECT registration_mode FROM course_settings WHERE id = 1").get() as { registration_mode: string } | undefined;
+  if (row?.registration_mode === "approval" || row?.registration_mode === "invite_only") {
+    return row.registration_mode;
+  }
+  return "open";
+}
+
+export function setRegistrationMode(mode: "open" | "approval" | "invite_only") {
+  const db = getDatabase();
+  db.prepare(`
+    INSERT INTO course_settings (id, registration_mode, updated_at)
+    VALUES (1, ?, ?)
+    ON CONFLICT(id) DO UPDATE SET registration_mode = excluded.registration_mode, updated_at = excluded.updated_at
+  `).run(mode, new Date().toISOString());
+}
+
+export function getAllCourseInvites(): Array<{ id: string; email: string; status: string; created_at: string }> {
+  const db = getDatabase();
+  const rows = db.prepare("SELECT id, email, status, created_at FROM course_invites ORDER BY created_at DESC LIMIT 100").all() as unknown as Array<{
+    id: string;
+    email: string;
+    status: string;
+    created_at: string;
+  }>;
+  return rows.map((r) => ({ ...r }));
+}
+
+export function isEmailInvited(email: string): boolean {
+  const db = getDatabase();
+  const row = db.prepare("SELECT id FROM course_invites WHERE email = ?").get(email.toLowerCase().trim()) as { id: string } | undefined;
+  return Boolean(row);
+}
+
+export function markInviteAccepted(email: string) {
+  const db = getDatabase();
+  db.prepare("UPDATE course_invites SET status = 'accepted' WHERE email = ?").run(email.toLowerCase().trim());
+}
+
+export function assignStudentOrCreateInvite(email: string): { result: "assigned" | "invited"; message: string } {
+  const db = getDatabase();
+  const cleanEmail = email.toLowerCase().trim();
+  const existing = getUserByEmail(cleanEmail);
+  if (existing) {
+    db.prepare("UPDATE users SET enrollment_status = 'approved' WHERE id = ?").run(existing.id);
+    db.prepare(`
+      INSERT INTO course_invites (id, email, status, created_at)
+      VALUES (?, ?, 'accepted', ?)
+      ON CONFLICT(email) DO UPDATE SET status = 'accepted'
+    `).run(`inv-${crypto.randomUUID()}`, cleanEmail, new Date().toISOString());
+    return { result: "assigned", message: `Course access immediately approved for existing student ${cleanEmail}.` };
+  }
+
+  db.prepare(`
+    INSERT INTO course_invites (id, email, status, created_at)
+    VALUES (?, ?, 'pending', ?)
+    ON CONFLICT(email) DO NOTHING
+  `).run(`inv-${crypto.randomUUID()}`, cleanEmail, new Date().toISOString());
+
+  return { result: "invited", message: `Invitation created for ${cleanEmail}. They can now register with immediate access.` };
 }
 
 export function recordDsaSubmission(sub: Omit<DbDsaSubmission, "id" | "created_at">): DbDsaSubmission {

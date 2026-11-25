@@ -27,7 +27,7 @@ export default async function WebDevLessonPage({ params }: LessonPageProps) {
   if (access.isLocked && lesson.id !== "html-intro") {
     return (
       <>
-        <SiteHeader signedIn={!!identity} />
+        <SiteHeader signedIn={!!identity} admin={identity?.role === "admin"} />
         <PrerequisiteLockScreen
           access={access}
           courseTitle="Full-Stack Web Development & MERN Lab"
@@ -42,7 +42,7 @@ export default async function WebDevLessonPage({ params }: LessonPageProps) {
 
   return (
     <>
-      <SiteHeader signedIn={!!identity} />
+      <SiteHeader signedIn={!!identity} admin={identity?.role === "admin"} />
       {access.isLocked && lesson.id === "html-intro" && (
         <div
           style={{

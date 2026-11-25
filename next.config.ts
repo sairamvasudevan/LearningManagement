@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { isSupabaseConfigured } from "./src/lib/supabase/config";
 
 const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
@@ -14,14 +15,15 @@ const securityHeaders = [
 function productionContentSecurityPolicy() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   let supabaseConnectSources = "";
-  if (supabaseUrl) {
+  if (isSupabaseConfigured() && supabaseUrl) {
     try {
       const parsed = new URL(supabaseUrl);
       supabaseConnectSources = `${parsed.origin} wss://${parsed.host}`;
     } catch {
-      // An invalid URL will also prevent Supabase client configuration; do not add it to CSP.
+      // Invalid URL ignored
     }
   }
+  const connectSources = ["'self'", supabaseConnectSources].filter(Boolean).join(" ");
   return [
     "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:",
     "base-uri 'self'",
@@ -30,10 +32,10 @@ function productionContentSecurityPolicy() {
     "frame-src 'self' blob: data:",
     "form-action 'self'",
     "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com data:",
-    "font-src 'self' https://fonts.gstatic.com data:",
-    `connect-src 'self' ${supabaseConnectSources} ws: wss: *`.trim(),
-    "img-src 'self' data: blob: *",
+    "style-src 'self' 'unsafe-inline' data:",
+    "font-src 'self' data:",
+    `connect-src ${connectSources}`,
+    "img-src 'self' data: blob:",
   ].join("; ");
 }
 

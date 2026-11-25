@@ -19,7 +19,7 @@ export default async function DsaCoursePage() {
 
   return (
     <>
-      <SiteHeader signedIn={!!identity} />
+      <SiteHeader signedIn={!!identity} admin={identity?.role === "admin"} />
       <main className="portal-container" style={{ maxWidth: "1280px", margin: "0 auto", padding: "32px 20px" }}>
         {/* Course Banner */}
         <div

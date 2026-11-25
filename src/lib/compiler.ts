@@ -68,6 +68,26 @@ function getJavaBinaries(): { javac: string; java: string } {
   return { javac: "javac", java: "java" };
 }
 
+// Build a stripped execution environment inside the temporary sandbox directory
+function getSandboxedEnv(tmpDir: string): NodeJS.ProcessEnv {
+  return {
+    NODE_ENV: process.env.NODE_ENV || "production",
+    PATH: process.env.PATH || "/usr/local/bin:/usr/bin:/bin",
+    LANG: "C.UTF-8",
+    LC_ALL: "C.UTF-8",
+    HOME: tmpDir,
+    TMPDIR: tmpDir,
+  };
+}
+
+function extractJavaClassName(code: string): string {
+  const pubMatch = code.match(/public\s+class\s+([A-Za-z_][A-Za-z0-9_]{0,63})/);
+  if (pubMatch) return pubMatch[1];
+  const anyMatch = code.match(/\bclass\s+([A-Za-z_][A-Za-z0-9_]{0,63})\b/);
+  if (anyMatch) return anyMatch[1];
+  return "Solution";
+}
+
 // Normalize output text for whitespace-invariant comparison
 export function normalizeOutput(text: string): string {
   return text
@@ -77,7 +97,7 @@ export function normalizeOutput(text: string): string {
 }
 
 /**
- * Executes a snippet of code with provided stdin.
+ * Executes a snippet of code with provided stdin inside an isolated temp directory.
  */
 export async function executeCode(
   language: SupportedLanguage,
@@ -87,12 +107,13 @@ export async function executeCode(
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "psl-run-"));
   const sdkFlags = getMacOsSdkFlag();
   const { javac, java } = getJavaBinaries();
+  const sandboxEnv = getSandboxedEnv(tmpDir);
 
   try {
     let executablePath = "";
     let runCommand = "";
     let runArgs: string[] = [];
-    let compileOutput = "";
+    const compileOutput = "";
 
     // Compilation / preparation phase
     if (language === "c") {
@@ -101,6 +122,8 @@ export async function executeCode(
       fs.writeFileSync(srcPath, code, "utf8");
 
       const compile = spawnSync("clang", ["-O2", ...sdkFlags, srcPath, "-o", executablePath], {
+        cwd: tmpDir,
+        env: sandboxEnv,
         timeout: 6000,
         encoding: "utf8",
         maxBuffer: 1024 * 64,
@@ -126,6 +149,8 @@ export async function executeCode(
         "clang++",
         ["-std=c++17", "-O2", ...sdkFlags, srcPath, "-o", executablePath],
         {
+          cwd: tmpDir,
+          env: sandboxEnv,
           timeout: 6000,
           encoding: "utf8",
           maxBuffer: 1024 * 64,
@@ -144,15 +169,13 @@ export async function executeCode(
       runCommand = executablePath;
       runArgs = [];
     } else if (language === "java") {
-      // Detect public class name or default to Solution
-      let className = "Solution";
-      const match = code.match(/public\s+class\s+([A-Za-z0-9_]+)/);
-      if (match) className = match[1];
-
+      const className = extractJavaClassName(code);
       const srcPath = path.join(tmpDir, `${className}.java`);
       fs.writeFileSync(srcPath, code, "utf8");
 
       const compile = spawnSync(javac, [srcPath], {
+        cwd: tmpDir,
+        env: sandboxEnv,
         timeout: 6000,
         encoding: "utf8",
         maxBuffer: 1024 * 64,
@@ -179,6 +202,8 @@ export async function executeCode(
     // Execution phase
     const startTime = process.hrtime.bigint();
     const run = spawnSync(runCommand, runArgs, {
+      cwd: tmpDir,
+      env: sandboxEnv,
       input: stdin,
       timeout: 3500, // 3.5 seconds execution limit
       encoding: "utf8",
@@ -187,7 +212,7 @@ export async function executeCode(
     const endTime = process.hrtime.bigint();
     const durationMs = Number((endTime - startTime) / BigInt(1000000));
 
-    if (run.error && (run.error as any).code === "ETIMEDOUT") {
+    if (run.error && (run.error as NodeJS.ErrnoException).code === "ETIMEDOUT") {
       return {
         status: "TIME_LIMIT_EXCEEDED",
         stdout: run.stdout || "",
@@ -224,7 +249,7 @@ export async function executeCode(
 }
 
 /**
- * Runs code against multiple test cases and evaluates acceptance.
+ * Runs code against multiple test cases and evaluates acceptance inside an isolated temp directory.
  */
 export async function evaluateTestCases(
   language: SupportedLanguage,
@@ -234,6 +259,7 @@ export async function evaluateTestCases(
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "psl-eval-"));
   const sdkFlags = getMacOsSdkFlag();
   const { javac, java } = getJavaBinaries();
+  const sandboxEnv = getSandboxedEnv(tmpDir);
 
   try {
     let runCommand = "";
@@ -246,6 +272,8 @@ export async function evaluateTestCases(
       fs.writeFileSync(srcPath, code, "utf8");
 
       const compile = spawnSync("clang", ["-O2", ...sdkFlags, srcPath, "-o", binPath], {
+        cwd: tmpDir,
+        env: sandboxEnv,
         timeout: 6000,
         encoding: "utf8",
         maxBuffer: 1024 * 64,
@@ -272,6 +300,8 @@ export async function evaluateTestCases(
         "clang++",
         ["-std=c++17", "-O2", ...sdkFlags, srcPath, "-o", binPath],
         {
+          cwd: tmpDir,
+          env: sandboxEnv,
           timeout: 6000,
           encoding: "utf8",
           maxBuffer: 1024 * 64,
@@ -291,14 +321,13 @@ export async function evaluateTestCases(
       runCommand = binPath;
       runArgs = [];
     } else if (language === "java") {
-      let className = "Solution";
-      const match = code.match(/public\s+class\s+([A-Za-z0-9_]+)/);
-      if (match) className = match[1];
-
+      const className = extractJavaClassName(code);
       const srcPath = path.join(tmpDir, `${className}.java`);
       fs.writeFileSync(srcPath, code, "utf8");
 
       const compile = spawnSync(javac, [srcPath], {
+        cwd: tmpDir,
+        env: sandboxEnv,
         timeout: 6000,
         encoding: "utf8",
         maxBuffer: 1024 * 64,
@@ -332,6 +361,8 @@ export async function evaluateTestCases(
     for (const tc of testCases) {
       const tcStart = process.hrtime.bigint();
       const run = spawnSync(runCommand, runArgs, {
+        cwd: tmpDir,
+        env: sandboxEnv,
         input: tc.input,
         timeout: 3000,
         encoding: "utf8",
@@ -341,7 +372,7 @@ export async function evaluateTestCases(
       const tcDurationMs = Number((tcEnd - tcStart) / BigInt(1000000));
       totalTime += tcDurationMs;
 
-      if (run.error && (run.error as any).code === "ETIMEDOUT") {
+      if (run.error && (run.error as NodeJS.ErrnoException).code === "ETIMEDOUT") {
         results.push({
           id: tc.id,
           passed: false,

@@ -295,6 +295,66 @@ export function getDsaMockComment(params: MockParams): DsaMockFeedback | null {
     };
   }
 
+  if (problemId === "best-time-to-buy-and-sell-stock") {
+    if (actualOutput.startsWith("-")) {
+      return {
+        badge: "📉 BUY HIGH, SELL LOW?",
+        headline: "You lost money on Wall Street!",
+        mock: `Outputting '${actualOutput}' means you paid someone to take your stock! Minimum profit should always be 0 (just stay home and don't buy!).`,
+        sillyMistake: "Allowing negative profit instead of clamping maxProfit at 0.",
+        hint: "Initialize minPrice = infinity and maxProfit = 0. If prices keep dropping, maxProfit stays 0.",
+      };
+    }
+
+    return {
+      badge: "💸 MISSED THE RALLY",
+      headline: "Wrong maximum profit!",
+      mock: `Best achievable profit was '${expectedOutput}', not '${actualOutput}'. Did you sell BEFORE you even bought the stock? Time travel isn't allowed!`,
+      sillyMistake: "Taking global max - global min without enforcing buyDay < sellDay.",
+      hint: "Track the lowest price seen so far (`minPrice`) as you scan left to right, and update `maxProfit = max(maxProfit, price - minPrice)`.",
+    };
+  }
+
+  if (problemId === "contains-duplicate") {
+    return {
+      badge: "👯 SEEING DOUBLE?",
+      headline: "Duplicate detection mismatch!",
+      mock: `Expected '${expectedOutput}', got '${actualOutput}'. Remember to print lowercase 'true' or 'false' — or did a clone slip past your HashSet?`,
+      sillyMistake: "Case mismatch (`True`/`False` vs `true`/`false`) or skipping the last element.",
+      hint: "Insert each element into a HashSet/Set while scanning; if already present, print `true` immediately, otherwise print `false`.",
+    };
+  }
+
+  if (problemId === "binary-search") {
+    if (actualOutput && expectedOutput !== "-1" && Number(actualOutput) === Number(expectedOutput) + 1) {
+      return {
+        badge: "🔍 0-INDEXED REMINDER",
+        headline: "Off-by-one: Binary Search uses 0-based index!",
+        mock: `You printed '${actualOutput}' when the answer is '${expectedOutput}'. Save 1-based indexing for Two Sum — Binary Search expects 0-based indices!`,
+        sillyMistake: "Returning 1-based position instead of 0-based array index.",
+        hint: "Return `mid` directly (0-indexed) when `nums[mid] === target`, and `-1` if `low > high`.",
+      };
+    }
+
+    return {
+      badge: "🧭 LOST IN THE HALVES",
+      headline: "Binary search missed the target!",
+      mock: `Expected '${expectedOutput}', got '${actualOutput}'. Check your boundary condition ('low <= high' vs 'low < high') so you don't skip single-element intervals!`,
+      sillyMistake: "Using 'low < high' or failing to update 'low = mid + 1' / 'high = mid - 1'.",
+      hint: "Use 'while (low <= high)', compute 'mid = low + Math.floor((high - low) / 2)', and shrink past 'mid' on mismatch.",
+    };
+  }
+
+  if (problemId === "merge-sorted-array") {
+    return {
+      badge: "🔀 TRAINWRECK MERGE",
+      headline: "Sorted arrays merged out of order!",
+      mock: `Expected '${expectedOutput}', got '${actualOutput}'. Did you leave extra zeros in nums1, forget trailing elements in nums2, or concatenate without merging?`,
+      sillyMistake: "Dropping leftover elements in the second loop or forgetting trailing spaces.",
+      hint: "Read n and m, then fill backwards from index `n + m - 1` comparing the tails of both arrays, copying any remaining elements of `nums2`.",
+    };
+  }
+
   // 5. UNIVERSAL WRONG ANSWER FALLBACK
   return {
     badge: "🎯 SILLY MISTAKE DETECTED",

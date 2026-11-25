@@ -543,9 +543,9 @@ export function CourseCatalogSection() {
                 ) : course.status === "available" ? (
                   <span
                     style={{
-                      background: "rgba(245, 158, 11, 0.2)",
-                      border: "1px solid #f59e0b",
-                      color: "#fde68a",
+                      background: "rgba(48, 209, 88, 0.16)",
+                      border: "1px solid rgba(48, 209, 88, 0.45)",
+                      color: "#30d158",
                       fontSize: "10px",
                       fontWeight: 800,
                       padding: "2px 8px",
@@ -553,7 +553,7 @@ export function CourseCatalogSection() {
                       textTransform: "uppercase",
                     }}
                   >
-                    🔒 PREREQUISITE: 100H LAB
+                    ⚡ OPEN INTERACTIVE LAB
                   </span>
                 ) : (
                   <span className="thumb-badge-hero">{course.badge}</span>
@@ -620,7 +620,7 @@ export function CourseCatalogSection() {
                     {course.slug === "problem-solving-lab"
                       ? "100% Scholarship · Free for Students"
                       : course.status === "available"
-                      ? "🔒 Unlocks After 100-Hour Lab"
+                      ? "100% Free · Live Compiler & Sandbox Included"
                       : "Cohort Launching Soon"}
                   </small>
                 </div>
@@ -712,7 +712,7 @@ export function CurriculumExplorer() {
           <h2>The 100-Hour Problem Solving Path</h2>
           <p>
             Advance from fundamentals to advanced algorithmic engineering. Passing each checkpoint
-            at 80% unlocks the next lesson. Module 01 is live today; Modules 02–100 unlock sequentially.
+            at 80% unlocks the next lesson. All 100 structured modules across 10 engineering stages are live.
           </p>
         </div>
         <Link className="apple-btn-secondary" href="/courses/problem-solving-lab">
@@ -1033,7 +1033,7 @@ export function RolePreviewTabs() {
                 Create Free Student Account →
               </Link>
               <Link className="apple-btn-secondary" href="/login">
-                Test Drive Demo Student
+                Student Portal Sign In
               </Link>
             </div>
           </div>
@@ -1110,8 +1110,8 @@ export function RolePreviewTabs() {
               </li>
             </ul>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              <Link className="apple-btn-primary" href="/login">
-                Test Drive Demo Admin →
+              <Link className="apple-btn-primary" href="/login?redirect=/admin">
+                Faculty Admin Portal →
               </Link>
               <Link className="apple-btn-secondary" href="/courses/problem-solving-lab">
                 Inspect Curriculum
@@ -1236,7 +1236,7 @@ const FAQS = [
   },
   {
     q: "How much of the 100-hour curriculum is published right now?",
-    a: "The full 100-module syllabus architecture and criterion-referenced learning engine are deployed. Module 01 (Separate the story from the task) is published with its comprehensive lesson, interactive activities, and database-scored 6-question checkpoint. Modules 02–100 are sequentially authored and published.",
+    a: "All 100 structured modules across 10 engineering stages are published with lessons, worked case studies, interactive checklists, and checkpoints — anchored by Module 01's 12-question (36-mark) mastery exam.",
   },
   {
     q: "Do I need prior experience with a specific programming language?",

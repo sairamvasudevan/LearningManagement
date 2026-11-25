@@ -9,7 +9,7 @@ import {
   HeroTryChallenge,
 } from "@/components/home-interactive";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
-import { PLATFORM_NAME, PLATFORM_SUBTITLE } from "@/lib/courses";
+import { PLATFORM_NAME } from "@/lib/courses";
 import { getCurrentIdentity } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";

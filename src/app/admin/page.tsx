@@ -2,7 +2,7 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
-import { getAdminMetrics, getModuleFeedbackMetrics } from "@/lib/db";
+import { getAdminMetrics, getModuleFeedbackMetrics, getRegistrationMode } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +16,7 @@ export default async function AdminHome() {
   let approvedCount = metrics.approvedStudents;
   let pendingCount = Math.max(0, metrics.totalStudents - metrics.approvedStudents);
   let completedLessonsCount = metrics.totalModulesMastered;
-  let registrationMode = "open";
+  let registrationMode = getRegistrationMode() as string;
 
   if (isSupabaseConfigured() && !identity.isDevSession) {
     try {
