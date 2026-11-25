@@ -107,8 +107,8 @@ export default async function HomePage() {
             <span className="system-eyebrow">Engineering Matrix</span>
             <h2 className="system-section-title">Core Training Modules</h2>
             <p className="system-section-desc">
-              Four unified training surfaces engineered to transition students from raw algorithmic reasoning
-              to interview problem solving and production full-stack deployment.
+              Five unified training surfaces engineered to transition students from raw algorithmic reasoning
+              to interview problem solving, full-stack engineering, and LSRW communication mastery.
             </p>
           </div>
 
@@ -293,6 +293,57 @@ export default async function HomePage() {
                 </Link>
                 <Link href="/ide" className="card-secondary-link">
                   Open Blank Scratchpad ↗
+                </Link>
+              </div>
+            </article>
+
+            {/* Module 05: Corporate Communication & LSRW Studio */}
+            <article className="training-module-card comm-span-full" style={{ borderColor: "rgba(192, 132, 252, 0.35)" }}>
+              <div className="training-card-header">
+                <div className="training-card-icon-box" style={{ background: "rgba(168, 85, 247, 0.16)", color: "#c084fc" }}>
+                  🎙️
+                </div>
+                <span className="training-card-pill" style={{ background: "rgba(168, 85, 247, 0.16)", color: "#d8b4fe" }}>
+                  MODULE 05 · PLACEMENT COMMUNICATION (LSRW)
+                </span>
+              </div>
+
+              <h3 className="training-card-title">Corporate Communication &amp; LSRW Assessment Lab</h3>
+              <div className="training-card-subtitle">
+                Listening · Speaking · Reading · Writing (Versant VEPT &amp; Mercer Mettl SpeechX / SVAR Aligned)
+              </div>
+              <p className="training-card-desc">
+                Practice campus placement communication rounds used by Accenture, Cognizant, TCS, and Amazon. Train
+                audio-repeat sentences, syntactic sentence builds, read-aloud prosody, blind passage reconstruction, and
+                corporate email writing with instant Versant-scale (20–80) &amp; CEFR verification.
+              </p>
+
+              <div className="training-card-specs-row">
+                <div className="spec-chip">
+                  <b>4 LSRW Modules</b>
+                  <span>Research-backed playbooks</span>
+                </div>
+                <div className="spec-chip">
+                  <b>12 Live Drills</b>
+                  <span>Mic / Typed + Audio Prompts</span>
+                </div>
+                <div className="spec-chip">
+                  <b>10-Part Mock Exam</b>
+                  <span>Timed Versant / SVAR Simulator</span>
+                </div>
+                <div className="spec-chip">
+                  <b style={{ color: "#c084fc" }}>20–80 CEFR Score</b>
+                  <span>Heuristic v1 · AI Slot Ready</span>
+                </div>
+              </div>
+
+              <div className="training-card-action-row">
+                <Link href="/communication/studio?tab=practice" className="apple-btn-primary" style={{ padding: "9px 20px", fontSize: "13px", background: "#9333ea" }}>
+                  <span>Open LSRW Studio</span>
+                  <span>→</span>
+                </Link>
+                <Link href="/communication" className="card-secondary-link">
+                  Explore LSRW Syllabus &amp; Mock Test ↗
                 </Link>
               </div>
             </article>

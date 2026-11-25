@@ -213,6 +213,27 @@ export function getDatabase(): DatabaseSync {
       status TEXT NOT NULL DEFAULT 'pending',
       created_at TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS communication_submissions (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      mode TEXT NOT NULL,
+      skill TEXT NOT NULL,
+      exercise_id TEXT NOT NULL,
+      overall_score INTEGER NOT NULL,
+      percent_score INTEGER NOT NULL,
+      cefr_level TEXT NOT NULL,
+      sentence_mastery INTEGER NOT NULL,
+      vocabulary_score INTEGER NOT NULL,
+      fluency_score INTEGER NOT NULL,
+      delivery_score INTEGER NOT NULL,
+      passed INTEGER NOT NULL DEFAULT 0,
+      response_summary TEXT DEFAULT '',
+      feedback_json TEXT DEFAULT '{}',
+      created_at TEXT NOT NULL,
+      FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+    );
+    CREATE INDEX IF NOT EXISTS idx_comm_sub_user ON communication_submissions(user_id, created_at);
   `);
 
   // Seed default course_settings row if missing
@@ -1084,4 +1105,97 @@ export function getModuleFeedbackMetrics(): ModuleFeedbackMetrics {
     moduleSummaries,
     flaggedModules,
   };
+}
+
+/* -------------------------------------------------------------
+   COMMUNICATION LSRW PRACTICE & ASSESSMENT PERSISTENCE
+------------------------------------------------------------- */
+
+export type DbCommunicationSubmission = {
+  id: string;
+  user_id: string;
+  mode: "practice" | "assessment";
+  skill: string;
+  exercise_id: string;
+  overall_score: number;
+  percent_score: number;
+  cefr_level: string;
+  sentence_mastery: number;
+  vocabulary_score: number;
+  fluency_score: number;
+  delivery_score: number;
+  passed: number;
+  response_summary: string;
+  feedback_json: string;
+  created_at: string;
+};
+
+export function recordCommunicationSubmission(data: {
+  userId: string;
+  mode: "practice" | "assessment";
+  skill: string;
+  exerciseId: string;
+  overallScore: number;
+  percentScore: number;
+  cefrLevel: string;
+  sentenceMastery: number;
+  vocabularyScore: number;
+  fluencyScore: number;
+  deliveryScore: number;
+  passed: boolean;
+  responseSummary?: string;
+  feedbackJson?: string;
+}): DbCommunicationSubmission {
+  const db = getDatabase();
+  const id = `comm-${crypto.randomBytes(6).toString("hex")}`;
+  const now = new Date().toISOString();
+
+  db.prepare(`
+    INSERT INTO communication_submissions (
+      id, user_id, mode, skill, exercise_id, overall_score, percent_score, cefr_level,
+      sentence_mastery, vocabulary_score, fluency_score, delivery_score, passed,
+      response_summary, feedback_json, created_at
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    id,
+    data.userId,
+    data.mode,
+    data.skill,
+    data.exerciseId,
+    data.overallScore,
+    data.percentScore,
+    data.cefrLevel,
+    data.sentenceMastery,
+    data.vocabularyScore,
+    data.fluencyScore,
+    data.deliveryScore,
+    data.passed ? 1 : 0,
+    (data.responseSummary || "").slice(0, 500),
+    data.feedbackJson || "{}",
+    now,
+  );
+
+  return db
+    .prepare("SELECT * FROM communication_submissions WHERE id = ?")
+    .get(id) as unknown as DbCommunicationSubmission;
+}
+
+export function getUserCommunicationSubmissions(userId: string): DbCommunicationSubmission[] {
+  const db = getDatabase();
+  return db
+    .prepare(
+      "SELECT * FROM communication_submissions WHERE user_id = ? ORDER BY created_at DESC LIMIT 50",
+    )
+    .all(userId) as unknown as DbCommunicationSubmission[];
+}
+
+export function getUserCompletedCommunicationExerciseIds(userId: string): Set<string> {
+  const db = getDatabase();
+  const rows = db
+    .prepare(
+      "SELECT DISTINCT exercise_id FROM communication_submissions WHERE user_id = ? AND passed = 1",
+    )
+    .all(userId) as unknown as { exercise_id: string }[];
+  return new Set(rows.map((r) => r.exercise_id));
 }

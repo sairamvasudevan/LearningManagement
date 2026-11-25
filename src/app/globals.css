@@ -6584,4 +6584,31 @@ td small {
   color: #93c5fd;
 }
 
+.comm-studio-split {
+  display: grid;
+  grid-template-columns: minmax(260px, 330px) 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.comm-span-full {
+  grid-column: 1 / -1;
+}
+
+.comparison-bad p,
+.comparison-good p {
+  margin: 6px 0 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 900px) {
+  .comm-studio-split,
+  .comparison-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+
 

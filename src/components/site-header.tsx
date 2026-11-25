@@ -142,7 +142,7 @@ export function SiteHeader({
               <div className="futuristic-modules-flyout">
                 <div className="flyout-header">
                   <span className="flyout-kicker">Core System Architecture</span>
-                  <span className="flyout-count">4 Precision Modules</span>
+                  <span className="flyout-count">5 Precision Modules</span>
                 </div>
 
                 <div className="flyout-grid">
@@ -198,6 +198,23 @@ export function SiteHeader({
                   </Link>
 
                   <Link
+                    href="/communication"
+                    className="flyout-item"
+                    onClick={() => setModulesDropdownOpen(false)}
+                  >
+                    <div className="flyout-icon" style={{ background: "rgba(168, 85, 247, 0.16)", color: "#c084fc" }}>
+                      🎙️
+                    </div>
+                    <div>
+                      <div className="flyout-title">
+                        <b>LSRW Communication Lab</b>
+                        <span className="flyout-badge-cyan">Versant / SVAR</span>
+                      </div>
+                      <div className="flyout-desc">Listening, Speaking, Reading &amp; Writing drills + timed corporate mock.</div>
+                    </div>
+                  </Link>
+
+                  <Link
                     href="/ide"
                     className="flyout-item"
                     onClick={() => setModulesDropdownOpen(false)}
@@ -229,6 +246,9 @@ export function SiteHeader({
           </Link>
           <Link href="/web-dev" className="futuristic-nav-link accent-green">
             Web Dev &amp; MERN
+          </Link>
+          <Link href="/communication" className="futuristic-nav-link" style={{ color: "#c084fc" }}>
+            LSRW Comm
           </Link>
           <Link href="/ide" className="futuristic-nav-link accent-amber">
             Cloud IDE
@@ -398,6 +418,14 @@ export function SiteHeader({
           >
             <span>🌐 Web Dev &amp; MERN Studio</span>
             <span className="drawer-badge">DOM Sandbox</span>
+          </Link>
+          <Link
+            href="/communication"
+            className="mobile-drawer-link"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <span>🎙️ LSRW Communication Lab</span>
+            <span className="drawer-badge">Versant / SVAR</span>
           </Link>
           <Link
             href="/ide"

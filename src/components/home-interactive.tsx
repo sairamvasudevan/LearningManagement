@@ -453,6 +453,7 @@ const CATEGORY_TABS = [
   { id: "all", label: "🔥 All Programs" },
   { id: "available", label: "⚡ Available Free (Flagship)" },
   { id: "Core Algorithmic Reasoning", label: "Problem Solving" },
+  { id: "Communication & LSRW", label: "Communication (LSRW)" },
   { id: "System Design", label: "System Design" },
   { id: "Artificial Intelligence", label: "Generative AI" },
   { id: "Full Stack Engineering", label: "Full Stack" },
@@ -652,6 +653,8 @@ export function CourseCatalogSection() {
                             ? "/web-dev"
                             : course.slug === "dsa-mastery-lab"
                             ? "/dsa"
+                            : course.slug === "communication-lsrw-lab"
+                            ? "/communication"
                             : `/courses/${course.slug}`
                         }
                       >
@@ -659,6 +662,8 @@ export function CourseCatalogSection() {
                           ? "Launch Arena →"
                           : course.slug === "web-dev-mern-lab"
                           ? "Launch Studio →"
+                          : course.slug === "communication-lsrw-lab"
+                          ? "Launch LSRW →"
                           : "Preview Track 👁️"}
                       </Link>
                     </>

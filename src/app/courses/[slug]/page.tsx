@@ -114,7 +114,10 @@ export default async function CourseDetailPage({ params }: PageProps) {
               ))}
             </ul>
 
-            {!isFlagship && course.slug !== "dsa-mastery-lab" && course.slug !== "web-dev-mern-lab" && (
+            {!isFlagship &&
+              course.slug !== "dsa-mastery-lab" &&
+              course.slug !== "web-dev-mern-lab" &&
+              course.slug !== "communication-lsrw-lab" && (
               <div
                 style={{
                   background: "rgba(0, 113, 227, 0.1)",
@@ -162,6 +165,15 @@ export default async function CourseDetailPage({ params }: PageProps) {
                 </Link>
                 <Link className="button button-full" href="/web-dev/html-intro" style={{ marginTop: 9 }}>
                   Open Chapter 01 Sandbox →
+                </Link>
+              </>
+            ) : course.slug === "communication-lsrw-lab" ? (
+              <>
+                <Link className="button button-cn-primary button-full" href="/communication/studio?tab=practice">
+                  🎙️ Launch LSRW Practice Studio →
+                </Link>
+                <Link className="button button-full" href="/communication/studio?tab=assessment" style={{ marginTop: 9 }}>
+                  🏆 Take Versant/SVAR Mock Test →
                 </Link>
               </>
             ) : (

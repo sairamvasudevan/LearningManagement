@@ -354,6 +354,66 @@ export default async function StudentPortalPage() {
               </div>
             </div>
 
+            {/* LSRW Communication Studio Banner */}
+            <div
+              style={{
+                background: "linear-gradient(135deg, #2e1065 0%, #1e1b4b 100%)",
+                borderRadius: "14px",
+                padding: "20px 24px",
+                color: "#ffffff",
+                marginBottom: "20px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: "16px",
+                border: "1px solid #7e22ce",
+              }}
+            >
+              <div>
+                <div style={{ display: "flex", gap: "8px", alignItems: "center", marginBottom: "6px" }}>
+                  <span
+                    style={{
+                      background: "#c084fc",
+                      color: "#1e1b4b",
+                      fontSize: "10px",
+                      fontWeight: 800,
+                      padding: "2px 8px",
+                      borderRadius: "99px",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    ✅ UNLOCKED · LSRW
+                  </span>
+                  <span style={{ fontSize: "12px", color: "#e9d5ff", fontWeight: 600 }}>
+                    Listening · Speaking · Reading · Writing (Versant / SVAR)
+                  </span>
+                </div>
+                <h3 style={{ margin: "0 0 4px", fontSize: "18px", color: "#f8fafc" }}>
+                  Corporate Communication &amp; LSRW Assessment Studio
+                </h3>
+                <p style={{ margin: 0, fontSize: "13px", color: "#ddd6fe", maxWidth: "620px" }}>
+                  Train Repeat Sentences, Jumbled Sentence Builds, Read-Aloud Prosody, Passage Reconstruction &amp; Emails, then test yourself on the 10-part timed mock exam.
+                </p>
+              </div>
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                <Link
+                  href="/communication/studio?tab=practice"
+                  className="button button-cn-primary"
+                  style={{ padding: "10px 18px", fontSize: "13px", fontWeight: 700, background: "#9333ea", borderColor: "#9333ea" }}
+                >
+                  Open LSRW Studio →
+                </Link>
+                <Link
+                  href="/communication"
+                  className="button button-quiet"
+                  style={{ padding: "10px 16px", fontSize: "12px", color: "#e9d5ff", borderColor: "#7e22ce" }}
+                >
+                  Syllabus &amp; Rubrics
+                </Link>
+              </div>
+            </div>
+
             {/* Quick Metrics Bar */}
             <div className="portal-metrics-grid">
               <div className="portal-metric-card">
