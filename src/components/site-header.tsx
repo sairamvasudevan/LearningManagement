@@ -232,6 +232,23 @@ export function SiteHeader({
                   </Link>
 
                   <Link
+                    href="/interview"
+                    className="flyout-item"
+                    onClick={() => setModulesDropdownOpen(false)}
+                  >
+                    <div className="flyout-icon" style={{ background: "rgba(16, 185, 129, 0.16)", color: "#34d399" }}>
+                      🤖
+                    </div>
+                    <div>
+                      <div className="flyout-title">
+                        <b>AI Mock Interviewer</b>
+                        <span className="flyout-badge-cyan">Chess ELO</span>
+                      </div>
+                      <div className="flyout-desc">Voice-enabled technical mock interviews with live grilling and FAANG scorecards.</div>
+                    </div>
+                  </Link>
+
+                  <Link
                     href="/ide"
                     className="flyout-item"
                     onClick={() => setModulesDropdownOpen(false)}
@@ -269,6 +286,9 @@ export function SiteHeader({
           </Link>
           <Link href="/audio-dsa" className="futuristic-nav-link" style={{ color: "#fdba74" }}>
             Audio DSA
+          </Link>
+          <Link href="/interview" className="futuristic-nav-link" style={{ color: "#34d399" }}>
+            AI Interview
           </Link>
           <Link href="/ide" className="futuristic-nav-link accent-amber">
             Cloud IDE
@@ -461,6 +481,14 @@ export function SiteHeader({
           >
             <span>🎧 Audio DSA Story Series</span>
             <span className="drawer-badge">28 Stories</span>
+          </Link>
+          <Link
+            href="/interview"
+            className="mobile-drawer-link"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <span>🤖 AI Mock Interview</span>
+            <span className="drawer-badge">Chess ELO</span>
           </Link>
           <Link
             href="/ide"

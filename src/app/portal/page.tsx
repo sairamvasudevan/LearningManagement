@@ -468,6 +468,59 @@ export default async function StudentPortalPage() {
               </div>
             </div>
 
+            {/* AI Mock Interview Arena Banner */}
+            <div
+              style={{
+                background: "linear-gradient(135deg, #064e3b 0%, #0f172a 100%)",
+                borderRadius: "14px",
+                padding: "20px 24px",
+                color: "#ffffff",
+                marginBottom: "20px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: "16px",
+                border: "1px solid #10b981",
+              }}
+            >
+              <div>
+                <div style={{ display: "flex", gap: "8px", alignItems: "center", marginBottom: "6px" }}>
+                  <span
+                    style={{
+                      background: "#6ee7b7",
+                      color: "#064e3b",
+                      fontSize: "10px",
+                      fontWeight: 800,
+                      padding: "2px 8px",
+                      borderRadius: "99px",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    🤖 AI MOCK INTERVIEW ARENA
+                  </span>
+                  <span style={{ fontSize: "12px", color: "#a7f3d0", fontWeight: 600 }}>
+                    Chess ELO Scale (800 to 2400) · Real-Time Voice Grilling · FAANG Scorecards
+                  </span>
+                </div>
+                <h3 style={{ margin: "0 0 4px", fontSize: "18px", color: "#f8fafc" }}>
+                  AI Technical Mock Interviewer: Grill Your Coding &amp; Invariants
+                </h3>
+                <p style={{ margin: 0, fontSize: "13px", color: "#d1fae5", maxWidth: "620px" }}>
+                  Interview with distinct bots ranging from supportive ELO 800 Interns to uncompromising ELO 2400 FAANG Bar Raisers. Features speech synthesis, mic voice recognition, and 5-dimension hiring rubrics.
+                </p>
+              </div>
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                <Link
+                  href="/interview"
+                  className="button button-cn-primary"
+                  style={{ padding: "10px 18px", fontSize: "13px", fontWeight: 700, background: "#10b981", borderColor: "#10b981", color: "#022c22" }}
+                >
+                  Start Mock Interview →
+                </Link>
+              </div>
+            </div>
+
             {/* Galgotias University Career, Codolio & Resume Profile Banner */}
             <div
               style={{

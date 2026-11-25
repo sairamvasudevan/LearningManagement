@@ -398,6 +398,55 @@ export default async function HomePage() {
                 </Link>
               </div>
             </article>
+
+            {/* Module 07: AI Technical Mock Interview Arena */}
+            <article className="training-module-card comm-span-full" style={{ borderColor: "rgba(16, 185, 129, 0.4)" }}>
+              <div className="training-card-header">
+                <div className="training-card-icon-box" style={{ background: "rgba(16, 185, 129, 0.16)", color: "#34d399" }}>
+                  🤖
+                </div>
+                <span className="training-card-pill" style={{ background: "rgba(16, 185, 129, 0.16)", color: "#34d399" }}>
+                  MODULE 07 · AI MOCK INTERVIEW ARENA (CHESS ELO TIERS)
+                </span>
+              </div>
+
+              <h3 className="training-card-title">Live AI Interview Bot: Real-Time Voice Grilling &amp; FAANG Scorecards</h3>
+              <div className="training-card-subtitle">
+                Chess ELO Tiers (800 to 2400) · Web Speech Synthesis &amp; Microphone · Invariant Defense · 5-Dimension Matrix
+              </div>
+              <p className="training-card-desc">
+                Engage in full-loop technical interviews against five distinct bots: from gentle ELO 800 Intern Sam to ruthless ELO 2400 FAANG Bar Raiser Magnus. Speak naturally using live speech recognition, code in the scratchpad, and defend your algorithms under adversarial edge-case grilling.
+              </p>
+
+              <div className="training-card-specs-row">
+                <div className="spec-chip">
+                  <b>5 ELO Difficulty Bots</b>
+                  <span>Intern (800) to Bar Raiser (2400)</span>
+                </div>
+                <div className="spec-chip">
+                  <b>Full Audio Dialogue</b>
+                  <span>Browser TTS &amp; live mic input</span>
+                </div>
+                <div className="spec-chip">
+                  <b>Free Daily Passes</b>
+                  <span>3 complimentary daily slots</span>
+                </div>
+                <div className="spec-chip">
+                  <b style={{ color: "#34d399" }}>Official Scorecard</b>
+                  <span>5-dim rubric + candidate ELO rating</span>
+                </div>
+              </div>
+
+              <div className="training-card-action-row">
+                <Link href="/interview" className="apple-btn-primary" style={{ padding: "9px 20px", fontSize: "13px", background: "#10b981", color: "#022c22", fontWeight: 700 }}>
+                  <span>Enter AI Mock Interview Arena</span>
+                  <span>→</span>
+                </Link>
+                <Link href="/interview" className="card-secondary-link">
+                  View ELO Bots &amp; Question Bank ↗
+                </Link>
+              </div>
+            </article>
           </div>
         </div>
       </section>

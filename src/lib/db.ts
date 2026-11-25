@@ -2,6 +2,13 @@ import { DatabaseSync } from "node:sqlite";
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
+import type {
+  InterviewSession,
+  InterviewFeedback,
+  InterviewMessage,
+  InterviewStage,
+  UserInterviewCredits,
+} from "./interview-types";
 
 export type DbUser = {
   id: string;
@@ -420,6 +427,35 @@ export function getDatabase(): DatabaseSync {
       FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
     );
     CREATE INDEX IF NOT EXISTS idx_dsa_audio_user ON dsa_audio_progress(user_id, episode_number);
+
+    CREATE TABLE IF NOT EXISTS interview_credits (
+      user_id TEXT PRIMARY KEY,
+      free_slots INTEGER NOT NULL DEFAULT 3,
+      purchased_slots INTEGER NOT NULL DEFAULT 0,
+      total_interviews INTEGER NOT NULL DEFAULT 0,
+      last_refill_date TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS interview_sessions (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      bot_id TEXT NOT NULL,
+      bot_elo INTEGER NOT NULL,
+      question_id TEXT NOT NULL,
+      stage TEXT NOT NULL DEFAULT 'INTRO',
+      messages_json TEXT NOT NULL DEFAULT '[]',
+      code TEXT NOT NULL DEFAULT '',
+      language TEXT NOT NULL DEFAULT 'python',
+      feedback_json TEXT DEFAULT NULL,
+      turn_count INTEGER NOT NULL DEFAULT 0,
+      status TEXT NOT NULL DEFAULT 'active',
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+    );
+    CREATE INDEX IF NOT EXISTS idx_interview_sessions_user ON interview_sessions(user_id, created_at DESC);
   `);
 
   // Seed default course_settings row if missing
@@ -2340,4 +2376,242 @@ export function getUserAudioDsaProgress(userId: string): DbAudioDsaProgress[] {
       "SELECT * FROM dsa_audio_progress WHERE user_id = ? ORDER BY episode_number ASC",
     )
     .all(userId) as unknown as DbAudioDsaProgress[];
+}
+
+export function getUserInterviewCredits(userId: string): UserInterviewCredits {
+  const db = getDatabase();
+  const now = new Date().toISOString();
+  const today = now.slice(0, 10);
+
+  let row = db
+    .prepare("SELECT * FROM interview_credits WHERE user_id = ?")
+    .get(userId) as {
+      user_id: string;
+      free_slots: number;
+      purchased_slots: number;
+      total_interviews: number;
+      last_refill_date: string;
+      updated_at: string;
+    } | undefined;
+
+  if (!row) {
+    db.prepare(`
+      INSERT INTO interview_credits (user_id, free_slots, purchased_slots, total_interviews, last_refill_date, updated_at)
+      VALUES (?, 3, 0, 0, ?, ?)
+    `).run(userId, today, now);
+
+    row = {
+      user_id: userId,
+      free_slots: 3,
+      purchased_slots: 0,
+      total_interviews: 0,
+      last_refill_date: today,
+      updated_at: now,
+    };
+  }
+
+  return {
+    userId: row.user_id,
+    freeSlots: row.free_slots,
+    purchasedSlots: row.purchased_slots,
+    totalInterviews: row.total_interviews,
+    lastRefillDate: row.last_refill_date,
+    updatedAt: row.updated_at,
+  };
+}
+
+export function deductInterviewCredit(userId: string): {
+  success: boolean;
+  freeRemaining: number;
+  purchasedRemaining: number;
+} {
+  const db = getDatabase();
+  const credits = getUserInterviewCredits(userId);
+  const now = new Date().toISOString();
+
+  if (credits.freeSlots > 0) {
+    const newFree = credits.freeSlots - 1;
+    db.prepare(`
+      UPDATE interview_credits
+      SET free_slots = ?, total_interviews = total_interviews + 1, updated_at = ?
+      WHERE user_id = ?
+    `).run(newFree, now, userId);
+    return {
+      success: true,
+      freeRemaining: newFree,
+      purchasedRemaining: credits.purchasedSlots,
+    };
+  }
+
+  if (credits.purchasedSlots > 0) {
+    const newPurchased = credits.purchasedSlots - 1;
+    db.prepare(`
+      UPDATE interview_credits
+      SET purchased_slots = ?, total_interviews = total_interviews + 1, updated_at = ?
+      WHERE user_id = ?
+    `).run(newPurchased, now, userId);
+    return {
+      success: true,
+      freeRemaining: 0,
+      purchasedRemaining: newPurchased,
+    };
+  }
+
+  return {
+    success: false,
+    freeRemaining: 0,
+    purchasedRemaining: 0,
+  };
+}
+
+export function addInterviewCredits(
+  userId: string,
+  count: number,
+): { success: boolean; total: number } {
+  const db = getDatabase();
+  getUserInterviewCredits(userId); // ensure row exists
+  const now = new Date().toISOString();
+  const safeCount = Math.max(1, Math.min(100, Math.round(count)));
+
+  db.prepare(`
+    UPDATE interview_credits
+    SET purchased_slots = purchased_slots + ?, updated_at = ?
+    WHERE user_id = ?
+  `).run(safeCount, now, userId);
+
+  const updated = getUserInterviewCredits(userId);
+  return {
+    success: true,
+    total: updated.freeSlots + updated.purchasedSlots,
+  };
+}
+
+export function claimDailyInterviewSlot(userId: string): {
+  claimed: boolean;
+  message: string;
+  balance: number;
+} {
+  const db = getDatabase();
+  const credits = getUserInterviewCredits(userId);
+  const now = new Date().toISOString();
+  const today = now.slice(0, 10);
+
+  if (credits.lastRefillDate === today && credits.freeSlots >= 3) {
+    return {
+      claimed: false,
+      message: "You already have your maximum daily complimentary slots (3).",
+      balance: credits.freeSlots + credits.purchasedSlots,
+    };
+  }
+
+  // Refill free slots back to 3
+  db.prepare(`
+    UPDATE interview_credits
+    SET free_slots = 3, last_refill_date = ?, updated_at = ?
+    WHERE user_id = ?
+  `).run(today, now, userId);
+
+  const updated = getUserInterviewCredits(userId);
+  return {
+    claimed: true,
+    message: "Refreshed to 3 complimentary interview slots for today!",
+    balance: updated.freeSlots + updated.purchasedSlots,
+  };
+}
+
+export function saveInterviewSession(session: InterviewSession): void {
+  const db = getDatabase();
+  const now = new Date().toISOString();
+
+  db.prepare(`
+    INSERT INTO interview_sessions (
+      id, user_id, bot_id, bot_elo, question_id, stage, messages_json, code, language, feedback_json, turn_count, status, created_at, updated_at
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(id) DO UPDATE SET
+      stage = excluded.stage,
+      messages_json = excluded.messages_json,
+      code = excluded.code,
+      language = excluded.language,
+      feedback_json = excluded.feedback_json,
+      turn_count = excluded.turn_count,
+      status = excluded.status,
+      updated_at = excluded.updated_at
+  `).run(
+    session.id,
+    session.userId,
+    session.botId,
+    session.botElo,
+    session.questionId,
+    session.stage,
+    JSON.stringify(session.messages),
+    session.code,
+    session.language,
+    session.feedback ? JSON.stringify(session.feedback) : null,
+    session.turnCount,
+    session.status,
+    session.createdAt,
+    session.updatedAt || now,
+  );
+}
+
+export function getInterviewSession(
+  id: string,
+  userId: string,
+): InterviewSession | null {
+  const db = getDatabase();
+  const row = db
+    .prepare(
+      "SELECT * FROM interview_sessions WHERE id = ? AND user_id = ?",
+    )
+    .get(id, userId) as Record<string, unknown> | undefined;
+
+  if (!row) return null;
+
+  return {
+    id: String(row.id),
+    userId: String(row.user_id),
+    botId: String(row.bot_id),
+    botElo: Number(row.bot_elo),
+    questionId: String(row.question_id),
+    stage: String(row.stage) as InterviewStage,
+    messages: parseJsonArray<InterviewMessage>(row.messages_json as string, []),
+    code: String(row.code || ""),
+    language: String(row.language || "python"),
+    feedback: row.feedback_json
+      ? (JSON.parse(row.feedback_json as string) as InterviewFeedback)
+      : null,
+    turnCount: Number(row.turn_count || 0),
+    status: String(row.status || "active") as "active" | "concluded",
+    createdAt: String(row.created_at),
+    updatedAt: String(row.updated_at),
+  };
+}
+
+export function listUserInterviewSessions(userId: string): InterviewSession[] {
+  const db = getDatabase();
+  const rows = db
+    .prepare(
+      "SELECT * FROM interview_sessions WHERE user_id = ? ORDER BY created_at DESC LIMIT 20",
+    )
+    .all(userId) as unknown as Array<Record<string, unknown>>;
+
+  return rows.map((row) => ({
+    id: String(row.id),
+    userId: String(row.user_id),
+    botId: String(row.bot_id),
+    botElo: Number(row.bot_elo),
+    questionId: String(row.question_id),
+    stage: String(row.stage) as InterviewStage,
+    messages: parseJsonArray<InterviewMessage>(row.messages_json as string, []),
+    code: String(row.code || ""),
+    language: String(row.language || "python"),
+    feedback: row.feedback_json
+      ? (JSON.parse(row.feedback_json as string) as InterviewFeedback)
+      : null,
+    turnCount: Number(row.turn_count || 0),
+    status: String(row.status || "active") as "active" | "concluded",
+    createdAt: String(row.created_at),
+    updatedAt: String(row.updated_at),
+  }));
 }
