@@ -355,28 +355,28 @@ export default async function HomePage() {
                   🎧
                 </div>
                 <span className="training-card-pill" style={{ background: "rgba(249, 115, 22, 0.16)", color: "#fdba74" }}>
-                  MODULE 06 · AUDIO STORY DSA SERIAL (24 EPISODES)
+                  MODULE 06 · AUDIO STORY DSA SERIAL (28 EPISODES)
                 </span>
               </div>
 
               <h3 className="training-card-title">Code by Ear: Learn Programming &amp; DSA via 2-Minute Audio Stories</h3>
               <div className="training-card-subtitle">
-                Funny Real-Life Campus &amp; Kitchen Stories · Side-by-Side Tech Comparisons · Interactive Episode Quizzes
+                19–21 College Humor · Timed Punchlines · Side-by-Side Tech Comparisons · Interactive Quizzes
               </div>
               <p className="training-card-desc">
-                Learn every foundational concept from Episode 01 (&ldquo;The Chilli Powder Payasam Disaster&rdquo; —
-                Compile-Time vs. Runtime Error) straight through Big-O, Arrays vs. Lists, Hash Maps, Trees, Heaps,
-                Graphs, Dynamic Programming &amp; Bitmasks in one continuous, humorous audio story series.
+                Learn every foundational concept from Episode 01 (&ldquo;The Illegal Hostel-Kettle Payasam Disaster&rdquo;
+                — Compile-Time vs. Runtime Error) straight through Big-O, Prefix Sums, Stacks, Hash Maps, Trees, Heaps,
+                Graphs, 1D/2D DP &amp; Bitmasks in one continuous, humorous campus audio story series.
               </p>
 
               <div className="training-card-specs-row">
                 <div className="spec-chip">
-                  <b>24 Episodes · 6 Seasons</b>
+                  <b>28 Episodes · 7 Seasons</b>
                   <span>Complete Programming + DSA syllabus</span>
                 </div>
                 <div className="spec-chip">
                   <b>~2 Min / Story</b>
-                  <span>Expressive offline English narration</span>
+                  <span>Campus comedy &amp; punchline beats</span>
                 </div>
                 <div className="spec-chip">
                   <b>Story vs Code Tables</b>
@@ -394,7 +394,7 @@ export default async function HomePage() {
                   <span>→</span>
                 </Link>
                 <Link href="/courses/audio-dsa-stories" className="card-secondary-link">
-                  View Full 24-Episode Syllabus ↗
+                  View Full 28-Episode Syllabus ↗
                 </Link>
               </div>
             </article>

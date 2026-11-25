@@ -32,27 +32,67 @@ interface AudioDsaStudioProps {
 
 const SPEAKER_BADGES: Record<
   AudioSpeakerRole,
-  { badge: string; accent: string; bg: string; pitch: number }
+  { badge: string; accent: string; bg: string; pitch: number; rateMultiplier: number }
 > = {
   narrator: {
     badge: "Story Narrator",
     accent: "#38bdf8",
     bg: "rgba(56, 189, 248, 0.14)",
     pitch: 1.0,
+    rateMultiplier: 1.0,
   },
   character: {
-    badge: "Story Comedy Scene",
+    badge: "Hostel Scene & Drama",
     accent: "#fbbf24",
     bg: "rgba(251, 191, 36, 0.14)",
-    pitch: 1.07,
+    pitch: 1.06,
+    rateMultiplier: 1.03,
+  },
+  punchline: {
+    badge: "Comedy Punchline Drop",
+    accent: "#fb7185",
+    bg: "rgba(251, 113, 133, 0.16)",
+    pitch: 1.12,
+    rateMultiplier: 1.05,
   },
   mentor: {
-    badge: "Mentor Priya · Tech Tie-In",
+    badge: "Mentor Priya · Tech Breakdown",
     accent: "#34d399",
     bg: "rgba(52, 211, 153, 0.14)",
     pitch: 0.94,
+    rateMultiplier: 0.96,
   },
 };
+
+function cleanTextForAudioSpeech(raw: string): string {
+  return raw
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/O\(\(V \+ E\) log V\)/g, "O of V plus E, times log V")
+    .replace(/O\(V \+ E\)/g, "O of V plus E")
+    .replace(/O\(n log n\)/gi, "O of n log n")
+    .replace(/O\(n log K\)/gi, "O of n log K")
+    .replace(/O\(n²\)|O\(n\^2\)/gi, "O of n squared")
+    .replace(/O\(2ⁿ\)|O\(2\^n\)/gi, "exponential 2 to the power n")
+    .replace(/O\(n!\)/gi, "factorial O of n")
+    .replace(/O\(α\(n\)\)/gi, "inverse Ackermann near constant time")
+    .replace(/O\(log n\)/gi, "O of log n")
+    .replace(/O\(1\)/g, "O of 1 constant time")
+    .replace(/O\(n\)/gi, "O of n linear time")
+    .replace(/10⁸|10\^8/g, "100 million")
+    .replace(/10⁵|10\^5/g, "100 thousand")
+    .replace(/arr\[i\]/gi, "array at i")
+    .replace(/->/g, " to ")
+    .replace(/<->/g, " connected with ")
+    .replace(/<=/g, " less than or equal to ")
+    .replace(/>=/g, " greater than or equal to ")
+    .replace(/!=/g, " not equal to ")
+    .replace(/==/g, " equals ")
+    .replace(/\^/g, " XOR ")
+    .replace(/—/g, ", ")
+    .replace(/\*\*/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
 
 function formatClock(totalSeconds: number): string {
   const clamped = Math.max(0, Math.floor(totalSeconds));
@@ -61,7 +101,10 @@ function formatClock(totalSeconds: number): string {
   return `${mins}:${String(secs).padStart(2, "0")}`;
 }
 
-function playStudioChime(kind: "start" | "twist" | "success" | "fail", enabled: boolean) {
+function playStudioChime(
+  kind: "start" | "twist" | "scratch" | "rimshot" | "ding" | "success" | "fail",
+  enabled: boolean,
+) {
   if (!enabled || typeof window === "undefined") return;
   try {
     const AudioCtx =
@@ -69,29 +112,47 @@ function playStudioChime(kind: "start" | "twist" | "success" | "fail", enabled: 
       (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
     if (!AudioCtx) return;
     const ctx = new AudioCtx();
-    const notes =
-      kind === "start"
-        ? [523.25, 659.25]
-        : kind === "twist"
-        ? [587.33, 783.99]
-        : kind === "success"
-        ? [523.25, 659.25, 783.99]
-        : [311.13, 277.18];
 
-    notes.forEach((freq, idx) => {
+    if (kind === "scratch") {
+      // Quick comedic downward turntable zip before plot twist
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-      osc.type = "sine";
-      osc.frequency.value = freq;
-      const startAt = ctx.currentTime + idx * 0.08;
-      gain.gain.setValueAtTime(0.001, startAt);
-      gain.gain.exponentialRampToValueAtTime(0.06, startAt + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.0001, startAt + 0.22);
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(720, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(190, ctx.currentTime + 0.16);
+      gain.gain.setValueAtTime(0.06, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.18);
       osc.connect(gain);
       gain.connect(ctx.destination);
-      osc.start(startAt);
-      osc.stop(startAt + 0.24);
-    });
+      osc.start();
+      osc.stop(ctx.currentTime + 0.19);
+    } else {
+      const notes =
+        kind === "start"
+          ? [523.25, 659.25]
+          : kind === "rimshot"
+          ? [440, 554.37, 659.25]
+          : kind === "ding" || kind === "twist"
+          ? [587.33, 783.99]
+          : kind === "success"
+          ? [523.25, 659.25, 783.99]
+          : [311.13, 277.18];
+
+      notes.forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = kind === "rimshot" ? "triangle" : "sine";
+        osc.frequency.value = freq;
+        const startAt = ctx.currentTime + idx * (kind === "rimshot" ? 0.065 : 0.08);
+        gain.gain.setValueAtTime(0.001, startAt);
+        gain.gain.exponentialRampToValueAtTime(0.065, startAt + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, startAt + 0.22);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(startAt);
+        osc.stop(startAt + 0.24);
+      });
+    }
     setTimeout(() => {
       ctx.close().catch(() => {});
     }, 650);
@@ -289,8 +350,10 @@ export function AudioDsaStudio({
       setPlaybackStatus("playing");
       statusRef.current = "playing";
 
-      if (idx === 0) playStudioChime("start", sfxRef.current);
-      else if (segment.speaker === "mentor") playStudioChime("twist", sfxRef.current);
+      if (segment.sfx) playStudioChime(segment.sfx, sfxRef.current);
+      else if (idx === 0) playStudioChime("start", sfxRef.current);
+      else if (segment.speaker === "mentor") playStudioChime("ding", sfxRef.current);
+      else if (segment.speaker === "punchline") playStudioChime("rimshot", sfxRef.current);
 
       const segBase = Math.round(
         (episode.estimatedSeconds * idx) / episode.segments.length,
@@ -306,7 +369,7 @@ export function AudioDsaStudio({
         // Offline caption-paced timed fallback when headless or no voice pack is installed
         const words = segment.text.split(/\s+/).length;
         const durationMs = Math.max(
-          2500,
+          2200,
           Math.round(((words / 2.4) * 1000) / Math.max(0.5, rateRef.current)),
         );
         fallbackTimerRef.current = setTimeout(() => {
@@ -317,31 +380,46 @@ export function AudioDsaStudio({
       }
 
       window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(
-        segment.text.replace(/`([^`]+)`/g, "$1"),
-      );
-      utterance.rate = rateRef.current;
-      utterance.pitch = SPEAKER_BADGES[segment.speaker].pitch;
+      const speakerProfile = SPEAKER_BADGES[segment.speaker];
+      const launchUtterance = () => {
+        if (statusRef.current !== "playing") return;
+        const spokenText = cleanTextForAudioSpeech(segment.text);
+        const utterance = new SpeechSynthesisUtterance(spokenText);
+        utterance.rate = Math.min(
+          1.75,
+          Math.max(0.65, rateRef.current * speakerProfile.rateMultiplier),
+        );
+        utterance.pitch = speakerProfile.pitch;
 
-      if (voiceUriRef.current) {
-        const match = window.speechSynthesis
-          .getVoices()
-          .find((v) => v.voiceURI === voiceUriRef.current);
-        if (match) utterance.voice = match;
+        if (voiceUriRef.current) {
+          const match = window.speechSynthesis
+            .getVoices()
+            .find((v) => v.voiceURI === voiceUriRef.current);
+          if (match) utterance.voice = match;
+        }
+
+        utterance.onend = () => {
+          if (statusRef.current !== "playing") return;
+          speakSegmentRef.current(episode, idx + 1);
+        };
+
+        utterance.onerror = (e) => {
+          if (e.error === "canceled" || e.error === "interrupted") return;
+          if (statusRef.current !== "playing") return;
+          speakSegmentRef.current(episode, idx + 1);
+        };
+
+        window.speechSynthesis.speak(utterance);
+      };
+
+      const beatPauseMs = segment.pauseBeforeMs
+        ? Math.round(segment.pauseBeforeMs / Math.max(0.6, rateRef.current))
+        : 0;
+      if (beatPauseMs > 0) {
+        fallbackTimerRef.current = setTimeout(launchUtterance, beatPauseMs);
+      } else {
+        launchUtterance();
       }
-
-      utterance.onend = () => {
-        if (statusRef.current !== "playing") return;
-        speakSegmentRef.current(episode, idx + 1);
-      };
-
-      utterance.onerror = (e) => {
-        if (e.error === "canceled" || e.error === "interrupted") return;
-        if (statusRef.current !== "playing") return;
-        speakSegmentRef.current(episode, idx + 1);
-      };
-
-      window.speechSynthesis.speak(utterance);
     },
     [selectEpisode, stopAudioEngine],
   );
@@ -384,11 +462,34 @@ export function AudioDsaStudio({
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
     stopAudioEngine();
     const labels = ["A", "B", "C", "D"];
-    const script = `Episode ${activeEpisode.episodeNumber} Story Challenge. ${activeEpisode.quiz.prompt} ${activeEpisode.quiz.options
-      .map((opt, idx) => `Option ${labels[idx]}: ${opt}.`)
-      .join(" ")}`;
+    const script = cleanTextForAudioSpeech(
+      `Episode ${activeEpisode.episodeNumber} Story Challenge. ${activeEpisode.quiz.prompt} ${activeEpisode.quiz.options
+        .map((opt, idx) => `Option ${labels[idx]}: ${opt}.`)
+        .join(" ")}`,
+    );
     const utt = new SpeechSynthesisUtterance(script);
     utt.rate = playbackRate;
+    if (selectedVoiceUri) {
+      const match = window.speechSynthesis
+        .getVoices()
+        .find((v) => v.voiceURI === selectedVoiceUri);
+      if (match) utt.voice = match;
+    }
+    window.speechSynthesis.speak(utt);
+  };
+
+  const handleReadTechSummaryAloud = () => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    stopAudioEngine();
+    const comparisonSpoken = activeEpisode.comparisonRows
+      .map((r) => `${r.storyElement} maps to ${r.technicalConcept}. ${r.whyItMatches}`)
+      .join(" ");
+    const script = cleanTextForAudioSpeech(
+      `Technical Comparison for Episode ${activeEpisode.episodeNumber}: ${activeEpisode.conceptTopic}. ${comparisonSpoken} Core Rule: ${activeEpisode.technicalExplanation}`,
+    );
+    const utt = new SpeechSynthesisUtterance(script);
+    utt.rate = playbackRate;
+    utt.pitch = 0.96;
     if (selectedVoiceUri) {
       const match = window.speechSynthesis
         .getVoices()
@@ -504,16 +605,16 @@ export function AudioDsaStudio({
                 borderRadius: "99px",
               }}
             >
-              24 EPISODES · ~2 MIN STORIES · 100% OFFLINE ENGLISH AUDIO
+              {AUDIO_DSA_EPISODES.length} EPISODES · ~2 MIN STORIES · 100% OFFLINE ENGLISH AUDIO
             </span>
           </div>
           <h1 style={{ margin: "0 0 8px", fontSize: "28px", fontWeight: 900, color: "#f8fafc" }}>
             Learn All of Programming &amp; DSA Through Funny 2-Minute Audio Stories
           </h1>
           <p style={{ margin: 0, fontSize: "14px", color: "#cbd5e1", lineHeight: 1.6 }}>
-            Follow Aarav, Babloo, Grandma &amp; Mentor Priya from cooking chilli-powder payasam (Ep 01) right up
-            through Arrays, Stacks, Hash Maps, Trees, Graphs, DP &amp; Bitmasks—every episode includes real-life audio
-            storytelling, technical comparisons, and an interactive quiz.
+            Built for 19–21 campus builders: binge Aarav, Babloo &amp; Mentor Priya from midnight dorm-kettle chilli
+            payasam (Ep 01) all the way through Prefix Sums, Graphs, DP &amp; Bitmasks—with comedic punchlines,
+            story-to-code comparison tables, and interactive quizzes.
           </p>
         </div>
 
@@ -588,7 +689,7 @@ export function AudioDsaStudio({
                 cursor: "pointer",
               }}
             >
-              All 6 Seasons
+              All {AUDIO_DSA_CHAPTERS.length} Seasons
             </button>
             {AUDIO_DSA_CHAPTERS.map((ch) => (
               <button
@@ -1061,9 +1162,28 @@ export function AudioDsaStudio({
                 padding: "22px",
               }}
             >
-              <h3 style={{ margin: "0 0 12px", fontSize: "18px", fontWeight: 800 }}>
-                Real-Life Story vs. Technical Concept Comparison
-              </h3>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                  gap: "10px",
+                  marginBottom: "12px",
+                }}
+              >
+                <h3 style={{ margin: 0, fontSize: "18px", fontWeight: 800 }}>
+                  Real-Life Story vs. Technical Concept Comparison
+                </h3>
+                <button
+                  type="button"
+                  onClick={handleReadTechSummaryAloud}
+                  className="button button-quiet button-small"
+                  style={{ borderColor: "#34d399", color: "#34d399" }}
+                >
+                  🔊 Listen to Tech Summary &amp; Rules
+                </button>
+              </div>
 
               <div style={{ overflowX: "auto", marginBottom: "18px" }}>
                 <table
@@ -1152,6 +1272,38 @@ export function AudioDsaStudio({
                 >
                   {activeEpisode.miniSnippet.code}
                 </pre>
+
+                <div
+                  style={{
+                    marginTop: "12px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <span style={{ fontSize: "12px", color: "#94a3b8", fontWeight: 700 }}>
+                    Unlocks Interview Questions:
+                  </span>
+                  {activeEpisode.mappedProblems.map((prob) => (
+                    <Link
+                      key={prob}
+                      href="/dsa"
+                      style={{
+                        fontSize: "11.5px",
+                        fontWeight: 700,
+                        color: "#38bdf8",
+                        background: "rgba(56, 189, 248, 0.12)",
+                        border: "1px solid rgba(56, 189, 248, 0.25)",
+                        padding: "3px 9px",
+                        borderRadius: "99px",
+                        textDecoration: "none",
+                      }}
+                    >
+                      {prob} ↗
+                    </Link>
+                  ))}
+                </div>
               </div>
             </div>
           )}
@@ -1394,7 +1546,7 @@ export function AudioDsaStudio({
                     <Link href="/login" style={{ color: "#fdba74", fontWeight: 700 }}>
                       Sign in cleanly
                     </Link>{" "}
-                    to persist all 24 episode completions across sessions.
+                    to persist all {AUDIO_DSA_EPISODES.length} episode completions across sessions.
                   </div>
                 )}
               </div>

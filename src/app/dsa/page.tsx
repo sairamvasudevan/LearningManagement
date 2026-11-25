@@ -102,7 +102,7 @@ export default async function DsaCoursePage() {
                   fontWeight: 700,
                 }}
               >
-                🎧 Learn via 2-Min Audio Stories (24 Ep) →
+                🎧 Learn via 2-Min Audio Stories (28 Ep) →
               </Link>
               <Link
                 href="/portal"

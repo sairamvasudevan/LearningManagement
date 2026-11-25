@@ -1,9 +1,13 @@
-export type AudioSpeakerRole = "narrator" | "character" | "mentor";
+export type AudioSpeakerRole = "narrator" | "character" | "punchline" | "mentor";
+
+export type AudioCueSfx = "start" | "scratch" | "rimshot" | "ding";
 
 export interface AudioStorySegment {
   speaker: AudioSpeakerRole;
   label: string;
   text: string;
+  pauseBeforeMs?: number;
+  sfx?: AudioCueSfx;
 }
 
 export interface ComparisonRow {
@@ -23,6 +27,7 @@ export interface AudioDsaEpisode {
   estimatedSeconds: number;
   teaser: string;
   castTag: string;
+  mappedProblems: string[];
   segments: AudioStorySegment[];
   comparisonRows: ComparisonRow[];
   technicalExplanation: string;

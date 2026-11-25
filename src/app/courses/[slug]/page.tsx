@@ -180,7 +180,7 @@ export default async function CourseDetailPage({ params }: PageProps) {
             ) : course.slug === "audio-dsa-stories" ? (
               <>
                 <Link className="button button-cn-primary button-full" href="/audio-dsa">
-                  🎧 Launch 24-Episode Audio Story Studio →
+                  🎧 Launch 28-Episode Audio Story Studio →
                 </Link>
                 <Link
                   className="button button-full"

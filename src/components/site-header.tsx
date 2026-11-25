@@ -225,9 +225,9 @@ export function SiteHeader({
                     <div>
                       <div className="flyout-title">
                         <b>Audio DSA Story Serial</b>
-                        <span className="flyout-badge-amber">24 Episodes</span>
+                        <span className="flyout-badge-amber">28 Episodes</span>
                       </div>
-                      <div className="flyout-desc">2-minute funny English audio stories teaching all programming &amp; DSA.</div>
+                      <div className="flyout-desc">2-minute funny college audio stories teaching all programming &amp; DSA.</div>
                     </div>
                   </Link>
 
@@ -460,7 +460,7 @@ export function SiteHeader({
             onClick={() => setMobileMenuOpen(false)}
           >
             <span>🎧 Audio DSA Story Series</span>
-            <span className="drawer-badge">24 Stories</span>
+            <span className="drawer-badge">28 Stories</span>
           </Link>
           <Link
             href="/ide"

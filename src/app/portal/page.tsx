@@ -444,10 +444,10 @@ export default async function StudentPortalPage() {
                       textTransform: "uppercase",
                     }}
                   >
-                    🎧 24 AUDIO STORIES · UNLOCKED
+                    🎧 28 AUDIO STORIES · UNLOCKED
                   </span>
                   <span style={{ fontSize: "12px", color: "#fed7aa", fontWeight: 600 }}>
-                    6 Seasons · 2-Min Funny English Stories · Comparison &amp; Quiz
+                    7 Seasons · 2-Min Campus Comedy Stories · Comparison &amp; Quiz
                   </span>
                 </div>
                 <h3 style={{ margin: "0 0 4px", fontSize: "18px", color: "#f8fafc" }}>

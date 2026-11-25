@@ -3,6 +3,7 @@ import { AUDIO_DSA_SEASON_A } from "@/lib/audio-dsa-season-a";
 import { AUDIO_DSA_SEASON_B } from "@/lib/audio-dsa-season-b";
 
 export type {
+  AudioCueSfx,
   AudioSpeakerRole,
   AudioStorySegment,
   ComparisonRow,
@@ -21,28 +22,32 @@ const CHAPTER_SUBTITLES: Record<number, { title: string; subtitle: string }> = {
     subtitle: "Compile vs Runtime Errors, Memory Value/Reference, Loops & Recursion",
   },
   2: {
-    title: "Season 2 · Complexity & Linear Structures",
-    subtitle: "Big-O Growth, Arrays vs Linked Lists, LIFO Stacks & FIFO Queues",
+    title: "Season 2 · Complexity, Memory & Linear DS",
+    subtitle: "Big-O Scaling, Arrays vs Linked Lists, Prefix Sums, Stacks & Queues",
   },
   3: {
-    title: "Season 3 · Fast Lookup & Core Patterns",
-    subtitle: "Hash Maps, Two Pointers, Sliding Windows & Binary Search",
+    title: "Season 3 · Hashing, Windows & Binary Search",
+    subtitle: "Hash Maps, Two Pointers / Floyd Cycle, Sliding Window & Binary Search",
   },
   4: {
-    title: "Season 4 · Sorting & Hierarchical Trees",
-    subtitle: "Merge/Quick Sort, Binary Search Trees, Heaps & Prefix Tries",
+    title: "Season 4 · Sorting, Intervals & Greedy",
+    subtitle: "Merge/Quick/3-Way Sort, Greedy Traps & Merging Overlapping Intervals",
   },
   5: {
-    title: "Season 5 · Graphs & Optimization",
-    subtitle: "Adjacency Lists, BFS vs DFS, Dijkstra, Topological Sort & Union-Find",
+    title: "Season 5 · Trees, Heaps & Tries",
+    subtitle: "Binary Trees, BST & LCA, Priority Queue Top-K & Prefix Tries",
   },
   6: {
-    title: "Season 6 · Algorithms Mastery & Finale",
-    subtitle: "Greedy Traps, Dynamic Programming, Backtracking & Bitwise Finale",
+    title: "Season 6 · Graphs, Shortest Paths & DSU",
+    subtitle: "Adjacency Lists & Components, BFS vs DFS, Dijkstra/Bellman & Topo Sort/DSU",
+  },
+  7: {
+    title: "Season 7 · Backtracking, DP & Bitwise Finale",
+    subtitle: "Choose-Explore-Undo Backtracking, 1D DP, 2D Knapsack/LCS & Bitmasks/XOR",
   },
 };
 
-export const AUDIO_DSA_CHAPTERS: AudioDsaChapter[] = [1, 2, 3, 4, 5, 6].map(
+export const AUDIO_DSA_CHAPTERS: AudioDsaChapter[] = [1, 2, 3, 4, 5, 6, 7].map(
   (chNum) => ({
     chapterNumber: chNum,
     title: CHAPTER_SUBTITLES[chNum].title,
