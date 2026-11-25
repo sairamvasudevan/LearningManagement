@@ -6690,6 +6690,184 @@ td small {
   }
 }
 
+/* Audio DSA Modern Player Deck & Controls */
+.audio-dsa-player-deck {
+  background: linear-gradient(145deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 27, 75, 0.92) 100%);
+  border: 1px solid rgba(251, 146, 60, 0.28);
+  border-radius: 18px;
+  padding: 24px;
+  color: #ffffff;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(12px);
+  position: relative;
+  overflow: hidden;
+}
+
+.audio-dsa-player-deck::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #f97316 0%, #fbbf24 50%, #34d399 100%);
+}
+
+.audio-dsa-eq-container {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 18px;
+  padding: 0 4px;
+}
+
+.audio-dsa-eq-bar {
+  width: 3.5px;
+  background: #34d399;
+  border-radius: 2px;
+  transition: height 0.15s ease;
+}
+
+.audio-dsa-eq-bar.active {
+  animation: audioBarBounce 0.8s ease-in-out infinite alternate;
+}
+
+.audio-dsa-eq-bar.active:nth-child(1) { height: 60%; animation-delay: 0.1s; }
+.audio-dsa-eq-bar.active:nth-child(2) { height: 95%; animation-delay: 0.25s; }
+.audio-dsa-eq-bar.active:nth-child(3) { height: 40%; animation-delay: 0.05s; }
+.audio-dsa-eq-bar.active:nth-child(4) { height: 85%; animation-delay: 0.35s; }
+.audio-dsa-eq-bar.active:nth-child(5) { height: 100%; animation-delay: 0.15s; }
+.audio-dsa-eq-bar.active:nth-child(6) { height: 50%; animation-delay: 0.3s; }
+
+.audio-dsa-eq-bar.idle {
+  height: 4px;
+  background: #64748b;
+  opacity: 0.6;
+}
+
+@keyframes audioBarBounce {
+  0% { height: 20%; }
+  50% { height: 100%; }
+  100% { height: 35%; }
+}
+
+.audio-dsa-scrubber {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 7px;
+  border-radius: 99px;
+  background: #1e293b;
+  outline: none;
+  cursor: pointer;
+  transition: height 0.15s ease;
+}
+
+.audio-dsa-scrubber:hover {
+  height: 9px;
+}
+
+.audio-dsa-scrubber::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #f97316;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 8px rgba(249, 115, 22, 0.7);
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.audio-dsa-scrubber::-webkit-slider-thumb:hover {
+  transform: scale(1.25);
+}
+
+.audio-dsa-scrubber::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #f97316;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 8px rgba(249, 115, 22, 0.7);
+  cursor: pointer;
+}
+
+.audio-dsa-ctrl-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid #334155;
+  color: #e2e8f0;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.audio-dsa-ctrl-btn:hover {
+  background: rgba(30, 41, 59, 0.9);
+  border-color: #64748b;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.audio-dsa-ctrl-btn:active {
+  transform: translateY(0);
+}
+
+.audio-dsa-primary-play {
+  background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+  border: 1px solid #fb923c;
+  color: #ffffff;
+  border-radius: 12px;
+  padding: 10px 22px;
+  font-size: 14px;
+  font-weight: 800;
+  box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35);
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.audio-dsa-primary-play:hover {
+  background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+  box-shadow: 0 6px 18px rgba(234, 88, 12, 0.5);
+  transform: translateY(-1px);
+}
+
+.audio-dsa-scene-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+  background: rgba(15, 23, 42, 0.6);
+  color: #94a3b8;
+}
+
+.audio-dsa-scene-chip:hover {
+  border-color: #475569;
+  color: #f8fafc;
+}
+
+.audio-dsa-scene-chip.active {
+  border-color: #f97316;
+  background: rgba(249, 115, 22, 0.18);
+  color: #fdba74;
+}
+
+
 /* ==========================================================================
    AI MOCK INTERVIEW ARENA & OBSIDIAN WORKSPACE STYLES
    ========================================================================== */

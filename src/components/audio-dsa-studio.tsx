@@ -66,6 +66,8 @@ const SPEAKER_BADGES: Record<
 
 function cleanTextForAudioSpeech(raw: string): string {
   return raw
+    .replace(/\*\*(.*?)\*\*/g, "$1")
+    .replace(/\*(.*?)\*/g, "$1")
     .replace(/`([^`]+)`/g, "$1")
     .replace(/O\(\(V \+ E\) log V\)/g, "O of V plus E, times log V")
     .replace(/O\(V \+ E\)/g, "O of V plus E")
@@ -76,11 +78,15 @@ function cleanTextForAudioSpeech(raw: string): string {
     .replace(/O\(n!\)/gi, "factorial O of n")
     .replace(/O\(α\(n\)\)/gi, "inverse Ackermann near constant time")
     .replace(/O\(log n\)/gi, "O of log n")
-    .replace(/O\(1\)/g, "O of 1 constant time")
-    .replace(/O\(n\)/gi, "O of n linear time")
+    .replace(/O\(1\)/g, "constant time O of 1")
+    .replace(/O\(n\)/gi, "linear time O of n")
     .replace(/10⁸|10\^8/g, "100 million")
     .replace(/10⁵|10\^5/g, "100 thousand")
-    .replace(/arr\[i\]/gi, "array at i")
+    .replace(/arr\[i\]/gi, "array at index i")
+    .replace(/arr\[low\]/gi, "array at index low")
+    .replace(/arr\[high\]/gi, "array at index high")
+    .replace(/a\[mid\]/gi, "array at index mid")
+    .replace(/\[Small=0, Medium=1, Large=2\]/g, "Small, Medium, and Large")
     .replace(/->/g, " to ")
     .replace(/<->/g, " connected with ")
     .replace(/<=/g, " less than or equal to ")
@@ -89,7 +95,6 @@ function cleanTextForAudioSpeech(raw: string): string {
     .replace(/==/g, " equals ")
     .replace(/\^/g, " XOR ")
     .replace(/—/g, ", ")
-    .replace(/\*\*/g, "")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -182,6 +187,8 @@ export function AudioDsaStudio({
   const [activeSegmentIdx, setActiveSegmentIdx] = useState<number>(0);
   const [elapsedSec, setElapsedSec] = useState<number>(0);
   const [playbackRate, setPlaybackRate] = useState<number>(1.0);
+  const [volume, setVolume] = useState<number>(1.0);
+  const [isMuted, setIsMuted] = useState<boolean>(false);
   const [sfxEnabled, setSfxEnabled] = useState<boolean>(true);
   const [autoAdvance, setAutoAdvance] = useState<boolean>(false);
   const [eyesFreeMode, setEyesFreeMode] = useState<boolean>(false);
@@ -189,6 +196,7 @@ export function AudioDsaStudio({
   const [selectedVoiceUri, setSelectedVoiceUri] = useState<string>("");
   const [ttsAvailable, setTtsAvailable] = useState<boolean>(false);
   const [voiceEngine, setVoiceEngine] = useState<"natural-hd" | "browser">("natural-hd");
+  const [selectedNeuralVoice, setSelectedNeuralVoice] = useState<string>("en-IN-PrabhatNeural");
 
   // Quiz & reflection state
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
@@ -221,12 +229,16 @@ export function AudioDsaStudio({
     [activeEpisode.episodeNumber],
   );
 
+  const playSessionTokenRef = useRef<number>(0);
   const statusRef = useRef(playbackStatus);
   const rateRef = useRef(playbackRate);
+  const volumeRef = useRef(volume);
+  const isMutedRef = useRef(isMuted);
   const voiceUriRef = useRef(selectedVoiceUri);
   const autoAdvanceRef = useRef(autoAdvance);
   const sfxRef = useRef(sfxEnabled);
   const voiceEngineRef = useRef(voiceEngine);
+  const selectedNeuralVoiceRef = useRef(selectedNeuralVoice);
   const audioElemRef = useRef<HTMLAudioElement | null>(null);
   const fallbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const speakSegmentRef = useRef<(ep: AudioDsaEpisode, idx: number) => void>(() => {});
@@ -237,6 +249,12 @@ export function AudioDsaStudio({
   useEffect(() => {
     rateRef.current = playbackRate;
   }, [playbackRate]);
+  useEffect(() => {
+    volumeRef.current = volume;
+  }, [volume]);
+  useEffect(() => {
+    isMutedRef.current = isMuted;
+  }, [isMuted]);
   useEffect(() => {
     voiceUriRef.current = selectedVoiceUri;
   }, [selectedVoiceUri]);
@@ -249,6 +267,9 @@ export function AudioDsaStudio({
   useEffect(() => {
     voiceEngineRef.current = voiceEngine;
   }, [voiceEngine]);
+  useEffect(() => {
+    selectedNeuralVoiceRef.current = selectedNeuralVoice;
+  }, [selectedNeuralVoice]);
 
   // Discover built-in English Web Speech voices offline
   useEffect(() => {
@@ -300,14 +321,23 @@ export function AudioDsaStudio({
   }, [playbackStatus, playbackRate, activeEpisode.estimatedSeconds]);
 
   const stopAudioEngine = useCallback(() => {
-    if (audioElemRef.current) {
-      audioElemRef.current.pause();
-      audioElemRef.current.src = "";
-      audioElemRef.current = null;
-    }
+    // Invalidate any in-flight playback sessions
+    playSessionTokenRef.current++;
+
     if (fallbackTimerRef.current) {
       clearTimeout(fallbackTimerRef.current);
       fallbackTimerRef.current = null;
+    }
+    if (audioElemRef.current) {
+      // Detach handlers first so synthetic errors don't trigger fallback
+      audioElemRef.current.onended = null;
+      audioElemRef.current.onerror = null;
+      audioElemRef.current.onplay = null;
+      audioElemRef.current.onpause = null;
+      audioElemRef.current.ontimeupdate = null;
+      audioElemRef.current.pause();
+      audioElemRef.current.src = "";
+      audioElemRef.current = null;
     }
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       window.speechSynthesis.cancel();
@@ -338,18 +368,31 @@ export function AudioDsaStudio({
 
   const speakSegment = useCallback(
     (episode: AudioDsaEpisode, idx: number) => {
-      if (audioElemRef.current) {
-        audioElemRef.current.pause();
-        audioElemRef.current.src = "";
-        audioElemRef.current = null;
-      }
+      // Invalidate any previous playback session and cleanly stop previous audio
+      playSessionTokenRef.current++;
+      const currentToken = playSessionTokenRef.current;
+
       if (fallbackTimerRef.current) {
         clearTimeout(fallbackTimerRef.current);
         fallbackTimerRef.current = null;
       }
+      if (audioElemRef.current) {
+        audioElemRef.current.onended = null;
+        audioElemRef.current.onerror = null;
+        audioElemRef.current.onplay = null;
+        audioElemRef.current.onpause = null;
+        audioElemRef.current.ontimeupdate = null;
+        audioElemRef.current.pause();
+        audioElemRef.current.src = "";
+        audioElemRef.current = null;
+      }
+      if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
 
       if (idx < 0 || idx >= episode.segments.length) {
-        stopAudioEngine();
+        setPlaybackStatus("idle");
+        statusRef.current = "idle";
         setElapsedSec(episode.estimatedSeconds);
         playStudioChime("start", sfxRef.current);
         if (autoAdvanceRef.current) {
@@ -379,7 +422,10 @@ export function AudioDsaStudio({
       const speakerProfile = SPEAKER_BADGES[segment.speaker];
 
       const launchUtterance = () => {
-        if (statusRef.current !== "playing") return;
+        if (currentToken !== playSessionTokenRef.current || statusRef.current !== "playing") return;
+        if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+        window.speechSynthesis.cancel();
+
         const spokenText = cleanTextForAudioSpeech(segment.text);
         const utterance = new SpeechSynthesisUtterance(spokenText);
         utterance.rate = Math.min(
@@ -396,42 +442,54 @@ export function AudioDsaStudio({
         }
 
         utterance.onend = () => {
-          if (statusRef.current !== "playing") return;
+          if (currentToken !== playSessionTokenRef.current || statusRef.current !== "playing") return;
           speakSegmentRef.current(episode, idx + 1);
         };
 
         utterance.onerror = (e) => {
+          if (currentToken !== playSessionTokenRef.current) return;
           if (e.error === "canceled" || e.error === "interrupted") return;
-          if (statusRef.current !== "playing") return;
-          speakSegmentRef.current(episode, idx + 1);
+          if (statusRef.current === "playing") {
+            speakSegmentRef.current(episode, idx + 1);
+          }
         };
 
         window.speechSynthesis.speak(utterance);
       };
 
       const playWithNaturalVoice = () => {
-        if (statusRef.current !== "playing") return;
+        if (currentToken !== playSessionTokenRef.current || statusRef.current !== "playing") return;
         try {
+          const voiceParam = selectedNeuralVoiceRef.current
+            ? `&voice=${encodeURIComponent(selectedNeuralVoiceRef.current)}`
+            : "";
           const streamUrl = `/api/audio-dsa/voice?text=${encodeURIComponent(
             segment.text,
-          )}&speaker=${encodeURIComponent(segment.speaker)}`;
+          )}&speaker=${encodeURIComponent(segment.speaker)}${voiceParam}`;
           const audio = new Audio(streamUrl);
           audio.playbackRate = rateRef.current;
+          audio.volume = isMutedRef.current ? 0 : volumeRef.current;
           audioElemRef.current = audio;
 
           audio.onended = () => {
-            if (statusRef.current !== "playing") return;
+            if (currentToken !== playSessionTokenRef.current || statusRef.current !== "playing") return;
             speakSegmentRef.current(episode, idx + 1);
           };
 
           audio.onerror = () => {
-            // Gracefully fall back to enhanced browser utterance if network stream fails
+            if (currentToken !== playSessionTokenRef.current || statusRef.current !== "playing") return;
+            audio.onerror = null;
             launchUtterance();
           };
 
-          audio.play().catch(() => {
-            launchUtterance();
-          });
+          const playPromise = audio.play();
+          if (playPromise !== undefined) {
+            playPromise.catch((err) => {
+              if (currentToken !== playSessionTokenRef.current || statusRef.current !== "playing") return;
+              if (err?.name === "AbortError") return;
+              launchUtterance();
+            });
+          }
         } catch {
           launchUtterance();
         }
@@ -445,12 +503,15 @@ export function AudioDsaStudio({
         voiceEngineRef.current === "natural-hd" ? playWithNaturalVoice : launchUtterance;
 
       if (beatPauseMs > 0) {
-        fallbackTimerRef.current = setTimeout(triggerVoice, beatPauseMs);
+        fallbackTimerRef.current = setTimeout(() => {
+          if (currentToken !== playSessionTokenRef.current || statusRef.current !== "playing") return;
+          triggerVoice();
+        }, beatPauseMs);
       } else {
         triggerVoice();
       }
     },
-    [selectEpisode, stopAudioEngine],
+    [selectEpisode],
   );
 
   useEffect(() => {
@@ -496,6 +557,58 @@ export function AudioDsaStudio({
     }
 
     speakSegment(activeEpisode, 0);
+  };
+
+  const handleSeek = (newSeconds: number) => {
+    const clampedSec = Math.max(0, Math.min(activeEpisode.estimatedSeconds, newSeconds));
+    setElapsedSec(clampedSec);
+    const targetIdx = Math.min(
+      activeEpisode.segments.length - 1,
+      Math.max(
+        0,
+        Math.floor((clampedSec / Math.max(1, activeEpisode.estimatedSeconds)) * activeEpisode.segments.length),
+      ),
+    );
+    if (playbackStatus === "playing") {
+      speakSegment(activeEpisode, targetIdx);
+    } else {
+      setActiveSegmentIdx(targetIdx);
+    }
+  };
+
+  const handleSkip = (deltaSeconds: number) => {
+    handleSeek(elapsedSec + deltaSeconds);
+  };
+
+  const handleSpeedChange = (newRate: number) => {
+    setPlaybackRate(newRate);
+    rateRef.current = newRate;
+    if (audioElemRef.current) {
+      audioElemRef.current.playbackRate = newRate;
+    }
+  };
+
+  const handleVolumeChange = (newVol: number) => {
+    setVolume(newVol);
+    volumeRef.current = newVol;
+    if (isMuted) {
+      setIsMuted(false);
+      isMutedRef.current = false;
+    }
+    if (audioElemRef.current) {
+      audioElemRef.current.volume = newVol;
+      audioElemRef.current.muted = false;
+    }
+  };
+
+  const handleToggleMute = () => {
+    const nextMuted = !isMuted;
+    setIsMuted(nextMuted);
+    isMutedRef.current = nextMuted;
+    if (audioElemRef.current) {
+      audioElemRef.current.muted = nextMuted;
+      audioElemRef.current.volume = nextMuted ? 0 : volume;
+    }
   };
 
   const handleReadQuizAloud = () => {
@@ -931,67 +1044,119 @@ export function AudioDsaStudio({
             {/* Podcast Controls Strip */}
             <div
               style={{
-                background: "rgba(2, 6, 23, 0.72)",
-                border: "1px solid #334155",
-                borderRadius: "14px",
-                padding: "16px",
+                background: "linear-gradient(145deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 27, 75, 0.92) 100%)",
+                border: "1px solid rgba(251, 146, 60, 0.28)",
+                borderRadius: "16px",
+                padding: "20px",
+                boxShadow: "0 14px 34px rgba(0, 0, 0, 0.35)",
               }}
             >
-              {/* Active speaker + clock */}
+              {/* Active speaker status + Animated Equalizer + Clock */}
               <div
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
                   flexWrap: "wrap",
-                  gap: "8px",
-                  marginBottom: "10px",
+                  gap: "10px",
+                  marginBottom: "12px",
                 }}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <span
-                    style={{
-                      display: "inline-block",
-                      width: "9px",
-                      height: "9px",
-                      borderRadius: "99px",
-                      background: playbackStatus === "playing" ? "#34d399" : "#94a3b8",
-                    }}
-                  />
-                  <span style={{ fontSize: "12.5px", fontWeight: 700, color: "#f8fafc" }}>
-                    {playbackStatus === "playing"
-                      ? `Now Speaking: ${activeEpisode.segments[activeSegmentIdx]?.label}`
-                      : playbackStatus === "paused"
-                      ? `Paused at: ${activeEpisode.segments[activeSegmentIdx]?.label}`
-                      : `Ready · ${ttsAvailable ? "English Voice Active" : "Synchronized Timed Story Mode"}`}
-                  </span>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  {/* Equalizer animation */}
+                  <div className="audio-dsa-eq-container" title={playbackStatus === "playing" ? "Audio Playing" : "Audio Idle"}>
+                    <div className={`audio-dsa-eq-bar ${playbackStatus === "playing" ? "active" : "idle"}`} />
+                    <div className={`audio-dsa-eq-bar ${playbackStatus === "playing" ? "active" : "idle"}`} />
+                    <div className={`audio-dsa-eq-bar ${playbackStatus === "playing" ? "active" : "idle"}`} />
+                    <div className={`audio-dsa-eq-bar ${playbackStatus === "playing" ? "active" : "idle"}`} />
+                    <div className={`audio-dsa-eq-bar ${playbackStatus === "playing" ? "active" : "idle"}`} />
+                    <div className={`audio-dsa-eq-bar ${playbackStatus === "playing" ? "active" : "idle"}`} />
+                  </div>
+
+                  <div>
+                    <span style={{ fontSize: "13px", fontWeight: 800, color: "#f8fafc" }}>
+                      {playbackStatus === "playing"
+                        ? `Now Playing: ${activeEpisode.segments[activeSegmentIdx]?.label}`
+                        : playbackStatus === "paused"
+                        ? `Paused at: ${activeEpisode.segments[activeSegmentIdx]?.label}`
+                        : `Ready · ${voiceEngine === "natural-hd" ? "⚡ Edge Neural HD Voice Active" : "🔊 Browser Voice Active"}`}
+                    </span>
+                    <div style={{ fontSize: "11px", color: "#94a3b8" }}>
+                      {voiceEngine === "natural-hd"
+                        ? "100% Studio-Grade Human Synthesis (Zero Voice Overlap Engine)"
+                        : "Offline Web Speech Fallback"}
+                    </div>
+                  </div>
                 </div>
-                <div style={{ fontSize: "12.5px", fontFamily: "ui-monospace, monospace", color: "#fdba74" }}>
+
+                <div
+                  style={{
+                    fontSize: "13px",
+                    fontFamily: "ui-monospace, monospace",
+                    color: "#fdba74",
+                    fontWeight: 700,
+                    background: "rgba(15, 23, 42, 0.7)",
+                    border: "1px solid #334155",
+                    padding: "4px 10px",
+                    borderRadius: "8px",
+                  }}
+                >
                   {formatClock(elapsedSec)} / {activeEpisode.durationLabel}
                 </div>
               </div>
 
-              {/* Segment Progress Bar */}
-              <div
-                style={{
-                  height: "8px",
-                  background: "#1e293b",
-                  borderRadius: "99px",
-                  overflow: "hidden",
-                  marginBottom: "14px",
-                }}
-              >
-                <div
-                  style={{
-                    width: `${playerPct}%`,
-                    height: "100%",
-                    background: "linear-gradient(90deg, #f97316, #fbbf24)",
-                    transition: "width 0.35s ease",
-                  }}
+              {/* Scrubber Range Slider (Clickable & Draggable) */}
+              <div style={{ marginBottom: "12px" }}>
+                <input
+                  type="range"
+                  min={0}
+                  max={activeEpisode.estimatedSeconds}
+                  value={elapsedSec}
+                  onChange={(e) => handleSeek(Number(e.target.value))}
+                  className="audio-dsa-scrubber"
+                  title="Drag or click to jump anywhere in the story"
                 />
               </div>
 
-              {/* Action Buttons Row */}
+              {/* Interactive Scene Chips (One-Click Jump to Scene) */}
+              <div
+                style={{
+                  display: "flex",
+                  gap: "6px",
+                  flexWrap: "wrap",
+                  marginBottom: "16px",
+                }}
+              >
+                {activeEpisode.segments.map((seg, idx) => {
+                  const isCurrent = idx === activeSegmentIdx;
+                  const profile = SPEAKER_BADGES[seg.speaker];
+                  return (
+                    <button
+                      key={`scene-chip-${idx}`}
+                      type="button"
+                      onClick={() => {
+                        handleSeek(Math.round((activeEpisode.estimatedSeconds * idx) / activeEpisode.segments.length));
+                      }}
+                      className={`audio-dsa-scene-chip ${isCurrent ? "active" : ""}`}
+                      style={{
+                        borderColor: isCurrent ? profile.accent : "rgba(51, 65, 85, 0.6)",
+                      }}
+                    >
+                      <span
+                        style={{
+                          width: "6px",
+                          height: "6px",
+                          borderRadius: "50%",
+                          background: isCurrent ? profile.accent : "#64748b",
+                        }}
+                      />
+                      <span>{seg.label.split("·")[0].trim()}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Main Controls Row */}
               <div
                 style={{
                   display: "flex",
@@ -1001,20 +1166,15 @@ export function AudioDsaStudio({
                   gap: "12px",
                 }}
               >
+                {/* Left Playback Control Buttons */}
                 <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
                   <button
                     type="button"
                     onClick={handlePlayToggle}
-                    className="button button-cn-primary"
-                    style={{
-                      background: playbackStatus === "playing" ? "#d97706" : "#ea580c",
-                      borderColor: "#ea580c",
-                      fontWeight: 800,
-                      padding: "10px 20px",
-                    }}
+                    className="audio-dsa-primary-play"
                   >
                     {playbackStatus === "playing"
-                      ? "⏸ Pause Audio Story"
+                      ? "⏸ Pause Story"
                       : playbackStatus === "paused"
                       ? "▶ Resume Story"
                       : "▶ Play 2-Min Audio Story"}
@@ -1022,11 +1182,28 @@ export function AudioDsaStudio({
 
                   <button
                     type="button"
+                    onClick={() => handleSkip(-10)}
+                    className="audio-dsa-ctrl-btn"
+                    title="Rewind 10 seconds"
+                  >
+                    ⏪ -10s
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleSkip(10)}
+                    className="audio-dsa-ctrl-btn"
+                    title="Skip forward 10 seconds"
+                  >
+                    +10s ⏩
+                  </button>
+
+                  <button
+                    type="button"
                     onClick={() =>
                       speakSegment(activeEpisode, Math.max(0, activeSegmentIdx - 1))
                     }
-                    className="button button-quiet button-small"
-                    style={{ borderColor: "#475569", color: "#e2e8f0" }}
+                    className="audio-dsa-ctrl-btn"
                     title="Previous story scene"
                   >
                     ⏮ Prev Scene
@@ -1040,8 +1217,7 @@ export function AudioDsaStudio({
                         Math.min(activeEpisode.segments.length - 1, activeSegmentIdx + 1),
                       )
                     }
-                    className="button button-quiet button-small"
-                    style={{ borderColor: "#475569", color: "#e2e8f0" }}
+                    className="audio-dsa-ctrl-btn"
                     title="Next story scene"
                   >
                     ⏭ Next Scene
@@ -1055,20 +1231,60 @@ export function AudioDsaStudio({
                         setActiveSegmentIdx(0);
                         setElapsedSec(0);
                       }}
-                      className="button button-quiet button-small"
-                      style={{ borderColor: "#475569", color: "#f87171" }}
+                      className="audio-dsa-ctrl-btn"
+                      style={{ color: "#f87171", borderColor: "#7f1d1d" }}
                     >
                       ■ Stop
                     </button>
                   )}
                 </div>
 
-                {/* Speed, Chimes, Voice Selector */}
-                <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
+                {/* Right Side Settings: Volume, Speed, Engine, SFX */}
+                <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
+                  {/* Volume & Mute control */}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      background: "#0f172a",
+                      border: "1px solid #334155",
+                      borderRadius: "8px",
+                      padding: "4px 8px",
+                    }}
+                  >
+                    <button
+                      type="button"
+                      onClick={handleToggleMute}
+                      style={{
+                        background: "transparent",
+                        border: "none",
+                        color: isMuted ? "#f87171" : "#34d399",
+                        cursor: "pointer",
+                        fontSize: "13px",
+                        padding: "0 2px",
+                      }}
+                      title={isMuted ? "Unmute" : "Mute"}
+                    >
+                      {isMuted || volume === 0 ? "🔇" : "🔊"}
+                    </button>
+                    <input
+                      type="range"
+                      min={0}
+                      max={1}
+                      step={0.05}
+                      value={isMuted ? 0 : volume}
+                      onChange={(e) => handleVolumeChange(Number(e.target.value))}
+                      style={{ width: "65px", cursor: "pointer", accentColor: "#f97316" }}
+                      title={`Volume: ${Math.round((isMuted ? 0 : volume) * 100)}%`}
+                    />
+                  </div>
+
+                  {/* Speed Selector */}
                   <select
                     aria-label="Audio speed"
                     value={playbackRate}
-                    onChange={(e) => setPlaybackRate(Number(e.target.value))}
+                    onChange={(e) => handleSpeedChange(Number(e.target.value))}
                     style={{
                       background: "#0f172a",
                       color: "#e2e8f0",
@@ -1078,12 +1294,14 @@ export function AudioDsaStudio({
                       fontSize: "12px",
                     }}
                   >
-                    <option value={0.85}>0.85x Calm</option>
+                    <option value={0.75}>0.75x Chill</option>
                     <option value={1}>1.0x Normal</option>
                     <option value={1.25}>1.25x Brisk</option>
                     <option value={1.5}>1.5x Fast</option>
+                    <option value={2.0}>2.0x Sprint</option>
                   </select>
 
+                  {/* Voice Engine Selector */}
                   <select
                     aria-label="Voice audio engine"
                     value={voiceEngine}
@@ -1101,9 +1319,35 @@ export function AudioDsaStudio({
                       fontWeight: 700,
                     }}
                   >
-                    <option value="natural-hd">🎙️ Natural Online HD (Lively & Humane)</option>
+                    <option value="natural-hd">🎙️ Edge Neural HD (100% Human Studio)</option>
                     <option value="browser">🔊 Browser Speech (Offline)</option>
                   </select>
+
+                  {/* Neural Voice Persona Selector */}
+                  {voiceEngine === "natural-hd" && (
+                    <select
+                      aria-label="Neural Speaker Voice"
+                      value={selectedNeuralVoice}
+                      onChange={(e) => {
+                        stopAudioEngine();
+                        setSelectedNeuralVoice(e.target.value);
+                      }}
+                      style={{
+                        background: "#0f172a",
+                        color: "#fdba74",
+                        border: "1px solid rgba(251, 146, 60, 0.4)",
+                        borderRadius: "8px",
+                        padding: "6px 8px",
+                        fontSize: "12px",
+                        fontWeight: 600,
+                      }}
+                    >
+                      <option value="en-IN-PrabhatNeural">Prabhat (Indian Male · Warm Narrator)</option>
+                      <option value="en-IN-NeerjaExpressiveNeural">Neerja (Indian Female · Mentor Priya)</option>
+                      <option value="en-US-BrianMultilingualNeural">Brian (US Male · Casual & Crisp)</option>
+                      <option value="en-US-EmmaMultilingualNeural">Emma (US Female · Clear & Engaging)</option>
+                    </select>
+                  )}
 
                   {voiceEngine === "browser" && voices.length > 0 && (
                     <select
