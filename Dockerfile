@@ -27,6 +27,9 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
+# Install native language runtimes for standalone & fallback compilation
+RUN apk add --no-cache clang gcc g++ musl-dev openjdk17-jdk python3
+
 # Create persistent data directory for SQLite database
 RUN mkdir -p /app/data && chown -R node:node /app
 
@@ -36,9 +39,10 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/src ./src
+COPY --from=builder /app/scripts ./scripts
 
 USER node
 
 EXPOSE 3000
 
-CMD ["npm", "run", "start"]
+CMD ["npx", "next", "start", "-H", "0.0.0.0", "-p", "3000"]

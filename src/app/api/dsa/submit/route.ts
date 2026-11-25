@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { evaluateTestCases, SupportedLanguage } from "@/lib/compiler";
+import { SupportedLanguage } from "@/lib/compiler";
 import { DSA_PROBLEMS } from "@/lib/dsa-problems";
-import { recordDsaSubmission } from "@/lib/db";
 import { getCurrentIdentity } from "@/lib/auth";
-import { getDsaMockComment } from "@/lib/dsa-mocking";
+import {
+  checkSubmissionRateLimit,
+  dispatchDsaSubmission,
+  resolveExecutionClientKey,
+} from "@/lib/execution-queue";
 import { hasSameOrigin } from "@/lib/security";
 
 export const dynamic = "force-dynamic";
@@ -17,10 +20,11 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { problemId, language, code } = body as {
+    const { problemId, language, code, async: asyncMode } = body as {
       problemId: string;
       language: SupportedLanguage;
       code: string;
+      async?: boolean;
     };
 
     if (!problemId || !language || !code || typeof code !== "string") {
@@ -50,6 +54,21 @@ export async function POST(req: NextRequest) {
     }
 
     const identity = await getCurrentIdentity();
+    const clientKey = resolveExecutionClientKey(
+      req.headers,
+      identity?.id ?? null,
+      req.cookies.get("psl_session")?.value ?? null,
+    );
+    const rate = checkSubmissionRateLimit(clientKey);
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: "Too many submissions in a short burst. Please wait a second." },
+        {
+          status: 429,
+          headers: { "Retry-After": String(rate.retryAfterSeconds) },
+        },
+      );
+    }
 
     // Combine sample and hidden test cases for final grading
     const allTestCases = [
@@ -65,46 +84,37 @@ export async function POST(req: NextRequest) {
       })),
     ];
 
-    const evaluation = await evaluateTestCases(language, code, allTestCases);
+    const dispatched = await dispatchDsaSubmission({
+      problemId,
+      language,
+      code,
+      allTestCases,
+      userId: identity?.id ?? null,
+      asyncMode: Boolean(asyncMode),
+    });
 
-    const userId = identity?.id;
-
-    let submissionId: string | null = null;
-    if (userId) {
-      try {
-        const dbRecord = recordDsaSubmission({
-          user_id: userId,
-          problem_id: problemId,
-          language,
-          code,
-          status: evaluation.status,
-          test_cases_passed: evaluation.testCasesPassed,
-          total_test_cases: evaluation.totalTestCases,
-          execution_time_ms: evaluation.executionTimeMs,
-        });
-        submissionId = dbRecord.id;
-      } catch (dbErr) {
-        console.error("Failed to record DSA submission in database:", dbErr);
-      }
+    if (dispatched.kind === "queued") {
+      return NextResponse.json(
+        {
+          queued: true,
+          status: "QUEUED",
+          jobId: dispatched.jobId,
+          queuePosition: dispatched.queuePosition,
+          queueDepth: dispatched.queueDepth,
+          estimatedWaitMs: dispatched.estimatedWaitMs,
+        },
+        { status: 202 },
+      );
     }
 
-    const mockComment = getDsaMockComment({
-      problemId,
-      status: evaluation.status,
-      code,
-      language,
-      testCasesPassed: evaluation.testCasesPassed,
-      totalTestCases: evaluation.totalTestCases,
-      results: evaluation.results,
-      compileOutput: evaluation.compileOutput,
-    });
-
-    return NextResponse.json({
-      submissionId,
-      mockComment,
-      ...evaluation,
-    });
+    return NextResponse.json(dispatched.output);
   } catch (err: unknown) {
+    if (err instanceof Error && err.message === "QUEUE_OVERLOADED") {
+      return NextResponse.json(
+        { error: "Judge queue is temporarily at capacity. Please retry shortly." },
+        { status: 503, headers: { "Retry-After": "3" } },
+      );
+    }
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Evaluation engine error" },
       { status: 500 },

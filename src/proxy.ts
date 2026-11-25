@@ -2,11 +2,17 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function proxy(request: NextRequest) {
-  // Enforce Localhost-Only Access: Block all LAN IP and external access
+  // Host check: strictly localhost / 127.0.0.1 offline unless ALLOWED_HOSTS is configured for cloud deployment
   const host = request.headers.get("host") || "";
   const hostname = host.split(":")[0];
-  if (hostname !== "localhost" && hostname !== "127.0.0.1") {
-    return new NextResponse("Access Forbidden: External LAN IP access is disabled.", {
+  const configuredHosts = (process.env.ALLOWED_HOSTS || "localhost,127.0.0.1")
+    .split(",")
+    .map((h) => h.trim())
+    .filter(Boolean);
+  const hostAllowed =
+    configuredHosts.includes("*") || configuredHosts.includes(hostname);
+  if (!hostAllowed) {
+    return new NextResponse("Access Forbidden: Host is not permitted by platform policy.", {
       status: 403,
       headers: { "Content-Type": "text/plain" },
     });

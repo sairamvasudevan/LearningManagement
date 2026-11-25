@@ -2,6 +2,10 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { SupportedLanguage } from "@/lib/compiler";
+import {
+  executeWithQueuePolling,
+  type QueueProgressState,
+} from "@/lib/execution-client";
 
 type IdeMode = "compiler" | "web";
 
@@ -309,6 +313,7 @@ export function StandaloneIde() {
   const [stdin, setStdin] = useState<string>("");
   const [showStdinBox, setShowStdinBox] = useState<boolean>(true);
   const [isRunning, setIsRunning] = useState<boolean>(false);
+  const [queueProgress, setQueueProgress] = useState<QueueProgressState | null>(null);
   const [result, setResult] = useState<ExecutionResult | null>(null);
   const [, setActiveConsoleTab] = useState<"output" | "stdin">("output");
 
@@ -372,22 +377,29 @@ export function StandaloneIde() {
   // Run backend code (C, C++, Java, Python)
   const handleRunCompiler = async () => {
     setIsRunning(true);
+    setQueueProgress(null);
     setActiveConsoleTab("output");
     setResult(null);
 
     try {
-      const res = await fetch("/api/compiler", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const { ok, data } = await executeWithQueuePolling<{
+        status?: string;
+        stdout?: string;
+        stderr?: string;
+        compileOutput?: string;
+        compilationError?: string;
+        executionTimeMs?: number;
+      }>(
+        "/api/compiler",
+        {
           language,
           code,
           stdin,
-        }),
-      });
+        },
+        setQueueProgress,
+      );
 
-      const data = await res.json();
-      if (!res.ok) {
+      if (!ok) {
         setResult({
           stdout: "",
           stderr: data.error || "Execution failed",
@@ -421,6 +433,7 @@ export function StandaloneIde() {
       });
     } finally {
       setIsRunning(false);
+      setQueueProgress(null);
     }
   };
 
@@ -1020,7 +1033,11 @@ export function StandaloneIde() {
                 >
                   {isRunning ? (
                     <div style={{ color: "#38bdf8", padding: "20px 0" }}>
-                      ⚡ Compiling and executing in isolated native runtime...
+                      {queueProgress?.status === "QUEUED"
+                        ? `⏳ Queued at position #${queueProgress.queuePosition}${
+                            queueProgress.queueDepth ? ` (${queueProgress.queueDepth} pending)` : ""
+                          } in isolated runtime pool...`
+                        : "⚡ Compiling and executing in isolated native runtime..."}
                     </div>
                   ) : !result ? (
                     <div style={{ color: "#475569", padding: "40px 10px", textAlign: "center" }}>

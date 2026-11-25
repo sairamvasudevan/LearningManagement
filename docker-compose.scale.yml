@@ -1,0 +1,68 @@
+services:
+  nginx:
+    image: nginx:1.27-alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./deploy/nginx.scale.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - web
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      HOSTNAME: "0.0.0.0"
+      ALLOWED_HOSTS: "${ALLOWED_HOSTS:-*}"
+      MAX_EXECUTION_WORKERS: "4"
+      MAX_EXECUTION_QUEUE_DEPTH: "50000"
+      JUDGE_WORKER_URLS: "http://judge-worker:4001"
+      JUDGE_WORKER_SECRET: "${JUDGE_WORKER_SECRET:-change-me-in-production}"
+      REDIS_URL: "redis://redis:6379"
+    volumes:
+      - app_data:/app/data
+    deploy:
+      replicas: 2
+    depends_on:
+      - redis
+      - judge-worker
+    restart: unless-stopped
+
+  judge-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["node", "scripts/judge-worker.mjs"]
+    environment:
+      PORT: "4001"
+      JUDGE_WORKER_HOST: "0.0.0.0"
+      JUDGE_WORKER_CONCURRENCY: "4"
+      JUDGE_WORKER_MAX_QUEUE: "500"
+      JUDGE_WORKER_SECRET: "${JUDGE_WORKER_SECRET:-change-me-in-production}"
+    read_only: true
+    tmpfs:
+      - /tmp:rw,exec,nosuid,nodev,size=512m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    pids_limit: 128
+    mem_limit: 1024m
+    cpus: "2.0"
+    deploy:
+      replicas: 8
+    restart: unless-stopped
+
+volumes:
+  app_data:
+  redis_data:

@@ -5,6 +5,10 @@ import Link from "next/link";
 import { DsaProblem } from "@/lib/dsa-problems";
 import { SupportedLanguage } from "@/lib/compiler";
 import { getDsaMockComment, type DsaMockFeedback } from "@/lib/dsa-mocking";
+import {
+  executeWithQueuePolling,
+  type QueueProgressState,
+} from "@/lib/execution-client";
 
 interface DsaTestCaseResult {
   id?: string;
@@ -58,6 +62,7 @@ export function DsaCodeArena({
   const [customStdin, setCustomStdin] = useState<string>(initialProblem.sampleTestCases[0]?.input || "");
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [queueProgress, setQueueProgress] = useState<QueueProgressState | null>(null);
 
   // Results state
   const [executionResult, setExecutionResult] = useState<DsaExecutionResult | null>(null);
@@ -139,6 +144,7 @@ export function DsaCodeArena({
     }
 
     setIsRunning(true);
+    setQueueProgress(null);
     setActiveConsoleTab("output");
     setExecutionResult(null);
     setSubmissionResult(null);
@@ -155,19 +161,25 @@ export function DsaCodeArena({
             ]
           : undefined;
 
-      const res = await fetch("/api/compiler", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const { ok, status, data } = await executeWithQueuePolling<DsaExecutionResult>(
+        "/api/compiler",
+        {
           language,
           code,
           stdin: modeToRun === "custom" ? customStdin : undefined,
           testCases,
-        }),
-      });
+        },
+        setQueueProgress,
+      );
 
-      const data = await res.json();
-      setExecutionResult(data);
+      if (!ok) {
+        setExecutionResult({
+          status: status === 429 || status === 503 ? "QUEUE_THROTTLED" : "RUNTIME_ERROR",
+          stderr: data.error || "Failed to execute code",
+        });
+      } else {
+        setExecutionResult(data);
+      }
     } catch (err: unknown) {
       setExecutionResult({
         status: "RUNTIME_ERROR",
@@ -175,31 +187,39 @@ export function DsaCodeArena({
       });
     } finally {
       setIsRunning(false);
+      setQueueProgress(null);
     }
   };
 
   // Submit against all test cases
   const handleSubmit = async () => {
     setIsSubmitting(true);
+    setQueueProgress(null);
     setActiveConsoleTab("output");
     setExecutionResult(null);
     setSubmissionResult(null);
 
     try {
-      const res = await fetch("/api/dsa/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const { ok, status, data } = await executeWithQueuePolling<DsaSubmissionResult>(
+        "/api/dsa/submit",
+        {
           problemId: problem.id,
           language,
           code,
-        }),
-      });
+        },
+        setQueueProgress,
+      );
 
-      const data = await res.json();
-      setSubmissionResult(data);
-      if (data.status === "ACCEPTED") {
-        setSolvedSet((prev) => new Set([...prev, problem.id]));
+      if (!ok) {
+        setSubmissionResult({
+          status: status === 429 ? "RATE_LIMITED" : "RUNTIME_ERROR",
+          compileOutput: data.error || "Submission failed",
+        });
+      } else {
+        setSubmissionResult(data);
+        if (data.status === "ACCEPTED") {
+          setSolvedSet((prev) => new Set([...prev, problem.id]));
+        }
       }
     } catch (err: unknown) {
       setSubmissionResult({
@@ -208,6 +228,7 @@ export function DsaCodeArena({
       });
     } finally {
       setIsSubmitting(false);
+      setQueueProgress(null);
     }
   };
 
@@ -513,7 +534,13 @@ export function DsaCodeArena({
                     <div className="dsa-loading-state">
                       <div className="dsa-spinner"></div>
                       <span>
-                        {isSubmitting
+                        {queueProgress?.status === "QUEUED"
+                          ? `Queued at position #${queueProgress.queuePosition}${
+                              queueProgress.queueDepth ? ` (${queueProgress.queueDepth} in pool)` : ""
+                            }...`
+                          : queueProgress?.status === "RUNNING"
+                          ? "Worker compiling and grading test cases..."
+                          : isSubmitting
                           ? "Compiling and evaluating against all test suites..."
                           : "Compiling and executing code on sandbox engine..."}
                       </span>

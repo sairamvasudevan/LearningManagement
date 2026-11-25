@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentIdentity } from "@/lib/auth";
 import { getDatabaseHealth, getAdminMetrics } from "@/lib/db";
+import { getExecutionEngineStats } from "@/lib/execution-queue";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { MODULES_CURRICULUM } from "@/lib/curriculum-data";
 
@@ -59,6 +60,7 @@ export async function GET() {
         totalModulesMastered: adminMetrics.totalModulesMastered,
         totalAssessmentAttempts: adminMetrics.totalAssessmentAttempts,
       },
+      executionEngine: getExecutionEngineStats(),
       timestamp: new Date().toISOString(),
     });
   } catch (error) {

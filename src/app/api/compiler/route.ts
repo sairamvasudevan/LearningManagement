@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { executeCode, evaluateTestCases, SupportedLanguage, TestCase } from "@/lib/compiler";
+import { SupportedLanguage, TestCase } from "@/lib/compiler";
+import { getCurrentIdentity } from "@/lib/auth";
+import {
+  checkSubmissionRateLimit,
+  dispatchCompilerRun,
+  resolveExecutionClientKey,
+} from "@/lib/execution-queue";
 import { hasSameOrigin } from "@/lib/security";
 
 export const dynamic = "force-dynamic";
@@ -15,11 +21,12 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { language, code, stdin, testCases } = body as {
+    const { language, code, stdin, testCases, async: asyncMode } = body as {
       language: SupportedLanguage;
       code: string;
       stdin?: string;
       testCases?: TestCase[];
+      async?: boolean;
     };
 
     if (!language || !code || typeof code !== "string") {
@@ -50,20 +57,61 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (testCases && Array.isArray(testCases) && testCases.length > 0) {
-      if (testCases.length > MAX_TEST_CASES) {
-        return NextResponse.json(
-          { error: `Maximum ${MAX_TEST_CASES} test cases allowed per run.` },
-          { status: 400 },
-        );
-      }
-      const evaluation = await evaluateTestCases(language, code, testCases);
-      return NextResponse.json(evaluation);
+    if (testCases && Array.isArray(testCases) && testCases.length > MAX_TEST_CASES) {
+      return NextResponse.json(
+        { error: `Maximum ${MAX_TEST_CASES} test cases allowed per run.` },
+        { status: 400 },
+      );
     }
 
-    const result = await executeCode(language, code, stdin || "");
-    return NextResponse.json(result);
+    const identity = await getCurrentIdentity();
+    const clientKey = resolveExecutionClientKey(
+      req.headers,
+      identity?.id ?? null,
+      req.cookies.get("psl_session")?.value ?? null,
+    );
+    const rate = checkSubmissionRateLimit(clientKey);
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: "Too many execution requests in a short burst. Please wait a second." },
+        {
+          status: 429,
+          headers: { "Retry-After": String(rate.retryAfterSeconds) },
+        },
+      );
+    }
+
+    const dispatched = await dispatchCompilerRun({
+      language,
+      code,
+      stdin,
+      testCases: Array.isArray(testCases) && testCases.length > 0 ? testCases : undefined,
+      userId: identity?.id ?? null,
+      asyncMode: Boolean(asyncMode),
+    });
+
+    if (dispatched.kind === "queued") {
+      return NextResponse.json(
+        {
+          queued: true,
+          status: "QUEUED",
+          jobId: dispatched.jobId,
+          queuePosition: dispatched.queuePosition,
+          queueDepth: dispatched.queueDepth,
+          estimatedWaitMs: dispatched.estimatedWaitMs,
+        },
+        { status: 202 },
+      );
+    }
+
+    return NextResponse.json(dispatched.output);
   } catch (err: unknown) {
+    if (err instanceof Error && err.message === "QUEUE_OVERLOADED") {
+      return NextResponse.json(
+        { error: "Execution queue is temporarily at capacity. Please retry shortly." },
+        { status: 503, headers: { "Retry-After": "3" } },
+      );
+    }
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Execution engine failure" },
       { status: 500 },

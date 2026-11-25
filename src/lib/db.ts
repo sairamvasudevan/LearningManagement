@@ -200,8 +200,12 @@ export function getDatabase(): DatabaseSync {
   const dbPath = path.join(dataDir, "lms.db");
   const db = new DatabaseSync(dbPath);
 
-  // WAL mode for fast concurrency
+  // High-concurrency SQLite WAL tuning
   db.exec("PRAGMA journal_mode = WAL;");
+  db.exec("PRAGMA busy_timeout = 5000;");
+  db.exec("PRAGMA synchronous = NORMAL;");
+  db.exec("PRAGMA cache_size = -64000;");
+  db.exec("PRAGMA temp_store = MEMORY;");
   db.exec("PRAGMA foreign_keys = ON;");
 
   // Schema initialization
@@ -393,6 +397,13 @@ export function getDatabase(): DatabaseSync {
       shortlisted_user_ids_json TEXT DEFAULT '[]',
       created_by TEXT DEFAULT '',
       created_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS execution_cache (
+      cache_key TEXT PRIMARY KEY,
+      result_json TEXT NOT NULL,
+      hit_count INTEGER NOT NULL DEFAULT 1,
+      updated_at TEXT NOT NULL
     );
   `);
 
@@ -2218,4 +2229,35 @@ export function getAllPlacementDrives(): DbPlacementDrive[] {
     created_by: String(r.created_by || ""),
     created_at: String(r.created_at),
   }));
+}
+
+export function getCachedExecutionResult(cacheKey: string): string | null {
+  try {
+    const db = getDatabase();
+    const row = db
+      .prepare("SELECT result_json FROM execution_cache WHERE cache_key = ?")
+      .get(cacheKey) as { result_json: string } | undefined;
+    if (!row) return null;
+    db.prepare(
+      "UPDATE execution_cache SET hit_count = hit_count + 1, updated_at = ? WHERE cache_key = ?",
+    ).run(new Date().toISOString(), cacheKey);
+    return row.result_json;
+  } catch {
+    return null;
+  }
+}
+
+export function storeCachedExecutionResult(cacheKey: string, resultJson: string) {
+  try {
+    const db = getDatabase();
+    db.prepare(`
+      INSERT INTO execution_cache (cache_key, result_json, hit_count, updated_at)
+      VALUES (?, ?, 1, ?)
+      ON CONFLICT(cache_key) DO UPDATE SET
+        result_json = excluded.result_json,
+        updated_at = excluded.updated_at
+    `).run(cacheKey, resultJson, new Date().toISOString());
+  } catch {
+    // Non-fatal cache write failure
+  }
 }
