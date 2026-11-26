@@ -1084,7 +1084,9 @@ export function AudioDsaStudio({
                     <div style={{ fontSize: "11px", color: "#94a3b8" }}>
                       {voiceEngine === "natural-hd"
                         ? "100% Studio-Grade Human Synthesis (Zero Voice Overlap Engine)"
-                        : "Offline Web Speech Fallback"}
+                        : ttsAvailable
+                        ? "Offline Web Speech Fallback Active"
+                        : "Synchronized Story Mode"}
                     </div>
                   </div>
                 </div>
@@ -1114,7 +1116,7 @@ export function AudioDsaStudio({
                   value={elapsedSec}
                   onChange={(e) => handleSeek(Number(e.target.value))}
                   className="audio-dsa-scrubber"
-                  title="Drag or click to jump anywhere in the story"
+                  title={`Drag or click to jump anywhere in the story (${playerPct}% played)`}
                 />
               </div>
 
