@@ -12,6 +12,14 @@ const execFileAsync = promisify(execFile);
 // Cache folder under data/audio-cache
 const CACHE_DIR = path.join(process.cwd(), "data", "audio-cache");
 
+const PYTHON_BIN = (() => {
+  const candidate = "/Library/Frameworks/Python.framework/Versions/3.15/bin/python3";
+  if (fs.existsSync(/*turbopackIgnore: true*/ candidate)) {
+    return candidate;
+  }
+  return process.env.PYTHON_BIN || "python3";
+})();
+
 // Ensure cache directory exists
 if (!fs.existsSync(CACHE_DIR)) {
   fs.mkdirSync(CACHE_DIR, { recursive: true });
@@ -151,7 +159,7 @@ export async function GET(req: NextRequest) {
     const scriptPath = path.join(process.cwd(), "scripts", "edge-tts-synthesize.py");
     try {
       await execFileAsync(
-        "python3",
+        PYTHON_BIN,
         [
           scriptPath,
           "--text",
@@ -165,7 +173,7 @@ export async function GET(req: NextRequest) {
           "--output",
           cachedFilePath,
         ],
-        { timeout: 15000 },
+        { timeout: 25000 },
       );
 
       if (fs.existsSync(cachedFilePath)) {

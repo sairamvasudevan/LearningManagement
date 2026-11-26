@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Edge TTS Neural Voice Synthesizer
-Generates studio-quality human speech using Microsoft Neural Voices via edge-tts.
+Generates studio-quality, highly realistic human speech using Microsoft Edge Neural Voices.
 """
 
 import sys
@@ -19,6 +19,8 @@ async def synthesize(text: str, voice: str, rate: str, pitch: str, output_path: 
             voice=voice,
             rate=rate,
             pitch=pitch,
+            connect_timeout=10,
+            receive_timeout=25,
         )
         await communicate.save(temp_path)
         os.replace(temp_path, output_path)
@@ -31,12 +33,13 @@ async def synthesize(text: str, voice: str, rate: str, pitch: str, output_path: 
         raise e
 
 def main():
-    parser = argparse.ArgumentParser(description="Synthesize human speech using edge-tts")
+    parser = argparse.ArgumentParser(description="Synthesize realistic human speech using edge-tts")
     parser.add_argument("--text", default="", help="Text to speak")
     parser.add_argument("--text-file", default="", help="Path to file containing text to speak")
     parser.add_argument("--voice", default="en-IN-PrabhatNeural", help="Neural voice name")
     parser.add_argument("--rate", default="+0%", help="Speech rate adjustment like +5 percent")
     parser.add_argument("--pitch", default="+0Hz", help="Speech pitch adjustment like +2Hz")
+    parser.add_argument("--pause-ms", type=int, default=0, help="Pause placeholder")
     parser.add_argument("--output", required=True, help="Destination mp3 file path")
 
     args = parser.parse_args()
